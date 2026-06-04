@@ -173,7 +173,6 @@ Cimega_Smart_Office/
 │   └── index.css
 ├── .eslintrc.json
 ├── AGENTS.md
-├── daftar_struktur.txt
 ├── package.json
 ├── README.md
 └── SETUP_ELECTRON.bat
