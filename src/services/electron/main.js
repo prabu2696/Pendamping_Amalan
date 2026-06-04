@@ -1,18 +1,42 @@
 process.env.NODE_NO_WARNINGS = '1';
 if (process.stdout.isTTY) console.clear();
-// ─────────────────────────────────────────────────────────
-//   CIMEGA SMART OFFICE v1.0.0
-//   Platform Administrasi Sekolah — Kurikulum Merdeka
-// ─────────────────────────────────────────────────────────
+
 const { app, BrowserWindow, ipcMain, dialog, shell } = require('electron');
 const path = require('path');
 
-// Tambahkan flag autoplay agar audio bisa jalan di background tanpa interaksi user
+// ── Suppress autoplay restriction ──
 app.commandLine.appendSwitch('autoplay-policy', 'no-user-gesture-required');
 
-// ── ADAPTIVE PERFORMANCE OPTIMIZER (SMART AUTO-SCALING) ──
-const optimizer = require('../../utils/performance_optimizer');
-optimizer.init();
+// ── Terminal Color Codes ──────────────────────────────────
+const C = {
+  reset:  '\x1b[0m',
+  bold:   '\x1b[1m',
+  dim:    '\x1b[2m',
+  cyan:   '\x1b[36m',
+  blue:   '\x1b[34m',
+  green:  '\x1b[32m',
+  yellow: '\x1b[33m',
+  red:    '\x1b[31m',
+  magenta:'\x1b[35m',
+  white:  '\x1b[97m',
+  gray:   '\x1b[90m',
+  bgDark: '\x1b[48;5;17m',
+};
+
+// ── Prefixed Logger ───────────────────────────────────────
+const log = {
+  info:    (msg) => console.log(`${C.cyan}${C.bold}[INFO]${C.reset}  ${msg}`),
+  ok:      (msg) => console.log(`${C.green}${C.bold}[ OK ]${C.reset}  ${msg}`),
+  warn:    (msg) => console.log(`${C.yellow}${C.bold}[WARN]${C.reset}  ${msg}`),
+  error:   (msg) => console.log(`${C.red}${C.bold}[ERR ]${C.reset}  ${msg}`),
+  system:  (msg) => console.log(`${C.blue}${C.bold}[ SYS]${C.reset}  ${msg}`),
+  event:   (msg) => console.log(`${C.magenta}${C.bold}[ EVT]${C.reset}  ${msg}`),
+  renderer:(msg) => console.log(`${C.yellow}${C.bold}[ UI ]${C.reset}  ${msg}`),
+  bug:     (msg) => console.log(`${C.red}${C.bold}[BUG!]${C.reset}${C.red}  ${msg}${C.reset}`),
+  dim:     (msg) => console.log(`${C.gray}${msg}${C.reset}`),
+  line:    ()    => console.log(`${C.gray}${'─'.repeat(60)}${C.reset}`),
+  dline:   ()    => console.log(`${C.cyan}${'═'.repeat(60)}${C.reset}`),
+};
 
 const fs = require('fs');
 const https = require('https');
@@ -1166,37 +1190,128 @@ app.on('web-contents-created', (event, contents) => {
 });
 
 // ══════════════════════════════════════════
+// RENDERER ERROR BRIDGE
+// Semua error dan console dari renderer diteruskan ke terminal
+// ══════════════════════════════════════════
+
+ipcMain.on('renderer:log',   (e, msg) => log.renderer(msg));
+ipcMain.on('renderer:warn',  (e, msg) => log.warn(`[UI WARN] ${msg}`));
+ipcMain.on('renderer:error', (e, { message, source, line, col, stack }) => {
+  log.bug(`RENDERER ERROR DETECTED`);
+  log.line();
+  log.bug(`Message : ${message}`);
+  if (source && source !== 'undefined') log.bug(`Source  : ${source}`);
+  if (line)  log.bug(`Location: Line ${line}${col ? ', Col ' + col : ''}`);
+  if (stack) {
+    log.dim('  Stack Trace:');
+    String(stack).split('\n').slice(0, 6).forEach(l => log.dim('  ' + l.trim()));
+  }
+  log.line();
+});
+
+ipcMain.on('renderer:unhandled-rejection', (e, { reason, stack }) => {
+  log.bug(`UNHANDLED PROMISE REJECTION`);
+  log.line();
+  log.bug(`Reason: ${reason}`);
+  if (stack) {
+    log.dim('  Stack Trace:');
+    String(stack).split('\n').slice(0, 6).forEach(l => log.dim('  ' + l.trim()));
+  }
+  log.line();
+});
+
+// ══════════════════════════════════════════
+// APP LIFECYCLE
+// ══════════════════════════════════════════
+
 app.whenReady().then(async () => {
   createWindow();
 
-  // Startup Banner — Professional Clean Edition (LIVE VALIDATION)
   setTimeout(async () => {
-    // Jalankan semua pengetesan secara paralel (Real-Time Handshake)
+    // Parallel live-check semua layanan
     const [fsStatus, sbStatus, aiStatus] = await Promise.all([
       checkFirestoreStatus(),
       checkSupabaseStatus(),
       checkAIServiceStatus()
     ]);
 
-    const pkg = require('../../../package.json');
-    const ver = pkg.version;
+    const pkg  = require('../../../package.json');
+    const env  = loadEnv();
+    const ver  = pkg.version || '1.0.0';
+    const node = process.versions.node;
+    const elec = process.versions.electron;
+    const now  = new Date().toLocaleString('id-ID', { dateStyle: 'long', timeStyle: 'short' });
 
-    console.clear ? console.clear() : console.log('\x1Bc');
+    // Helper: status badge
+    const badge = (status) => {
+      const s = String(status).toUpperCase();
+      if (s.includes('CONNECTED') || s.includes('ACTIVE') || s.includes('SECURE'))  return `${C.green}${C.bold}● AKTIF${C.reset}`;
+      if (s.includes('OFFLINE') || s.includes('ERROR'))   return `${C.red}${C.bold}● OFFLINE${C.reset}`;
+      if (s.includes('TIMEOUT'))  return `${C.yellow}${C.bold}● TIMEOUT${C.reset}`;
+      if (s.includes('NOT_CONFIGURED')) return `${C.gray}● TIDAK DIKONFIGURASI${C.reset}`;
+      return `${C.cyan}${C.bold}● ${status}${C.reset}`;
+    };
 
-    console.log(`CIMEGA SMART OFFICE v${ver}`);
-    console.log(`Platform Administrasi Sekolah - Kurikulum Merdeka`);
-    console.log(`------------------------------------------------------------`);
-    console.log(`[CORE]   Database (Firestore) : ${fsStatus}`);
-    console.log(`[CORE]   Storage  (Supabase)  : ${sbStatus}`);
-    console.log(`[CORE]   AI Generation        : ${aiStatus}`);
-    console.log(`[ASSETS] Music Library        : ${musicFiles.length} Tracks Loaded`);
-    console.log(`[SYSTEM] Node.js              : v${process.versions.node}`);
-    console.log(`[SYSTEM] Electron             : v${process.versions.electron}`);
-    console.log(`------------------------------------------------------------`);
+    const credBadge = (val, label) =>
+      val && val.length > 5
+        ? `${C.green}${C.bold}● ${label} TERKONFIGURASI${C.reset}`
+        : `${C.red}${C.bold}● ${label} TIDAK ADA${C.reset}`;
+
+    if (process.stdout.isTTY) process.stdout.write('\x1Bc');
+
+    console.log('');
+    log.dline();
+    console.log(`${C.cyan}${C.bold}`);
+    console.log(`  ██████╗██╗███╗   ███╗███████╗ ██████╗  █████╗ `);
+    console.log(`  ██╔════╝██║████╗ ████║██╔════╝██╔════╝ ██╔══██╗`);
+    console.log(`  ██║     ██║██╔████╔██║█████╗  ██║  ███╗███████║`);
+    console.log(`  ██║     ██║██║╚██╔╝██║██╔══╝  ██║   ██║██╔══██║`);
+    console.log(`  ╚██████╗██║██║ ╚═╝ ██║███████╗╚██████╔╝██║  ██║`);
+    console.log(`   ╚═════╝╚═╝╚═╝     ╚═╝╚══════╝ ╚═════╝ ╚═╝  ╚═╝${C.reset}`);
+    console.log(`${C.white}${C.bold}  SMART OFFICE  ${C.reset}${C.gray}— Platform Administrasi Sekolah — Kurikulum Merdeka 2026/2027${C.reset}`);
+    console.log(`${C.gray}  v${ver}  |  ${now}${C.reset}`);
+    log.dline();
+    console.log('');
+
+    // ── STATUS LAYANAN ──────────────────────────
+    console.log(`${C.bold}${C.white}  LAYANAN AKTIF${C.reset}`);
+    log.line();
+    console.log(`  ${'Firebase  (Database)'.padEnd(26)} ${badge(fsStatus)}`);
+    console.log(`  ${'Supabase  (Storage)'.padEnd(26)} ${badge(sbStatus)}`);
+    console.log(`  ${'Gemini AI (Generator)'.padEnd(26)} ${badge(aiStatus)}`);
+    console.log(`  ${'BGM Library'.padEnd(26)} ${C.cyan}${C.bold}● ${musicFiles.length} LAGU DIMUAT${C.reset}`);
+    console.log('');
+
+    // ── KREDENSIAL ───────────────────────────────
+    console.log(`${C.bold}${C.white}  KREDENSIAL${C.reset}`);
+    log.line();
+    console.log(`  ${'Firebase API Key'.padEnd(26)} ${credBadge(env.FIREBASE_API_KEY,       'Firebase Key')}`);
+    console.log(`  ${'Firebase Project ID'.padEnd(26)} ${credBadge(env.FIREBASE_PROJECT_ID,  'Project ID')}`);
+    console.log(`  ${'Supabase URL'.padEnd(26)} ${credBadge(env.SUPABASE_URL,            'Supabase URL')}`);
+    console.log(`  ${'Supabase Anon Key'.padEnd(26)} ${credBadge(env.SUPABASE_ANON_KEY,     'Supabase Key')}`);
+    console.log(`  ${'Gemini API Key'.padEnd(26)} ${credBadge(env.GEMINI_API_KEY,          'Gemini Key')}`);
+    console.log('');
+
+    // ── SISTEM ────────────────────────────────────
+    console.log(`${C.bold}${C.white}  SISTEM${C.reset}`);
+    log.line();
+    console.log(`  ${'Node.js'.padEnd(26)} ${C.white}v${node}${C.reset}`);
+    console.log(`  ${'Electron'.padEnd(26)} ${C.white}v${elec}${C.reset}`);
+    console.log(`  ${'Platform'.padEnd(26)} ${C.white}${process.platform} (${process.arch})${C.reset}`);
+    console.log(`  ${'App Path'.padEnd(26)} ${C.gray}${app.getPath('userData')}${C.reset}`);
+    console.log('');
+    log.dline();
+    console.log(`${C.green}${C.bold}  ✓ CIMEGA SIAP DIGUNAKAN  ${C.reset}${C.gray}— Error dari aplikasi akan tampil di bawah ini${C.reset}`);
+    log.dline();
+    console.log('');
+
   }, 1200);
 });
 
 app.on('window-all-closed', () => { if (process.platform !== 'darwin') app.quit(); });
 app.on('activate', () => { if (!mainWindow) createWindow(); });
-app.on('before-quit', () => { _sessionKeyStore = {}; });
+app.on('before-quit', () => {
+  _sessionKeyStore = {};
+  log.event('Aplikasi ditutup — session key dibersihkan.');
+});
 

@@ -206,12 +206,51 @@ try {
   console.error('❌ PRELOAD: window.cimegaAPI GAGAL expose:', e.message);
 }
 
-console.log('🚀 PRELOAD v1.0.0 SECURE: Bridge siap. Firebase → CDN renderer. Gemini AI, Auto-Updater, Session Key Store aktif.');
+console.log('✅ PRELOAD SECURE: Bridge siap — Firebase CDN, Gemini AI, Auto-Updater, Session Key Store aktif.');
 
-// ── 5. JEMBATAN KE ANTARMUKA: Inject Performance Mode ────────
+// ═══════════════════════════════════════════════════════════
+// RENDERER ERROR BRIDGE — Kirim semua error ke terminal Main
+// ═══════════════════════════════════════════════════════════
 window.addEventListener('DOMContentLoaded', () => {
+
+  // 1. Tangkap window.onerror (JS runtime errors)
+  window.addEventListener('error', (event) => {
+    ipcRenderer.send('renderer:error', {
+      message: event.message || String(event.error),
+      source:  event.filename  || '',
+      line:    event.lineno    || 0,
+      col:     event.colno     || 0,
+      stack:   event.error?.stack || '',
+    });
+  });
+
+  // 2. Tangkap Promise rejections yang tidak di-handle
+  window.addEventListener('unhandledrejection', (event) => {
+    const reason = event.reason;
+    ipcRenderer.send('renderer:unhandled-rejection', {
+      reason: reason?.message || String(reason),
+      stack:  reason?.stack   || '',
+    });
+  });
+
+  // 3. Intercept console.error & console.warn dari renderer → terminal
+  const _origError = console.error.bind(console);
+  const _origWarn  = console.warn.bind(console);
+
+  console.error = (...args) => {
+    _origError(...args);
+    const msg = args.map(a => (typeof a === 'object' ? JSON.stringify(a) : String(a))).join(' ');
+    ipcRenderer.send('renderer:error', { message: msg, source: 'console.error', line: 0, col: 0, stack: '' });
+  };
+
+  console.warn = (...args) => {
+    _origWarn(...args);
+    const msg = args.map(a => (typeof a === 'object' ? JSON.stringify(a) : String(a))).join(' ');
+    ipcRenderer.send('renderer:warn', msg);
+  };
+
+  // 4. Performance mode injection
   if (process.argv.includes('--entry-level')) {
     document.body.classList.add('entry-level-mode');
-    console.log('⚡ [PERFORMANCE OPTIMIZER] Entry-Level Mode diaktifkan. Grafik kelas tinggi dinonaktifkan secara elegan.');
   }
 });
