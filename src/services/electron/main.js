@@ -6,6 +6,9 @@ const path = require('path');
 
 // ── Suppress autoplay restriction ──
 app.commandLine.appendSwitch('autoplay-policy', 'no-user-gesture-required');
+app.commandLine.appendSwitch('ignore-gpu-blocklist');
+app.commandLine.appendSwitch('enable-gpu-rasterization');
+app.commandLine.appendSwitch('enable-zero-copy');
 
 // ── Terminal Color Codes ──────────────────────────────────
 const C = {
@@ -34,8 +37,8 @@ const log = {
   renderer:(msg) => console.log(`${C.yellow}${C.bold}[ UI ]${C.reset}  ${msg}`),
   bug:     (msg) => console.log(`${C.red}${C.bold}[BUG!]${C.reset}${C.red}  ${msg}${C.reset}`),
   dim:     (msg) => console.log(`${C.gray}${msg}${C.reset}`),
-  line:    ()    => console.log(`${C.gray}${'─'.repeat(60)}${C.reset}`),
-  dline:   ()    => console.log(`${C.cyan}${'═'.repeat(60)}${C.reset}`),
+  line:    ()    => console.log(`${C.gray}${'-'.repeat(60)}${C.reset}`),
+  dline:   ()    => console.log(`${C.cyan}${'-'.repeat(60)}${C.reset}`),
 };
 
 const fs = require('fs');
@@ -1251,45 +1254,39 @@ app.whenReady().then(async () => {
     // Helper: status badge
     const badge = (status) => {
       const s = String(status).toUpperCase();
-      if (s.includes('CONNECTED') || s.includes('ACTIVE') || s.includes('SECURE'))  return `${C.green}${C.bold}● AKTIF${C.reset}`;
-      if (s.includes('OFFLINE') || s.includes('ERROR'))   return `${C.red}${C.bold}● OFFLINE${C.reset}`;
-      if (s.includes('TIMEOUT'))  return `${C.yellow}${C.bold}● TIMEOUT${C.reset}`;
-      if (s.includes('NOT_CONFIGURED')) return `${C.gray}● TIDAK DIKONFIGURASI${C.reset}`;
-      return `${C.cyan}${C.bold}● ${status}${C.reset}`;
+      if (s.includes('CONNECTED') || s.includes('ACTIVE') || s.includes('SECURE'))  return `${C.green}${C.bold}[AKTIF]${C.reset}`;
+      if (s.includes('OFFLINE') || s.includes('ERROR'))   return `${C.red}${C.bold}[OFFLINE]${C.reset}`;
+      if (s.includes('TIMEOUT'))  return `${C.yellow}${C.bold}[TIMEOUT]${C.reset}`;
+      if (s.includes('NOT_CONFIGURED')) return `${C.gray}[BELUM DIKONFIGURASI]${C.reset}`;
+      return `${C.cyan}${C.bold}[${status}]${C.reset}`;
     };
 
     const credBadge = (val, label) =>
       val && val.length > 5
-        ? `${C.green}${C.bold}● ${label} TERKONFIGURASI${C.reset}`
-        : `${C.red}${C.bold}● ${label} TIDAK ADA${C.reset}`;
+        ? `${C.green}${C.bold}[TERKONFIGURASI]${C.reset}`
+        : `${C.red}${C.bold}[TIDAK ADA]${C.reset}`;
 
     if (process.stdout.isTTY) process.stdout.write('\x1Bc');
 
     console.log('');
     log.dline();
-    console.log(`${C.cyan}${C.bold}`);
-    console.log(`  ██████╗██╗███╗   ███╗███████╗ ██████╗  █████╗ `);
-    console.log(`  ██╔════╝██║████╗ ████║██╔════╝██╔════╝ ██╔══██╗`);
-    console.log(`  ██║     ██║██╔████╔██║█████╗  ██║  ███╗███████║`);
-    console.log(`  ██║     ██║██║╚██╔╝██║██╔══╝  ██║   ██║██╔══██║`);
-    console.log(`  ╚██████╗██║██║ ╚═╝ ██║███████╗╚██████╔╝██║  ██║`);
-    console.log(`   ╚═════╝╚═╝╚═╝     ╚═╝╚══════╝ ╚═════╝ ╚═╝  ╚═╝${C.reset}`);
-    console.log(`${C.white}${C.bold}  SMART OFFICE  ${C.reset}${C.gray}— Platform Administrasi Sekolah — Kurikulum Merdeka 2026/2027${C.reset}`);
-    console.log(`${C.gray}  v${ver}  |  ${now}${C.reset}`);
+    console.log(`${C.cyan}${C.bold}  CIMEGA SMART OFFICE${C.reset}`);
+    console.log(`  Platform Administrasi Sekolah - Kurikulum Merdeka 2026/2027`);
+    console.log(`  Versi: v${ver}  |  Waktu: ${now}`);
     log.dline();
     console.log('');
 
     // ── STATUS LAYANAN ──────────────────────────
-    console.log(`${C.bold}${C.white}  LAYANAN AKTIF${C.reset}`);
+    console.log(`${C.bold}${C.white}  STATUS LAYANAN${C.reset}`);
     log.line();
     console.log(`  ${'Firebase  (Database)'.padEnd(26)} ${badge(fsStatus)}`);
     console.log(`  ${'Supabase  (Storage)'.padEnd(26)} ${badge(sbStatus)}`);
     console.log(`  ${'Gemini AI (Generator)'.padEnd(26)} ${badge(aiStatus)}`);
-    console.log(`  ${'BGM Library'.padEnd(26)} ${C.cyan}${C.bold}● ${musicFiles.length} LAGU DIMUAT${C.reset}`);
+    console.log(`  ${'BGM Library'.padEnd(26)} ${C.cyan}${C.bold}[${musicFiles.length} LAGU DIMUAT]${C.reset}`);
     console.log('');
 
     // ── KREDENSIAL ───────────────────────────────
-    console.log(`${C.bold}${C.white}  KREDENSIAL${C.reset}`);
+    console.log(`${C.bold}${C.white}  KREDENSIAL SISTEM${C.reset}`);
     log.line();
     console.log(`  ${'Firebase API Key'.padEnd(26)} ${credBadge(env.FIREBASE_API_KEY,       'Firebase Key')}`);
     console.log(`  ${'Firebase Project ID'.padEnd(26)} ${credBadge(env.FIREBASE_PROJECT_ID,  'Project ID')}`);
@@ -1299,7 +1296,7 @@ app.whenReady().then(async () => {
     console.log('');
 
     // ── SISTEM ────────────────────────────────────
-    console.log(`${C.bold}${C.white}  SISTEM${C.reset}`);
+    console.log(`${C.bold}${C.white}  INFORMASI SISTEM${C.reset}`);
     log.line();
     console.log(`  ${'Node.js'.padEnd(26)} ${C.white}v${node}${C.reset}`);
     console.log(`  ${'Electron'.padEnd(26)} ${C.white}v${elec}${C.reset}`);
@@ -1307,7 +1304,7 @@ app.whenReady().then(async () => {
     console.log(`  ${'App Path'.padEnd(26)} ${C.gray}${app.getPath('userData')}${C.reset}`);
     console.log('');
     log.dline();
-    console.log(`${C.green}${C.bold}  ✓ CIMEGA SIAP DIGUNAKAN  ${C.reset}${C.gray}— Error dari aplikasi akan tampil di bawah ini${C.reset}`);
+    console.log(`${C.green}${C.bold}  CIMEGA SIAP DIGUNAKAN  ${C.reset}${C.gray}- Status log dan error aplikasi akan tampil di bawah ini:${C.reset}`);
     log.dline();
     console.log('');
 

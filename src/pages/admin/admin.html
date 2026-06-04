@@ -8,9 +8,15 @@
   <script src="../../utils/dialog-system.js"></script>
 
   <link rel="stylesheet" href="admin.css">
-</head>
 <body>
-<div class="notif-toast" id="toastContainer"></div>
+  <!-- Space Background Nebula (Astra Academy Style) -->
+  <div class="space-background">
+    <div class="sphere s1"></div>
+    <div class="sphere s2"></div>
+    <div class="sphere s3"></div>
+    <div class="sphere s4"></div>
+  </div>
+  <div class="notif-toast" id="toastContainer"></div>
 
 <!-- SIDEBAR -->
 <div class="sidebar">
@@ -25,7 +31,7 @@
     <div class="nav-section">Menu Utama</div>
     <div class="nav-item active" onclick="showPage('dashboard',this)"><span class="nav-icon">📊</span>Dashboard</div>
     <div class="nav-section">Manajemen Terpadu</div>
-    <div class="nav-item active" style="color:var(--gold)" onclick="showPage('master',this)"><span class="nav-icon">📦</span>Data Master</div>
+    <div class="nav-item" style="color:var(--gold)" onclick="showPage('master',this)"><span class="nav-icon">📦</span>Data Master</div>
 
 
     <div class="nav-section">Manajemen Administrasi</div>
@@ -114,8 +120,8 @@
             </div>
           </div>
           <div style="display:flex; flex-direction:column; gap:10px">
-            <button id="btnLockApp" class="btn" style="width:100%; background:linear-gradient(135deg,#ff2244,#cc0033); color:#fff; border:none; font-weight:700; font-family: 'Plus Jakarta Sans', sans-serif; font-size:11px; letter-spacing:1px; display:none" onclick="openLockModal()">🔒 KUNCI APLIKASI</button>
-            <button id="btnUnlockApp" class="btn" style="width:100%; background:linear-gradient(135deg,#00cc66,#009944); color:#fff; border:none; font-weight:700; font-family: 'Plus Jakarta Sans', sans-serif; font-size:11px; letter-spacing:1px; display:none" onclick="unlockApp()">🔓 BUKA KUNCI APLIKASI</button>
+            <button id="btnLockApp" class="btn btn-lock" style="width:100%; display:none" onclick="openLockModal()">🔒 KUNCI APLIKASI</button>
+            <button id="btnUnlockApp" class="btn btn-unlock" style="width:100%; display:none" onclick="unlockApp()">🔓 BUKA KUNCI APLIKASI</button>
           </div>
         </div>
       </div>
@@ -352,8 +358,8 @@
     <div class="form-group"><label class="form-label">Status</label>
       <select class="form-control" id="sekolahStatus"><option value="aktif">Aktif</option><option value="nonaktif">Nonaktif</option></select>
     </div>
-    <div style="background:rgba(255,208,0,0.05); border:1px dashed var(--gold); border-radius:10px; padding:12px; margin-top:10px;">
-      <div style="font-family: 'Plus Jakarta Sans', sans-serif; font-size:10px; color:var(--gold); margin-bottom:8px;">🔐 SHARED SECURITY KEYS (SAAS)</div>
+    <div style="background:rgba(251,191,36,0.02); border:1px solid rgba(251,191,36,0.15); border-radius:12px; padding:14px; margin-top:14px; backdrop-filter:blur(10px); box-shadow: inset 0 1px 0 rgba(255,255,255,0.05);">
+      <div style="font-family: 'Plus Jakarta Sans', sans-serif; font-size:10px; color:var(--gold); margin-bottom:8px; font-weight:700;">🔐 SHARED SECURITY KEYS (SAAS)</div>
       <div class="form-group" style="margin-bottom:8px;">
         <div style="display:flex; justify-content:space-between; align-items:center;">
           <label class="form-label" style="font-size:10px; color:var(--muted);">School Secret Key (AES-256)</label>
@@ -410,7 +416,7 @@
       </div>
     </div>
 
-    <div id="teachingAssignmentsContainer" style="display:none; margin-bottom: 20px; padding: 15px; background: rgba(0, 229, 255, 0.04); border: 1px dashed rgba(0, 229, 255, 0.2); border-radius: 12px;">
+    <div id="teachingAssignmentsContainer" style="display:none; margin-bottom: 20px; padding: 16px; background: rgba(0, 229, 255, 0.02); border: 1px solid rgba(0, 229, 255, 0.2); border-radius: 14px; backdrop-filter:blur(10px); box-shadow: inset 0 1px 0 rgba(255,255,255,0.05);">
       <label class="form-label" style="font-size: 11px; margin-bottom: 10px;">🎯 JANGKAUAN MENGAJAR (Pilih Kelas)</label>
       <div id="teachingClasses">
         <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px;">
@@ -2038,7 +2044,7 @@ if (document.readyState === 'loading') {
       </div>
       <div style="display:flex;gap:10px;justify-content:flex-end">
         <button class="btn btn-ghost" onclick="document.getElementById('modalLockConfirm').classList.remove('show')">Batal</button>
-        <button class="btn" style="background:linear-gradient(135deg,#ff2244,#cc0033);color:#fff;font-weight:700" onclick="lockApp()">🔒 Ya, Kunci Sekarang</button>
+        <button class="btn btn-lock" onclick="lockApp()">🔒 Ya, Kunci Sekarang</button>
       </div>
     </div>
   </div>

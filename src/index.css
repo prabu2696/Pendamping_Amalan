@@ -8,11 +8,11 @@
   --purple: #7c3aed;       /* Violet Canva */
   --blue: #4f46e5;         /* Indigo Canva */
   --cyan: #0ea5e9;         /* Sky Blue */
-  --dark: #08090d;         /* Deep Space Charcoal */
-  --dark2: #0f1016;        /* Card Background */
-  --dark3: #141622;        /* Input/Dropdown Background */
-  --card: rgba(18, 20, 29, 0.45); /* Frosted Glass Card */
-  --border: rgba(255, 255, 255, 0.06); /* Frosted Glass Border */
+  --dark: #030206;         /* Deep Space Base */
+  --dark2: rgba(13, 14, 21, 0.45); /* Translucent Card */
+  --dark3: rgba(10, 11, 16, 0.65);  /* Input Background */
+  --card: rgba(255, 255, 255, 0.035); /* Frosted Glass Card */
+  --border: rgba(255, 255, 255, 0.08); /* Frosted Glass Border */
   --text: #f8fafc;         /* Slate White text */
   --muted: #94a3b8;        /* Muted slate text */
   --success: #10b981;      /* Emerald */
@@ -28,33 +28,83 @@
   box-sizing: border-box;
 }
 
+/* Base Body setting - transparent so the fixed background is visible */
 body {
   font-family: 'Plus Jakarta Sans', sans-serif !important;
-  background-color: var(--dark);
+  background: transparent;
   color: var(--text);
+  min-height: 100vh;
+  position: relative;
 }
 
-/* Ambient Background Blobs (Deep Space Glass) */
-body::before {
-  content: '';
+/* True Space Background with Glowing Drifting Nebula Spheres */
+.space-background {
   position: fixed;
   inset: 0;
+  z-index: -100;
+  background-color: #030206;
   background-image: 
-    radial-gradient(circle at 80% 15%, rgba(124, 58, 237, 0.12) 0%, transparent 45%),
-    radial-gradient(circle at 15% 80%, rgba(14, 165, 233, 0.1) 0%, transparent 50%),
-    radial-gradient(circle at 50% 50%, rgba(79, 70, 229, 0.06) 0%, transparent 55%);
-  background-attachment: fixed;
-  z-index: -2;
+    radial-gradient(circle at 50% 50%, rgba(15, 12, 30, 0.5) 0%, #030206 100%);
+  overflow: hidden;
   pointer-events: none;
-  animation: ambientDrift 20s ease-in-out infinite alternate;
 }
 
-@keyframes ambientDrift {
+.sphere {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.65;
+  mix-blend-mode: screen;
+  animation: drift 30s ease-in-out infinite alternate;
+  pointer-events: none;
+  will-change: transform;
+  transform: translate3d(0, 0, 0);
+}
+
+.sphere.s1 {
+  width: 550px;
+  height: 550px;
+  background: radial-gradient(circle, rgba(124, 58, 237, 0.45) 0%, rgba(124, 58, 237, 0) 70%);
+  top: -10%;
+  right: -5%;
+}
+
+.sphere.s2 {
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle, rgba(14, 165, 233, 0.4) 0%, rgba(14, 165, 233, 0) 70%);
+  bottom: -15%;
+  left: -5%;
+  animation-delay: -6s;
+}
+
+.sphere.s3 {
+  width: 450px;
+  height: 450px;
+  background: radial-gradient(circle, rgba(236, 72, 153, 0.3) 0%, rgba(236, 72, 153, 0) 70%);
+  top: 40%;
+  left: 35%;
+  animation-delay: -12s;
+}
+
+.sphere.s4 {
+  width: 500px;
+  height: 500px;
+  background: radial-gradient(circle, rgba(79, 70, 229, 0.35) 0%, rgba(79, 70, 229, 0) 70%);
+  bottom: 30%;
+  right: 20%;
+  animation-delay: -18s;
+}
+
+@keyframes drift {
   0% {
-    filter: hue-rotate(0deg) saturate(1);
+    transform: translate3d(0px, 0px, 0px) scale(1) rotate(0deg);
+  }
+  50% {
+    transform: translate3d(40px, -60px, 0px) scale(1.1) rotate(20deg);
   }
   100% {
-    filter: hue-rotate(15deg) saturate(1.1);
+    transform: translate3d(-30px, 40px, 0px) scale(0.9) rotate(-20deg);
   }
 }
 
@@ -67,12 +117,11 @@ body::before {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb { 
-  background-color: rgba(255, 255, 255, 0.08);
+  background-color: rgba(255, 255, 255, 0.12);
   border-radius: 10px; 
-  transition: background-color 0.2s;
 }
 ::-webkit-scrollbar-thumb:hover { 
-  background-color: rgba(124, 58, 237, 0.3);
+  background-color: rgba(124, 58, 237, 0.4);
 }
 ::-webkit-scrollbar-corner {
   background: transparent;
@@ -190,7 +239,7 @@ body::before {
 
 /* Textarea Editor Areas */
 #builder-html, #builder-js, #builder-prompt {
-    background: rgba(10, 11, 16, 0.5);
+    background: rgba(10, 11, 16, 0.4);
     border: 1px solid var(--border);
     border-radius: 10px;
     color: #e2e8f0;
@@ -241,9 +290,9 @@ body.entry-level-mode .sidebar {
     border: 1px solid var(--border);
     border-radius: 16px;
     padding: 24px;
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
+    backdrop-filter: blur(24px) saturate(180%);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37), inset 0 0 0 1px rgba(255, 255, 255, 0.05);
     color: var(--text);
     animation: fadeInUp 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
@@ -272,7 +321,7 @@ body.entry-level-mode .sidebar {
 
 .cyber-input, .cyber-select {
     background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.09);
     border-radius: 10px;
     padding: 12px 14px;
     color: #fff;
@@ -301,7 +350,7 @@ textarea.cyber-input {
 /* Premium Buttons */
 .cyber-button {
     background: rgba(255, 255, 255, 0.04);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.09);
     color: var(--text);
     padding: 10px 20px;
     border-radius: 10px;

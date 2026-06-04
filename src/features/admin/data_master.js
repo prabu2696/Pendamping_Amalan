@@ -101,12 +101,12 @@ window.AdminMaster = {
         // Render Orphan Users
         if (orphanUsers.length > 0) {
             html += `
-                <div class="card" style="margin-top:20px; border:1px dashed var(--gold); background:rgba(255,208,0,0.02)">
-                    <div class="card-header" style="background:rgba(255,208,0,0.05)">
+                <div class="card" style="margin-top:20px">
+                    <div class="card-header" style="display:flex; flex-direction:column; align-items:flex-start; gap:4px">
                         <div class="card-title" style="color:var(--gold)">👤 PENGGUNA MANDIRI & ADMINISTRATOR (${orphanUsers.length})</div>
-                        <p style="font-size:11px; color:var(--muted)">Daftar akun yang tidak terafiliasi dengan institusi tertentu, termasuk akun Administrator sistem.</p>
+                        <p style="font-size:11px; color:var(--muted); margin:0">Daftar akun yang tidak terafiliasi dengan institusi tertentu, termasuk akun Administrator sistem.</p>
                     </div>
-                    <div class="table-wrap" style="margin:10px; border:none">
+                    <div class="table-wrap" style="border:none; border-radius:0; background:transparent; box-shadow:none; backdrop-filter:none; -webkit-backdrop-filter:none">
                         ${this.renderUserTable(orphanUsers)}
                     </div>
                 </div>
@@ -152,7 +152,7 @@ window.AdminMaster = {
                         <button class="btn btn-primary btn-sm" onclick="window.AdminMaster.addManualUser('${s.id}', '${s.nama.replace(/'/g, "\\'")}', '${s.npsn}')">+ Tambah User</button>
                     </div>
                 </div>
-                <div class="table-wrap" style="border:none; border-radius:0">
+                <div class="table-wrap" style="border:none; border-radius:0; background:transparent; box-shadow:none; backdrop-filter:none; -webkit-backdrop-filter:none">
                     ${this.renderUserTable(users)}
                 </div>
             </div>

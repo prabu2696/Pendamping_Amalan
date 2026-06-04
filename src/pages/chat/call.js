@@ -479,25 +479,15 @@ window.toggleScreenShare = async function() {
 
     sources.forEach(src => {
       const item = document.createElement('div');
-      item.style.cssText = 'width:180px; background:rgba(6, 20, 40, 0.6); border:1px solid var(--border-color); border-radius:10px; padding:10px; cursor:pointer; text-align:center; transition:all 0.2s; display:flex; flex-direction:column; align-items:center; gap:8px;';
-      item.onmouseover = () => {
-        item.style.borderColor = 'var(--cyan)';
-        item.style.boxShadow = '0 0 10px rgba(0, 229, 255, 0.3)';
-        item.style.transform = 'scale(1.03)';
-      };
-      item.onmouseout = () => {
-        item.style.borderColor = 'var(--border-color)';
-        item.style.boxShadow = 'none';
-        item.style.transform = 'none';
-      };
+      item.className = 'screen-source-item';
       
       const img = document.createElement('img');
       img.src = src.thumbnail;
-      img.style.cssText = 'width:150px; height:90px; object-fit:cover; border-radius:6px; border:1px solid rgba(255,255,255,0.1);';
+      img.style.cssText = 'width:150px; height:90px; object-fit:cover; border-radius:8px; border:1px solid rgba(255,255,255,0.1);';
       
       const title = document.createElement('div');
       title.innerText = src.name;
-      title.style.cssText = 'font-size:10px; color:#fff; font-weight:700; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; width:100%;';
+      title.style.cssText = 'font-size:10px; color:#fff; font-weight:700; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; width:100%; margin-top:4px;';
       
       item.appendChild(img);
       item.appendChild(title);
