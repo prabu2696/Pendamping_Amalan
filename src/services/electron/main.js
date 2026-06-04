@@ -294,7 +294,7 @@ function createWindow() {
       devTools: true,      // ✅ Debug mode
       preload: path.join(__dirname, 'preload.js'),
       backgroundThrottling: true, // ✅ SMART SCALING: Drop CPU when minimized
-      additionalArguments: [optimizer.isLowEnd ? '--entry-level' : '--normal-level'] // ✅ Inject status for renderer
+      additionalArguments: ['--normal-level'] // ✅ Inject status for renderer
     },
     show: false,
     backgroundColor: '#020b18',
