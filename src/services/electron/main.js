@@ -125,32 +125,38 @@ function getOutputDir() {
 
 function loadLocalMusicFiles() {
   try {
-    // Gabungkan lagu dari: (1) src/assets/assets_music (default, bundled), (2) userData/assets_music (upload)
     const bundledMusicDir = path.join(__dirname, '..', '..', 'assets', 'assets_music');
-    const userMusicDir = getMusicUserDir();
-    const musicDir = fs.existsSync(bundledMusicDir) ? bundledMusicDir : userMusicDir;
-    if (!fs.existsSync(musicDir)) return;
-    const files = fs.readdirSync(musicDir)
-      .filter(f => /\.(mp3|ogg|wav|flac|m4a|aac)$/i.test(f));
-    if (files.length > 0) {
-      musicFiles = sortMusicFiles(files.map(f => {
-        const absPath = path.resolve(musicDir, f);
-        // Split pada backslash Windows, join dengan forward slash, lalu encode spasi
-        // Hasilnya: file:///C:/Users/.../Kang%20Prabu%20-%20Himne%20SDN%20Cimega.mp3
-        const posixPath = absPath.split(path.sep).join('/');
-        const fileUrl = 'file:///' + posixPath.split(' ').join('%20');
-        return {
-          id: f,
-          title: f.replace(/\.(mp3|ogg|wav|flac|m4a|aac)$/i, '').trim(),
-          url: fileUrl,
-        };
-      }));
+    const userMusicDir    = getMusicUserDir();
+
+    // Gabungkan KEDUA direktori via Map (fileName → fullPath)
+    // userMusicDir menang jika ada nama file yang sama
+    const allFiles = new Map();
+    for (const dir of [bundledMusicDir, userMusicDir]) {
+      if (!fs.existsSync(dir)) continue;
+      fs.readdirSync(dir)
+        .filter(f => /\.(mp3|ogg|wav|flac|m4a|aac)$/i.test(f))
+        .forEach(f => allFiles.set(f, path.join(dir, f)));
+    }
+
+    if (allFiles.size > 0) {
+      musicFiles = sortMusicFiles(
+        Array.from(allFiles.entries()).map(([f, absPath]) => {
+          const posixPath = absPath.split(path.sep).join('/');
+          const fileUrl   = 'file:///' + posixPath.split(' ').join('%20');
+          return {
+            id:    f,
+            title: f.replace(/\.(mp3|ogg|wav|flac|m4a|aac)$/i, '').trim(),
+            url:   fileUrl,
+          };
+        })
+      );
       buildShuffleQueue();
     }
   } catch (e) {
     console.warn('[WARN] loadLocalMusicFiles:', e.message);
   }
 }
+
 loadLocalMusicFiles();
 
 // Sinkronisasi playlist BGM Firestore dinonaktifkan di main process untuk keamanan. Pemutaran diatur secara lokal.
