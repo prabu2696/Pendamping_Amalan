@@ -137,6 +137,16 @@ try {
     // ── VOICE & LOGGING (Pusat Kendali) ──────────────────────────
     ttsGenerate: (payload) => ipcRenderer.invoke('tts-generate', payload),
     logToTerminal: (msg, type = 'INFO') => ipcRenderer.invoke('system:log', { msg, type }),
+
+    // ── ★ BARU v2.0: Document Generation (Aman via Main Process) ──
+    // Menggantikan document_service.js yang pakai require() di renderer
+    generatePDF:     (htmlContent, fileName, options = {}) => ipcRenderer.invoke('doc:generate-pdf', { htmlContent, fileName, ...options }),
+    saveHTML:        (htmlContent, fileName) => ipcRenderer.invoke('doc:save-html', { htmlContent, fileName }),
+    openFile:        (filePath)             => ipcRenderer.invoke('doc:open-file', filePath),
+    openOutputDir:   ()                     => ipcRenderer.invoke('doc:open-output-dir'),
+    listOutputDocs:  ()                     => ipcRenderer.invoke('doc:list-output'),
+    openCallWindow:  (opts)                 => ipcRenderer.invoke('call:open-window', opts),
+    getScreenSources: ()                    => ipcRenderer.invoke('screen:get-sources'),
   });
   console.log('✅ PRELOAD v1.0.0 SECURE: window.cimegaConfig exposed');
 } catch (e) {
@@ -188,6 +198,8 @@ try {
     setSessionKey:   (key) => ipcRenderer.invoke('session-set-key', key),
     getSessionKey:   ()    => ipcRenderer.invoke('session-get-key'),
     clearSessionKey: ()    => ipcRenderer.invoke('session-clear-key'),
+    openCallWindow:  (opts) => ipcRenderer.invoke('call:open-window', opts),
+    getScreenSources: ()    => ipcRenderer.invoke('screen:get-sources'),
   });
   console.log('✅ PRELOAD v1.0.0 SECURE: window.cimegaAPI exposed');
 } catch (e) {

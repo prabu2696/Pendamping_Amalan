@@ -15,7 +15,7 @@ window.CimegaPrinter = {
     const modalId = 'cimegaPrintModal';
     if (!document.getElementById(modalId)) {
       const modalHtml = `
-        <div id="${modalId}" style="position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:10000; display:flex; align-items:center; justify-content:center; backdrop-filter:blur(10px); font-family: Arial;">
+        <div id="${modalId}" style="position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:10000; display:flex; align-items:center; justify-content:center; backdrop-filter:blur(10px); font-family: 'Plus Jakarta Sans', sans-serif;">
           <div class="card" style="width:100%; max-width:500px; border-color:var(--cyan);">
             <div class="card-header">
               <div class="card-title">🖨️ PENGATURAN CETAK & EKSPOR</div>

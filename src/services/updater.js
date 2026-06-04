@@ -33,7 +33,7 @@ const CimegaUpdater = (() => {
         #cimegaUpdaterPopup {
           position: fixed; inset: 0; background: rgba(0,0,0,0.75);
           z-index: 99999; display: none; align-items: center; justify-content: center;
-          backdrop-filter: blur(6px); font-family: Arial;
+          backdrop-filter: blur(6px); font-family: 'Plus Jakarta Sans', sans-serif;
         }
         #cimegaUpdaterPopup.show { display: flex; }
         .upd-box {
@@ -50,12 +50,12 @@ const CimegaUpdater = (() => {
         .upd-box::before { top:-1px;left:-1px;border-width:2px 0 0 2px;border-radius:6px 0 0 0 }
         .upd-box::after  { bottom:-1px;right:-1px;border-width:0 2px 2px 0;border-radius:0 0 6px 0 }
         .upd-icon { font-size:48px; text-align:center; margin-bottom:16px; }
-        .upd-title { font-family: Arial; font-size:16px; font-weight:700;
+        .upd-title { font-family: 'Plus Jakarta Sans', sans-serif; font-size:16px; font-weight:700;
           color:#fff; text-align:center; margin-bottom:6px; letter-spacing:1px; }
         .upd-ver { text-align:center; margin-bottom:14px; }
         .upd-ver .old { font-size:12px; color:#5a8aaa; }
         .upd-ver .arrow { font-size:14px; color:#00e5ff; margin:0 8px; }
-        .upd-ver .new { font-family: Arial; font-size:14px; color:#00e5ff; font-weight:700; }
+        .upd-ver .new { font-family: 'Plus Jakarta Sans', sans-serif; font-size:14px; color:#00e5ff; font-weight:700; }
         .upd-notes {
           background:rgba(0,229,255,0.04); border:1px solid rgba(0,229,255,0.1);
           border-radius:10px; padding:12px 14px; margin-bottom:18px;
@@ -69,7 +69,7 @@ const CimegaUpdater = (() => {
           border-radius:20px; transition:width .3s; width:0%; }
         .upd-actions { display:flex; gap:10px; }
         .upd-btn { flex:1; padding:13px; border-radius:10px; border:none; cursor:pointer;
-          font-family: Arial; font-size:11px; font-weight:700; letter-spacing:2px;
+          font-family: 'Plus Jakarta Sans', sans-serif; font-size:11px; font-weight:700; letter-spacing:2px;
           transition:all .2s; }
         .upd-btn-primary { background:linear-gradient(135deg,#0044cc,#0066ff,#00aaff);
           background-size:200%; color:#fff; animation:grad 3s ease infinite; }

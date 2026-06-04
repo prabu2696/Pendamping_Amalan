@@ -61,7 +61,18 @@ window.CimegaVoice = {
         this.stop();
         const msg = new SpeechSynthesisUtterance(text);
         msg.lang = 'id-ID';
-        msg.rate = 1.0;
+        msg.rate = 1.08;
+        
+        // Find best Indonesian voice
+        const voices = window.speechSynthesis.getVoices();
+        const bestVoice = voices.find(v => 
+            v.lang.includes('id') && 
+            (v.name.includes('Google') || v.name.includes('Natural') || v.name.includes('Microsoft'))
+        ) || voices.find(v => v.lang.includes('id'));
+        
+        if (bestVoice) {
+            msg.voice = bestVoice;
+        }
         
         msg.onstart = () => { 
             this.isPlaying = true; 

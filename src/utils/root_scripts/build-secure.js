@@ -3,33 +3,36 @@ const path = require('path');
 const { execSync } = require('child_process');
 const JavaScriptObfuscator = require('javascript-obfuscator');
 const { globSync } = require('glob');
+const bytenode = require('bytenode');
 
 async function runSecureBuild() {
     console.log("============== CIMEGA SECURE BUILD ==============");
     console.log("[1/5] Memulai proses backup source code murni...");
 
     // 1. Backup file asli agar ruang kerja (workspace) tetap aman
+    if (fs.existsSync('.src_backup')) {
+        fs.removeSync('.src_backup');
+    }
     fs.copySync('src', '.src_backup');
-    fs.copyFileSync('main.js', '.main_backup.js');
-    fs.copyFileSync('preload.js', '.preload_backup.js');
 
     try {
-        console.log("[2/5] Mengacak (Obfuscate) kode javascript menjadi heksadesimal...");
+        console.log("[2/5] Mengacak (Obfuscate) kode javascript renderer...");
         
-        // Kumpulkan semua file JS yang akan diobfuscate
-        const jsFiles = globSync('src/**/*.js', { ignore: 'node_modules/**' }).concat(['main.js', 'preload.js']);
+        // Kumpulkan semua file JS, kecualikan file main/preload terlebih dahulu untuk penanganan khusus
+        const jsFiles = globSync('src/**/*.js', { ignore: 'node_modules/**' });
         
         jsFiles.forEach(file => {
+            // Kita obfuscate semua file terlebih dahulu
             const code = fs.readFileSync(file, 'utf8');
             const result = JavaScriptObfuscator.obfuscate(code, {
                 compact: true,
                 controlFlowFlattening: true,       // Membuat logika berputar-putar rumit
-                controlFlowFlatteningThreshold: 0.7,
-                debugProtection: true,             // 🛑 ANTI-DEBUGGER: Membekukan browser hacker
+                controlFlowFlatteningThreshold: 0.6,
+                debugProtection: true,             // 🛑 ANTI-DEBUGGER
                 debugProtectionInterval: 4000,
                 disableConsoleOutput: true,        // Menghilangkan semua console.log
-                identifierNamesGenerator: 'hexadecimal', // Variabel menjadi _0x4d3f
-                selfDefending: true,               // Memblokir format ualng (beautify)
+                identifierNamesGenerator: 'hexadecimal', 
+                selfDefending: true,               
                 stringArray: true,
                 stringArrayEncoding: ['base64', 'rc4'],
                 splitStrings: true,
@@ -38,31 +41,49 @@ async function runSecureBuild() {
             fs.writeFileSync(file, result.getObfuscatedCode(), 'utf8');
         });
 
-        console.log("[3/5] Koding berhasil diajak dan diamankan. Memulai proses Build Installer...");
+        console.log("[3/5] Mengompilasi main.js dan preload.js ke V8 Bytecode (.jsc)...");
         
-        // 2. Jalankan electron-builder
-        // Installer akan membungkus kodingan "rusak" tersebut
+        const mainJsPath = 'src/services/electron/main.js';
+        const preloadJsPath = 'src/services/electron/preload.js';
+
+        // Kompilasi file menjadi bytecode biner .jsc
+        await bytenode.compileFile({
+            filename: mainJsPath,
+            output: 'src/services/electron/main.jsc'
+        });
+
+        await bytenode.compileFile({
+            filename: preloadJsPath,
+            output: 'src/services/electron/preload.jsc'
+        });
+
+        // Ganti main.js dan preload.js dengan loader Bytenode sederhana
+        const mainLoaderCode = `const bytenode = require('bytenode');\nrequire('./main.jsc');\n`;
+        const preloadLoaderCode = `const bytenode = require('bytenode');\nrequire('./preload.jsc');\n`;
+
+        fs.writeFileSync(mainJsPath, mainLoaderCode, 'utf8');
+        fs.writeFileSync(preloadJsPath, preloadLoaderCode, 'utf8');
+
+        console.log("[4/5] Kompilasi biner selesai. Memulai pembuatan installer (electron-builder)...");
+        
+        // Jalankan electron-builder
         execSync('npx electron-builder --win --x64', { stdio: 'inherit' });
 
-        console.log("[4/5] Build Selesai. Ekstraksi Installer sukses!");
+        console.log("[5/5] Build Selesai. Ekstraksi Installer sukses!");
 
     } catch (e) {
-        console.error("Terjadi Kesalahan saat proses Build: ", e.message);
+        console.error("❌ Terjadi Kesalahan saat proses Build: ", e.message);
     } finally {
-        console.log("[5/5] Memulihkan source code murni ke ruang kerja...");
+        console.log("Memulihkan source code murni ke ruang kerja...");
         
-        // 3. Restore file asli bagaimanapun hasil build-nya (sukses/gagal)
-        fs.removeSync('src');                     // Hapus folder src yang sudah dienkripsi
-        fs.renameSync('.src_backup', 'src');      // Kembalikan folder asli
-        
-        fs.removeSync('main.js');
-        fs.renameSync('.main_backup.js', 'main.js');
-        
-        fs.removeSync('preload.js');
-        fs.renameSync('.preload_backup.js', 'preload.js');
+        // Restore file asli bagaimanapun hasil build-nya (sukses/gagal)
+        if (fs.existsSync('.src_backup')) {
+            fs.removeSync('src');                     // Hapus folder src hasil enkripsi/kompilasi
+            fs.renameSync('.src_backup', 'src');      // Kembalikan folder murni asli
+        }
 
         console.log("============== SELESAI ==============");
-        console.log("Source code aman, Installer `.exe` dengan keamanan tingkat tinggi siap didistribusikan!");
+        console.log("Source code aman, Installer `.exe` biner terlindungi siap didistribusikan!");
     }
 }
 
@@ -72,14 +93,6 @@ process.on('SIGINT', () => {
     if (fs.existsSync('.src_backup')) {
         fs.removeSync('src');
         fs.renameSync('.src_backup', 'src');
-    }
-    if (fs.existsSync('.main_backup.js')) {
-        fs.removeSync('main.js');
-        fs.renameSync('.main_backup.js', 'main.js');
-    }
-    if (fs.existsSync('.preload_backup.js')) {
-        fs.removeSync('preload.js');
-        fs.renameSync('.preload_backup.js', 'preload.js');
     }
     process.exit();
 });

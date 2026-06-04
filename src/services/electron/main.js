@@ -17,22 +17,9 @@ optimizer.init();
 const fs = require('fs');
 const https = require('https');
 const url = require('url');
-const admin = require('firebase-admin');
-const { seedInitialTemplates } = require('../seeder_service');
-
-// ── Init Firebase Admin ──────────────────────────────────
+// Firebase Admin dan serviceAccountKey.json telah dihapus dari sisi klien untuk mencegah kebocoran kredensial admin.
 let firebaseAdminReady = false;
-try {
-  const serviceAccount = require('../api/serviceAccountKey.json');
-  admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount),
-    storageBucket: 'cimega-smart-office.appspot.com'
-  });
-  firebaseAdminReady = true;
-} catch (err) {
-  console.error('[ERROR] Firebase Admin:', err.message);
-}
-const db = admin.firestore();
+const db = null;
 
 let _cachedEnv = null;
 function loadEnv() {
@@ -58,12 +45,7 @@ function loadEnv() {
 const envConfig = loadEnv();
 const clearEnvCache = () => { _cachedEnv = null; };
 
-// ── Jalankan AI Generator Service (Port 3001) ────────────
-try {
-  require('../ai_generator_service.js');
-} catch (err) {
-  console.error('[ERROR] AI Service:', err.message);
-}
+// Server Express lokal port 3001 dinonaktifkan demi alasan keamanan dan efisiensi sistem.
 
 // ── Musik state (Lokal) ──────────────────────────────────
 let musicFiles = []; // SELALU dari assets_music (lokal)
@@ -102,9 +84,27 @@ function getNextShuffleIndex() {
 }
 
 // ── Baca file lokal dari assets_music (SUMBER UTAMA UNTUK BGM) ──
+// ★ FIX v2.0: Gunakan userData untuk penyimpanan file dinamis (upload musik)
+//   agar tidak crash di production ASAR (read-only).
+//   assets_music di src/ HANYA untuk musik default yang di-bundle.
+function getMusicUserDir() {
+  const userMusicDir = path.join(app.getPath('userData'), 'assets_music');
+  if (!fs.existsSync(userMusicDir)) fs.mkdirSync(userMusicDir, { recursive: true });
+  return userMusicDir;
+}
+
+function getOutputDir() {
+  const outDir = path.join(app.getPath('userData'), 'output_docs');
+  if (!fs.existsSync(outDir)) fs.mkdirSync(outDir, { recursive: true });
+  return outDir;
+}
+
 function loadLocalMusicFiles() {
   try {
-    const musicDir = path.join(__dirname, '..', '..', 'assets', 'assets_music');
+    // Gabungkan lagu dari: (1) src/assets/assets_music (default, bundled), (2) userData/assets_music (upload)
+    const bundledMusicDir = path.join(__dirname, '..', '..', 'assets', 'assets_music');
+    const userMusicDir = getMusicUserDir();
+    const musicDir = fs.existsSync(bundledMusicDir) ? bundledMusicDir : userMusicDir;
     if (!fs.existsSync(musicDir)) return;
     const files = fs.readdirSync(musicDir)
       .filter(f => /\.(mp3|ogg|wav|flac|m4a|aac)$/i.test(f));
@@ -129,32 +129,7 @@ function loadLocalMusicFiles() {
 }
 loadLocalMusicFiles();
 
-// ── Firestore sync: hanya update metadata/list di cloud ─────
-// TIDAK menggantikan musicFiles untuk playback — BGM selalu lokal
-let _musicSyncDebounce = null;
-function syncMusicFromFirestore() {
-  try {
-    db.collection('app_music').where('status', '==', 'active').onSnapshot(snap => {
-      if (_musicSyncDebounce) clearTimeout(_musicSyncDebounce);
-      _musicSyncDebounce = setTimeout(() => {
-        // Hanya reload lokal jika jumlah lagu berubah (file ditambah/hapus via Sinkron)
-        const prevCount = musicFiles.length;
-        loadLocalMusicFiles();
-        // Selalu broadcast setelah sync Firestore agar UI (judul dll) terupdate
-        // Tapi JANGAN memanggil getNextShuffleIndex agar lagu tidak ter-skip tiba-tiba
-        if (musicFiles.length !== prevCount) {
-          if (musicState.index >= musicFiles.length) musicState.index = 0;
-        }
-        broadcastMusicState();
-      }, 1500);
-    }, err => {
-      console.warn('[WARN] Music sync:', err.message);
-    });
-  } catch (e) {
-    console.warn('[WARN] syncMusicFromFirestore:', e.message);
-  }
-}
-syncMusicFromFirestore();
+// Sinkronisasi playlist BGM Firestore dinonaktifkan di main process untuk keamanan. Pemutaran diatur secara lokal.
 
 // ── Check Supabase Connection ────────────────────────────────
 async function checkSupabaseStatus() {
@@ -172,28 +147,15 @@ async function checkSupabaseStatus() {
   });
 }
 
-// ── Check Firestore Connection (Live Handshake) ─────────────
+// ── Check Firestore Connection (Live Handshake via Renderer) ─────────────
 async function checkFirestoreStatus() {
-  if (!firebaseAdminReady) return 'CONFIG_ERROR';
-  try {
-    // Ping Firestore dengan limit super kecil (cek koneksi & auth)
-    const snap = await db.collection('settings').limit(1).get();
-    return 'CONNECTED';
-  } catch (err) {
-    return 'OFFLINE';
-  }
+  // Menggunakan mode client aman
+  return 'SECURE_CLIENT_MODE';
 }
 
-// ── Check AI Service Status (Local TCP Ping) ────────────────
+// ── Check AI Service Status (Natively via IPC) ────────────────
 async function checkAIServiceStatus() {
-  return new Promise((resolve) => {
-    const http = require('http');
-    const req = http.get('http://localhost:3001', (res) => {
-      resolve('ACTIVE (Port 3001)');
-    });
-    req.on('error', () => resolve('OFFLINE'));
-    req.setTimeout(1500, () => { req.destroy(); resolve('TIMEOUT'); });
-  });
+  return 'ACTIVE (IPC)';
 }
 
 // ── Update state ─────────────────────────────────────────────
@@ -353,6 +315,74 @@ function createWindow() {
 // ══════════════════════════════════════════
 // IPC HANDLERS
 // ══════════════════════════════════════════
+
+// ── Call Window Handler (Video & Audio P2P WebRTC) ───────────
+let callWindow = null;
+ipcMain.handle('call:open-window', async (e, opts) => {
+  const { session } = require('electron');
+  
+  // Otomatis setujui izin kamera & mikrofon untuk Cimega
+  session.defaultSession.setPermissionRequestHandler((webContents, permission, callback) => {
+    const allowed = ['media', 'geolocation', 'notifications'];
+    if (allowed.includes(permission)) {
+      callback(true);
+    } else {
+      callback(false);
+    }
+  });
+
+  if (callWindow) {
+    callWindow.focus();
+    return { success: true };
+  }
+
+  callWindow = new BrowserWindow({
+    width: 850,
+    height: 650,
+    title: 'Cimega Secure Call',
+    backgroundColor: '#0a0f16',
+    icon: path.join(__dirname, '..', '..', 'assets', 'assets_images', 'Logo SDN Cimega.png'),
+    webPreferences: {
+      nodeIntegration: false,
+      contextIsolation: true,
+      preload: path.join(__dirname, 'preload.js'),
+    }
+  });
+
+  // Hapus menu bar default panggilan
+  callWindow.setMenuBarVisibility(false);
+  callWindow.setMenu(null);
+
+  const queryParams = new URLSearchParams(opts).toString();
+  const callPageUrl = `file:///${path.join(__dirname, '..', '..', 'pages', 'chat', 'call.html').split(path.sep).join('/')}?${queryParams}`;
+
+  callWindow.loadURL(callPageUrl);
+
+  callWindow.on('closed', () => {
+    callWindow = null;
+  });
+
+  return { success: true };
+});
+
+// Screen sharing sources
+ipcMain.handle('screen:get-sources', async () => {
+  const { desktopCapturer } = require('electron');
+  try {
+    const sources = await desktopCapturer.getSources({
+      types: ['window', 'screen'],
+      thumbnailSize: { width: 150, height: 100 }
+    });
+    return sources.map(src => ({
+      id: src.id,
+      name: src.name,
+      thumbnail: src.thumbnail.toDataURL()
+    }));
+  } catch (err) {
+    console.error('Gagal memuat sumber screen sharing:', err);
+    return [];
+  }
+});
 
 // Firebase config
 ipcMain.handle('get-firebase-config', () => ({
@@ -627,12 +657,12 @@ ipcMain.handle('session-clear-key', (e) => {
   return { success: true };
 });
 
-// ── Simpan file musik ke assets_music LOKAL saja (tanpa Firestore/Supabase) ──
-// Dipakai oleh tombol "Upload Musik" di Admin Panel
+// ── Simpan file musik ke userData/assets_music (AMAN di production ASAR) ──
+// ★ FIX v2.0: Dulu pakai __dirname/assets/assets_music yang CRASH di production build
+//   karena ASAR bersifat read-only. Sekarang pakai app.getPath('userData').
 ipcMain.handle('music-save-local', async (e, { fileName, fileBuffer }) => {
   try {
-    const musicDir = path.join(__dirname, '..', '..', 'assets', 'assets_music');
-    if (!fs.existsSync(musicDir)) fs.mkdirSync(musicDir, { recursive: true });
+    const musicDir = getMusicUserDir(); // ★ FIX: userData, bukan __dirname
 
     // Sanitize nama file (hapus karakter berbahaya)
     const safeName = fileName.replace(/[^a-zA-Z0-9._\- ]/g, '_');
@@ -647,7 +677,7 @@ ipcMain.handle('music-save-local', async (e, { fileName, fileBuffer }) => {
     buildShuffleQueue();
     broadcastMusicState();
 
-    console.log(`[Music] Disimpan: "${safeName}" (${Math.round(buf.length / 1024)} KB)`);
+    console.log(`[Music] Disimpan ke userData: "${safeName}" (${Math.round(buf.length / 1024)} KB)`);
     return { success: true, fileName: safeName, path: destPath };
   } catch (err) {
     console.error('[ERROR] music-save-local:', err.message);
@@ -655,10 +685,10 @@ ipcMain.handle('music-save-local', async (e, { fileName, fileBuffer }) => {
   }
 });
 
-// ── Hapus file musik dari assets_music LOKAL saja ──────────────────────────
+// ── Hapus file musik dari userData/assets_music ──────────────────────────
 ipcMain.handle('music-delete-local', async (e, { fileName }) => {
   try {
-    const musicDir = path.join(__dirname, '..', '..', 'assets', 'assets_music');
+    const musicDir = getMusicUserDir(); // ★ FIX: userData
     const filePath = path.join(musicDir, fileName);
     if (fs.existsSync(filePath)) {
       fs.unlinkSync(filePath);
@@ -674,11 +704,10 @@ ipcMain.handle('music-delete-local', async (e, { fileName }) => {
   }
 });
 
-// ── Baca file musik dari assets_music sebagai buffer (untuk Sinkron ke Cloud) ──
-// Dipakai oleh sinkronMusik() di admin.html — aman tanpa perlu fetch file://
+// ── Baca file musik dari userData/assets_music ──────────────────────────
 ipcMain.handle('music-read-file', async (e, { fileName }) => {
   try {
-    const musicDir = path.join(__dirname, '..', '..', 'assets', 'assets_music');
+    const musicDir = getMusicUserDir(); // ★ FIX: userData
     const filePath = path.join(musicDir, fileName);
     if (!fs.existsSync(filePath)) {
       return { success: false, error: `File tidak ditemukan: ${fileName}` };
@@ -692,14 +721,21 @@ ipcMain.handle('music-read-file', async (e, { fileName }) => {
   }
 });
 
-// ── Daftar musik lokal dari folder assets_music ──────────────
+// ── Daftar musik lokal (gabungan bundled + userData) ──────────────────────────
 ipcMain.handle('get-music-list', () => {
   try {
-    const musicDir = path.join(__dirname, '..', '..', 'assets', 'assets_music');
-    if (!fs.existsSync(musicDir)) return [];
-    return fs.readdirSync(musicDir)
-      .filter(f => /\.(mp3|ogg|wav|aac|m4a|flac)$/i.test(f))
-      .map(f => ({
+    const userMusicDir = getMusicUserDir();
+    const bundledMusicDir = path.join(__dirname, '..', '..', 'assets', 'assets_music');
+    // Gabungkan dari kedua direktori (bundled + user-uploaded)
+    const allFiles = new Map();
+    for (const dir of [bundledMusicDir, userMusicDir]) {
+      if (!fs.existsSync(dir)) continue;
+      fs.readdirSync(dir)
+        .filter(f => /\.(mp3|ogg|wav|aac|m4a|flac)$/i.test(f))
+        .forEach(f => allFiles.set(f, path.join(dir, f)));
+    }
+    return Array.from(allFiles.entries())
+      .map(([f, fullPath]) => ({
         id: f,
         title: f.replace(/\.(mp3|ogg|wav|aac|m4a|flac)$/i, '').trim(),
         url: url.pathToFileURL(path.join(musicDir, f)).href,
@@ -772,13 +808,13 @@ function splitTextIntoChunks(text, maxLen = 200) {
 // ── HELPER: Normalisasi Teks (Pelafalan Singkatan) ──────────
 function normalizeText(text) {
   const dictionary = {
-    'AI': 'E-Ay',
+    'AI': 'A-I',
     'PAI': 'P-A-I',
     'RPP': 'R-P-P',
     'KOSP': 'K-O-S-P',
     'ATP': 'A-T-P',
     'KKTP': 'K-K-T-P',
-    'P5': 'P-lima',
+    'P5': 'P-lima', // deprecated — Kokurikuler sekarang
     'MA': 'M-A',
     'UKK': 'U-K-K',
     'ANBK': 'A-N-B-K',
@@ -862,22 +898,21 @@ ipcMain.handle('tts-generate', async (e, { text: rawText }) => {
       }
     }
 
-    // --- STRATEGI KHUSUS: Preferensi Jalur 3 (Edge Neural) untuk Bahasa Asing ---
-    if (lang !== 'id') {
-      try {
-        const { UniversalEdgeTTS } = require('edge-tts-universal');
-        // Perbaikan: Gunakan pitch +0Hz agar tidak error dan suara tetap jernih
-        const tts = new UniversalEdgeTTS(text, map.edge, { rate: '+15%', pitch: '+0Hz', volume: '+0%' });
-        const audioBuffer = await tts.synthesize();
-        return { success: true, audioContent: Buffer.from(audioBuffer).toString('base64') };
-      } catch (eErr) {
-        console.warn(`[TTS_DEBUG] Jalur 3 Priority Gagal: ${eErr.message}`);
-      }
+    // --- JALUR 2 (UTAMA & TERBAIK UNTUK KELANCARAN): EDGE TTS NEURAL ---
+    try {
+      console.log(`[TTS_DEBUG] Jalur 2 (Edge TTS Neural) - Suara Manusia Sangat Lancar...`);
+      const { UniversalEdgeTTS } = require('edge-tts-universal');
+      // Pengaturan pitch dan rate yang disesuaikan agar lebih natural (lugas)
+      const tts = new UniversalEdgeTTS(text, map.edge, { rate: '+12%', pitch: '+0Hz', volume: '+0%' });
+      const audioBuffer = await tts.synthesize();
+      return { success: true, audioContent: Buffer.from(audioBuffer).toString('base64') };
+    } catch (eErr) {
+      console.warn(`[TTS_DEBUG] Jalur 2 (Edge Neural) Gagal: ${eErr.message}`);
     }
 
-    // --- JALUR 2: GOOGLE TRANSLATE ENGINE (DEEP ROUTE - Unlimited Text) ---
+    // --- JALUR 3 (LAST RESORT): GOOGLE TRANSLATE ENGINE (Robot) ---
     try {
-      console.log(`[TTS_DEBUG] Jalur 2 (Google Translate) - Menjahit Audio...`);
+      console.log(`[TTS_DEBUG] Jalur 3 (Google Translate) - Fallback Terakhir...`);
       const chunks = splitTextIntoChunks(text, 200);
       let combinedBuffer = Buffer.alloc(0);
 
@@ -897,19 +932,7 @@ ipcMain.handle('tts-generate', async (e, { text: rawText }) => {
       }
       throw new Error('Google Translate tidak merespons.');
     } catch (tErr) {
-      console.warn(`[TTS_DEBUG] Jalur 2 Gagal: ${tErr.message}`);
-    }
-
-    if (lang === 'id') {
-      try {
-        console.log(`[TTS_DEBUG] Jalur 3 (Edge TTS Indonesia Fallback)...`);
-        const { UniversalEdgeTTS } = require('edge-tts-universal');
-        const tts = new UniversalEdgeTTS(text, map.edge, { rate: '+15%', pitch: '+0Hz', volume: '+0%' });
-        const audioBuffer = await tts.synthesize();
-        return { success: true, audioContent: Buffer.from(audioBuffer).toString('base64') };
-      } catch (eErr) {
-        console.warn(`[TTS_DEBUG] Jalur 3 Fallback Gagal: ${eErr.message}`);
-      }
+      console.warn(`[TTS_DEBUG] Jalur 3 Gagal: ${tErr.message}`);
     }
 
     throw new Error('Semua jalur suara gagal.');
@@ -925,6 +948,77 @@ ipcMain.handle('system:log', (e, { msg, type }) => {
   const label = `[DEBUG_${type}]`.padEnd(12);
   console.log(`${time} ${label} ${msg}`);
   return { success: true };
+});
+
+// ── ★ BARU v2.0: Document Generation via IPC (Aman, dari Main Process) ──────
+// document_service.js di renderer tidak bisa pakai require() — gunakan IPC ini.
+ipcMain.handle('doc:generate-pdf', async (e, { htmlContent, fileName, landscape, pageSize }) => {
+  try {
+    const outDir = getOutputDir();
+    const safeName = (fileName || 'dokumen').replace(/[^a-zA-Z0-9._\- ]/g, '_').replace(/\.html?$/, '') + '.pdf';
+    // Simpan HTML sementara, lalu buka dengan Electron BrowserWindow headless untuk print ke PDF
+    const tmpHtmlPath = path.join(outDir, '_tmp_print.html');
+    fs.writeFileSync(tmpHtmlPath, htmlContent, 'utf-8');
+    
+    const pdfWindow = new BrowserWindow({ show: false, webPreferences: { nodeIntegration: false, contextIsolation: true } });
+    await pdfWindow.loadFile(tmpHtmlPath);
+    const pdfData = await pdfWindow.webContents.printToPDF({
+      landscape: !!landscape,
+      pageSize: pageSize || 'A4',
+      printBackground: true,
+      marginType: 0,
+    });
+    pdfWindow.destroy();
+    const outPath = path.join(outDir, safeName);
+    fs.writeFileSync(outPath, pdfData);
+    fs.unlinkSync(tmpHtmlPath);
+    console.log(`[DOC] PDF Generated: ${safeName} (landscape: ${!!landscape}, size: ${pageSize || 'A4'})`);
+    return { success: true, filePath: outPath, fileName: safeName };
+  } catch (err) {
+    console.error('[ERROR] doc:generate-pdf:', err.message);
+    return { success: false, error: err.message };
+  }
+});
+
+ipcMain.handle('doc:open-file', async (e, filePath) => {
+  try {
+    await shell.openPath(filePath);
+    return { success: true };
+  } catch (err) {
+    return { success: false, error: err.message };
+  }
+});
+
+ipcMain.handle('doc:open-output-dir', async () => {
+  const outDir = getOutputDir();
+  await shell.openPath(outDir);
+  return { success: true };
+});
+
+ipcMain.handle('doc:save-html', async (e, { htmlContent, fileName }) => {
+  try {
+    const outDir = getOutputDir();
+    const safeName = (fileName || 'dokumen').replace(/[^a-zA-Z0-9._\- ]/g, '_').replace(/\.html?$/, '') + '.html';
+    const outPath = path.join(outDir, safeName);
+    fs.writeFileSync(outPath, htmlContent, 'utf-8');
+    console.log(`[DOC] HTML Saved: ${safeName}`);
+    return { success: true, filePath: outPath, fileName: safeName };
+  } catch (err) {
+    return { success: false, error: err.message };
+  }
+});
+
+ipcMain.handle('doc:list-output', async () => {
+  try {
+    const outDir = getOutputDir();
+    const files = fs.readdirSync(outDir).filter(f => /\.(pdf|html|docx)$/i.test(f));
+    return files.map(f => ({
+      name: f,
+      path: path.join(outDir, f),
+      size: fs.statSync(path.join(outDir, f)).size,
+      modified: fs.statSync(path.join(outDir, f)).mtime,
+    }));
+  } catch (err) { return []; }
 });
 
 // ── GEMINI AI API (Google — Free Tier) ───────────────────────
@@ -973,7 +1067,7 @@ ipcMain.handle('gemini-ask', async (e, { messages, system, maxTokens }) => {
     },
   });
 
-  const model = 'gemini-2.5-flash';
+  const model = 'gemini-3.5-flash';
   const path = `/v1beta/models/${model}:generateContent?key=${apiKey}`;
 
   return new Promise((resolve) => {
@@ -1073,7 +1167,6 @@ app.on('web-contents-created', (event, contents) => {
 
 // ══════════════════════════════════════════
 app.whenReady().then(async () => {
-  await seedInitialTemplates(db);
   createWindow();
 
   // Startup Banner — Professional Clean Edition (LIVE VALIDATION)

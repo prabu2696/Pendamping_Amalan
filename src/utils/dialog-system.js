@@ -33,7 +33,7 @@ window.CyberDialog = {
           -webkit-mask-composite: xor; mask-composite: exclude;
         }
         .cyber-dialog-header {
-          font-family: Arial; font-weight: 700; font-size: 14px;
+          font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; font-size: 14px;
           letter-spacing: 2px; color: #00e5ff; display: flex; align-items: center; gap: 10px;
           margin-bottom: 16px; border-bottom: 1px solid rgba(0, 229, 255, 0.2); padding-bottom: 12px;
         }
@@ -49,7 +49,7 @@ window.CyberDialog = {
         .cyber-dialog-actions { display: flex; justify-content: flex-end; gap: 12px; }
         .cyber-btn-confirm, .cyber-btn-cancel {
           background: transparent; border: 1px solid rgba(0, 229, 255, 0.4); color: #00e5ff;
-          font-family: Arial; font-size: 12px; font-weight: 600; padding: 8px 16px;
+          font-family: 'Plus Jakarta Sans', sans-serif; font-size: 12px; font-weight: 600; padding: 8px 16px;
           cursor: pointer; transition: all 0.2s;
           clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px));
         }

@@ -41,6 +41,7 @@ build/
 out/
 release/
 dist_electron/
+*.jsc
 
 # File installer Windows
 *.exe

@@ -1,4 +1,10 @@
 /* Global Design System - Cimega Smart Office */
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+body {
+  font-family: 'Plus Jakarta Sans', sans-serif !important;
+}
+
 
 /* Cyberpunk Global Scrollbar (Gemini Style) */
 ::-webkit-scrollbar { width: 8px; height: 8px; }
@@ -82,7 +88,7 @@
 }
 
 .orbitron-title {
-    font-family: Arial;
+    font-family: 'Plus Jakarta Sans', sans-serif;
     color: #00e5ff;
     font-size: 18px;
     letter-spacing: 2px;
@@ -104,7 +110,7 @@
     padding: 8px 14px;
     border-radius: 6px;
     font-size: 11px;
-    font-family: Arial;
+    font-family: 'Plus Jakarta Sans', sans-serif;
     cursor: pointer;
     transition: all 0.3s ease;
 }
@@ -171,4 +177,185 @@ body.entry-level-mode .glass-effect {
     background-color: #030d1c !important; /* Ganti dengan warna solid gelap */
     box-shadow: none !important; /* Matikan efek glow besar */
     border: 1px solid rgba(0, 229, 255, 0.8) !important; /* Pertahankan identitas neon */
-}
+}
+
+/* ── CYBER-GLASS DESIGN SYSTEM (NEW 2026/2027) ── */
+.cyber-container {
+    background: rgba(4, 20, 45, 0.5);
+    border: 1px solid rgba(0, 229, 255, 0.15);
+    border-radius: 12px;
+    padding: 24px;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    color: #e0f4ff;
+    animation: slideIn 0.4s ease;
+}
+
+.cyber-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+.cyber-group {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 16px;
+}
+
+.cyber-label {
+    font-family: 'Orbitron', Arial, sans-serif;
+    font-size: 11px;
+    color: #00e5ff;
+    margin-bottom: 6px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    font-weight: 700;
+}
+
+.cyber-input, .cyber-select {
+    background: rgba(0, 229, 255, 0.03);
+    border: 1px solid rgba(0, 229, 255, 0.2);
+    border-radius: 8px;
+    padding: 12px 14px;
+    color: #fff;
+    font-size: 13px;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    transition: all 0.3s ease;
+    outline: none;
+}
+
+.cyber-input:focus, .cyber-select:focus {
+    border-color: #00e5ff;
+    box-shadow: 0 0 15px rgba(0, 229, 255, 0.15);
+    background: rgba(0, 229, 255, 0.08);
+}
+
+textarea.cyber-input {
+    resize: vertical;
+    min-height: 80px;
+}
+
+.cyber-select option {
+    background: #020b18;
+    color: #fff;
+}
+
+.cyber-button {
+    background: rgba(0, 229, 255, 0.08);
+    border: 1px solid rgba(0, 229, 255, 0.3);
+    color: #00e5ff;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-family: 'Orbitron', Arial, sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.cyber-button:hover {
+    background: rgba(0, 229, 255, 0.15);
+    box-shadow: 0 0 20px rgba(0, 229, 255, 0.2);
+    transform: translateY(-2px);
+}
+
+.cyber-button.primary {
+    background: linear-gradient(135deg, rgba(0, 102, 255, 0.4), rgba(0, 229, 255, 0.3));
+    border: 1px solid #00e5ff;
+    color: #fff;
+}
+
+.cyber-button.primary:hover {
+    background: linear-gradient(135deg, rgba(0, 102, 255, 0.6), rgba(0, 229, 255, 0.5));
+    box-shadow: 0 0 25px rgba(0, 229, 255, 0.4);
+}
+
+.cyber-button.danger {
+    background: rgba(255, 68, 102, 0.1);
+    border-color: rgba(255, 68, 102, 0.3);
+    color: #ff4466;
+}
+
+.cyber-button.danger:hover {
+    background: rgba(255, 68, 102, 0.2);
+    box-shadow: 0 0 20px rgba(255, 68, 102, 0.3);
+}
+
+.cyber-title {
+    font-family: 'Orbitron', Arial, sans-serif;
+    font-size: 18px;
+    color: #fff;
+    margin-bottom: 16px;
+    border-bottom: 1px solid rgba(0, 229, 255, 0.2);
+    padding-bottom: 8px;
+    text-shadow: 0 0 10px rgba(0, 229, 255, 0.4);
+}
+
+.cyber-title span {
+    color: #00e5ff;
+}
+
+/* Loading Overlay */
+.cyber-loading {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+    color: #00e5ff;
+    text-align: center;
+}
+
+.cyber-spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid rgba(0, 229, 255, 0.2);
+    border-top-color: #00e5ff;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 16px;
+}
+
+.cyber-loading-text {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 2px;
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 0.6; }
+    50% { opacity: 1; }
+}
+
+/* Modern Checkbox/Radio */
+.cyber-check-group {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.cyber-check-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    font-size: 12px;
+    color: #e0f4ff;
+}
+
+.cyber-check-label input {
+    accent-color: #00e5ff;
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+}
+

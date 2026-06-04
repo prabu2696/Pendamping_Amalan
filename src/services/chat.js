@@ -9,7 +9,7 @@ window.CimegaChat = {
   clearedAt: 0,
 
   // ── 1. STATE & CONTEXT ──
-  currentTab: 'school', // 'school' | 'kepsek' (Konteks pembukaan dari Sidebar)
+  currentTab: 'school', // 'school' | 'kepsek'
   currentMode: 'group',  // 'group'  | 'private'
   targetId: null,       // User ID untuk Chat Privat
   targetName: null,     // Nama User untuk Judul Header
@@ -42,6 +42,13 @@ window.CimegaChat = {
       this.setPresence(true);
       this.startMembersListener();
       this.startMessagesListener();
+      
+      // Setup incoming call listeners (v6)
+      if (this.unsubCallsSchool) this.unsubCallsSchool();
+      if (this.unsubCallsDirect) this.unsubCallsDirect();
+      this.stopIncomingRing();
+      this.startIncomingCallListener();
+      
       this.presenceInterval = setInterval(() => this.setPresence(true), 30000);
     }
 
@@ -67,12 +74,11 @@ window.CimegaChat = {
     const container = document.getElementById(containerId);
     if (!container) return;
 
-    // DINAMIS Berdasarkan Konteks
     const sidebarTitle = this.currentTab === 'kepsek' ? 'KOLEGA KEPALA SEKOLAH' : 'USER AKTIF';
     const sidebarIcon = this.currentTab === 'kepsek' ? '🏛️' : '🌍';
 
     container.innerHTML = `
-      <div id="cimegaChatWrapper" style="display:flex; height:calc(100vh - 150px); background:var(--card); border:1px solid var(--border); border-radius:12px; overflow:hidden; font-family: Arial;">
+      <div id="cimegaChatWrapper" style="display:flex; height:calc(100vh - 150px); background:var(--card); border:1px solid var(--border); border-radius:12px; overflow:hidden; font-family: 'Plus Jakarta Sans', sans-serif;">
         <!-- SIDEBAR -->
         <div style="width:260px; border-right:1px solid var(--border); background:rgba(0,0,0,0.25); display:flex; flex-direction:column; flex-shrink:0;">
           
@@ -94,7 +100,11 @@ window.CimegaChat = {
                 <div id="chatHeaderSub" style="font-size:10px; color:var(--cyan); opacity:0.8;">Saluran Institusi Terenkripsi</div>
               </div>
             </div>
-            <div style="display:flex; gap:8px;">
+            <div style="display:flex; align-items:center; gap:10px;">
+               <!-- Call Buttons (Audio & Video) -->
+               <button id="btnChatCall" onclick="window.CimegaChat.startCall('audio')" style="background:rgba(0,229,255,0.1); border:1px solid rgba(0,229,255,0.3); color:var(--cyan); width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:14px; cursor:pointer; transition: all 0.3s;" title="Panggilan Suara">📞</button>
+               <button id="btnChatVideo" onclick="window.CimegaChat.startCall('video')" style="background:rgba(255,0,255,0.1); border:1px solid rgba(255,0,255,0.3); color:var(--magenta); width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:14px; cursor:pointer; transition: all 0.3s;" title="Panggilan Video">📹</button>
+               
                <button onclick="window.CimegaChat.clearChat()" style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:var(--muted); padding:6px 12px; border-radius:6px; font-size:10px; cursor:pointer;">BERSIHKAN</button>
             </div>
           </div>
@@ -138,13 +148,22 @@ window.CimegaChat = {
           --indicator-color: #00e5ff;
           --button-hover-background: rgba(0, 229, 255, 0.1);
         }
-
         .chat-date-divider { clear: both; display:flex; align-items:center; justify-content:center; margin: 20px 0; width: 100%; }
         .chat-date-label { padding: 4px 15px; background:rgba(255,255,255,0.05); border-radius:10px; font-size:10px; color:#aaa; font-weight:700; border:1px solid rgba(255,255,255,0.03); }
         .chat-img-msg { transition: transform 0.2s; border: 1px solid rgba(255,255,255,0.1); }
         .chat-img-msg:hover { transform: scale(1.02); }
         .spinner-sm { width:24px; height:24px; border:3px solid rgba(0,229,255,0.1); border-top-color:var(--cyan); border-radius:50%; animation:spinChat 0.8s linear infinite; margin:0 auto; }
         @keyframes spinChat { to { transform: rotate(360deg); } }
+        
+        /* Pulse Animation for Active Call button */
+        @keyframes activeCallPulse {
+          0% { box-shadow: 0 0 0 0 rgba(0, 230, 118, 0.6); }
+          70% { box-shadow: 0 0 0 12px rgba(0, 230, 118, 0); }
+          100% { box-shadow: 0 0 0 0 rgba(0, 230, 118, 0); }
+        }
+        .btn-call-active-glow {
+          animation: activeCallPulse 1.8s infinite;
+        }
       </style>
     `;
     this.updateHeader();
@@ -172,8 +191,6 @@ window.CimegaChat = {
   },
 
   switchPrivate: function (id, name) {
-    // Chat pribadi hanya bisa dipicu di mode Kepsek
-    if (this.currentTab !== 'kepsek') return;
     if (this.currentMode === 'private' && this.targetId === id) return;
 
     this.currentMode = 'private';
@@ -189,7 +206,6 @@ window.CimegaChat = {
     const files = Array.from(e.target.files);
     if (!files.length) return;
 
-    // ATURAN BARU: Maksimal 10 gambar sekaligus
     if (files.length > 10) {
       if (window.showToast) window.showToast('warn', 'Batas Terlampaui', 'Maksimal 10 gambar yang dapat dikirim sekaligus.');
       else await window.CyberDialog.alert('Maksimal 10 gambar yang dapat dikirim sekaligus.');
@@ -197,9 +213,7 @@ window.CimegaChat = {
       return;
     }
 
-    const isKepsek = this.currentUser.roles.includes('kepsek');
     const maxSize = 10 * 1024 * 1024; // 10MB
-
     const p = document.getElementById('chatUploadProgress');
     const pi = document.getElementById('chatUploadProgressInner');
     const st = document.getElementById('chatUploadStatus');
@@ -210,7 +224,6 @@ window.CimegaChat = {
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
 
-      // ── ATURAN BARU: HANYA GAMBAR (JPG/PNG) & BERLAKU UNTUK SEMUA USER (TERMASUK KEPSEK) ──
       if (file.type !== 'image/jpeg' && file.type !== 'image/png') {
         if (window.showToast) window.showToast('error', 'Format Ditolak', `File "${file.name}" ditolak. Chat sekolah hanya mendukung format JPG dan PNG.`);
         else await window.CyberDialog.alert(`File "${file.name}" ditolak. Chat hanya mendukung format JPG/PNG.`);
@@ -253,8 +266,14 @@ window.CimegaChat = {
     if (this.unsubMembers) this.unsubMembers();
     const { collection, query, where, onSnapshot } = window._fb;
 
-    // ★ SCHOOL ISOLATION GUARD ★
-    let q = query(collection(this.db, "users"), where("sekolah", "==", this.sekolah));
+    let q;
+    if (this.currentTab === 'kepsek') {
+      // Kepsek bisa berkomunikasi lintas sekolah
+      q = query(collection(this.db, "users"));
+    } else {
+      // Staf biasa terisolasi di satu sekolah
+      q = query(collection(this.db, "users"), where("sekolah", "==", this.sekolah));
+    }
 
     this.unsubMembers = onSnapshot(q, (snap) => {
       let members = [];
@@ -262,15 +281,16 @@ window.CimegaChat = {
         const data = d.data();
         const roles = data.roles || [data.role?.toLowerCase() || 'guru'];
 
-        // Mode Filter
         if (this.currentTab === 'kepsek') {
-          // Hanya tampilkan Kepsek lain
+          // Hanya kepsek lain
           if (roles.includes('kepsek') && d.id !== this.currentUser.id) {
             members.push({ id: d.id, ...data });
           }
         } else {
-          // Tampilkan semua di grup sekolah
-          members.push({ id: d.id, ...data });
+          // Semua staf sekolah kecuali diri sendiri
+          if (d.id !== this.currentUser.id) {
+            members.push({ id: d.id, ...data });
+          }
         }
       });
       this._lastMembers = members;
@@ -283,14 +303,22 @@ window.CimegaChat = {
     const { collection, query, where, onSnapshot } = window._fb;
 
     let q;
-    // ★ MULTI-SCHOOL ISOLATION GUARD ★
     if (this.currentMode === 'private') {
       const sortedIds = [this.currentUser.id, this.targetId].sort();
-      const privateID = `${this.sekolah}_${sortedIds.join('_')}`;
-      q = query(collection(this.db, "chats"),
-        where("sekolah", "==", this.sekolah),
-        where("private_id", "==", privateID)
-      );
+      if (this.currentTab === 'kepsek') {
+        // Chat pribadi Kepsek lintas sekolah
+        const privateID = `kepsek_${sortedIds.join('_')}`;
+        q = query(collection(this.db, "chats"),
+          where("private_id", "==", privateID)
+        );
+      } else {
+        // Chat pribadi staf biasa diisolasi per sekolah
+        const privateID = `${this.sekolah}_${sortedIds.join('_')}`;
+        q = query(collection(this.db, "chats"),
+          where("sekolah", "==", this.sekolah),
+          where("private_id", "==", privateID)
+        );
+      }
     } else {
       const scope = this.currentTab === 'kepsek' ? 'kepsek' : 'school';
       q = query(collection(this.db, "chats"),
@@ -325,20 +353,23 @@ window.CimegaChat = {
     const headerOC = document.getElementById('onlineCount');
     if (!cont) return; cont.innerHTML = '';
 
-    // ★ KEPSEK MODE UI ★
+    // ★ GROUP BUTTON DI SIDEBAR CHAT ★
+    const groupBtn = document.createElement('div');
+    groupBtn.onclick = () => {
+      this.currentMode = 'group';
+      this.targetId = null;
+      this.updateHeader();
+      this.startMessagesListener();
+      this.renderMembersList(members);
+    };
+    groupBtn.style.cssText = `display:flex; align-items:center; gap:10px; padding:12px; border-radius:10px; background:${this.currentMode === 'group' ? 'rgba(0,229,255,0.15)' : 'rgba(255,255,255,0.03)'}; cursor:pointer; margin-bottom:12px; border:1px solid ${this.currentMode === 'group' ? 'var(--cyan)' : 'rgba(255,255,255,0.05)'}; transition:all 0.2s;`;
+    
     if (this.currentTab === 'kepsek') {
-      const groupBtn = document.createElement('div');
-      groupBtn.onclick = () => {
-        this.currentMode = 'group';
-        this.targetId = null;
-        this.updateHeader();
-        this.startMessagesListener();
-        this.renderMembersList(members);
-      };
-      groupBtn.style.cssText = `display:flex; align-items:center; gap:10px; padding:12px; border-radius:10px; background:${this.currentMode === 'group' ? 'rgba(0,229,255,0.15)' : 'rgba(255,255,255,0.03)'}; cursor:pointer; margin-bottom:12px; border:1px solid ${this.currentMode === 'group' ? 'var(--cyan)' : 'rgba(255,255,255,0.05)'}; transition:all 0.2s;`;
       groupBtn.innerHTML = `<div style="font-size:20px;">🏛️</div><div><div style="font-size:12px; color:#fff; font-weight:700;">Grup Forum Kepsek</div><div style="font-size:9px; color:var(--muted);">Diskusi Pimpinan</div></div>`;
-      cont.appendChild(groupBtn);
+    } else {
+      groupBtn.innerHTML = `<div style="font-size:20px;">🌍</div><div><div style="font-size:12px; color:#fff; font-weight:700;">Grup Komunitas</div><div style="font-size:9px; color:var(--muted);">Saluran Publik Sekolah</div></div>`;
     }
+    cont.appendChild(groupBtn);
 
     const now = Date.now();
     let onlineCount = 0;
@@ -350,9 +381,9 @@ window.CimegaChat = {
       const isActive = this.currentMode === 'private' && this.targetId === m.id;
       const div = document.createElement('div');
       div.onclick = () => {
-        if (this.currentTab === 'kepsek') this.switchPrivate(m.id, m.nama);
+        this.switchPrivate(m.id, m.nama);
       };
-      div.style.cssText = `display:flex; align-items:center; gap:10px; padding:10px; border-radius:10px; background:${isActive ? 'rgba(0,229,255,0.1)' : 'rgba(255,255,255,0.02)'}; cursor:${this.currentTab === 'kepsek' ? 'pointer' : 'default'}; border:1px solid ${isActive ? 'var(--cyan)' : 'rgba(255,255,255,0.03)'}; transition:all 0.2s; margin-bottom:4px;`;
+      div.style.cssText = `display:flex; align-items:center; gap:10px; padding:10px; border-radius:10px; background:${isActive ? 'rgba(0,229,255,0.1)' : 'rgba(255,255,255,0.02)'}; cursor:pointer; border:1px solid ${isActive ? 'var(--cyan)' : 'rgba(255,255,255,0.03)'}; transition:all 0.2s; margin-bottom:4px;`;
 
       const avatar = m.avatarUrl ? `<img src="${m.avatarUrl}" style="width:32px; height:32px; border-radius:50%; object-fit:cover;">` : `<div style="width:32px; height:32px; border-radius:50%; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); display:flex; align-items:center; justify-content:center; font-size:14px;">👤</div>`;
 
@@ -390,7 +421,6 @@ window.CimegaChat = {
       const isMe = String(m.senderId) === String(this.currentUser.id);
       let content = '';
 
-      // ★ MEDIA/FILE DETECTION ★
       if (m.text.startsWith('{"name":')) {
         try {
           const file = JSON.parse(m.text);
@@ -457,7 +487,7 @@ window.CimegaChat = {
     const payload = await this.encryptSafe(text);
 
     const docData = {
-      sekolah: this.sekolah, // MANDATORY FOR ISOLATION
+      sekolah: this.sekolah,
       sender_id: this.currentUser.id,
       sender_name: this.currentUser.nama,
       payload: payload,
@@ -468,8 +498,13 @@ window.CimegaChat = {
 
     if (this.currentMode === 'private') {
       const sortedIds = [this.currentUser.id, this.targetId].sort();
-      docData.private_id = `${this.sekolah}_${sortedIds.join('_')}`; // ISOLATED BY SCHOOL
-      docData.scope = 'private';
+      if (this.currentTab === 'kepsek') {
+        docData.private_id = `kepsek_${sortedIds.join('_')}`;
+        docData.scope = 'private_kepsek';
+      } else {
+        docData.private_id = `${this.sekolah}_${sortedIds.join('_')}`;
+        docData.scope = 'private';
+      }
     } else {
       docData.scope = this.currentTab === 'kepsek' ? 'kepsek' : 'school';
     }
@@ -499,6 +534,287 @@ window.CimegaChat = {
     try {
       await window._fb.updateDoc(window._fb.doc(this.db, "chats", id), { deleted: true });
     } catch (e) { await window.CyberDialog.alert('Gagal menghapus pesan.'); }
+  },
+
+  // ── CALLING INTEGRATION (v6) ──
+  unsubCallsSchool: null,
+  unsubCallsDirect: null,
+  ringCtx: null,
+  ringInterval: null,
+
+  playIncomingRing: function() {
+    if (this.ringCtx) return;
+    this.ringCtx = new (window.AudioContext || window.webkitAudioContext)();
+    if (this.ringCtx.state === 'suspended') {
+      this.ringCtx.resume();
+    }
+    const playSeq = () => {
+      if (!this.ringCtx) return;
+      const notes = [329.63, 392.00, 523.25, 659.25]; // E5, G5, C6, E6
+      let startTime = this.ringCtx.currentTime;
+      notes.forEach((freq, idx) => {
+        const osc = this.ringCtx.createOscillator();
+        const gainNode = this.ringCtx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq, startTime + (idx * 0.15));
+        gainNode.gain.setValueAtTime(0.0, startTime + (idx * 0.15));
+        gainNode.gain.linearRampToValueAtTime(0.1, startTime + (idx * 0.15) + 0.03);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, startTime + (idx * 0.15) + 0.2);
+        osc.connect(gainNode);
+        gainNode.connect(this.ringCtx.destination);
+        osc.start(startTime + (idx * 0.15));
+        osc.stop(startTime + (idx * 0.15) + 0.25);
+      });
+    };
+    playSeq();
+    this.ringInterval = setInterval(playSeq, 1500);
+  },
+
+  stopIncomingRing: function() {
+    if (this.ringInterval) {
+      clearInterval(this.ringInterval);
+      this.ringInterval = null;
+    }
+    if (this.ringCtx) {
+      try { this.ringCtx.close(); } catch(_) {}
+      this.ringCtx = null;
+    }
+  },
+
+  startIncomingCallListener: function() {
+    if (this.unsubCallsSchool) this.unsubCallsSchool();
+    if (this.unsubCallsDirect) this.unsubCallsDirect();
+    
+    const { collection, query, where, onSnapshot } = window._fb;
+    
+    const handleChanges = (snap) => {
+      let activeGroupCall = null;
+      let incomingRingingCall = null;
+
+      snap.forEach(docSnap => {
+        const data = docSnap.data();
+        const callId = docSnap.id;
+        const isFromMe = String(data.callerId) === String(this.currentUser.id);
+        const myParticipantObj = data.participants?.find(p => String(p.id) === String(this.currentUser.id));
+
+        if (data.status === 'ringing') {
+          if (!isFromMe) {
+            let isTarget = false;
+            if (data.scope === 'private') {
+              isTarget = String(data.targetId) === String(this.currentUser.id);
+            } else if (data.scope === 'kepsek') {
+              isTarget = this.currentUser.roles.includes('kepsek');
+            } else {
+              isTarget = true; // School-wide group call
+            }
+
+            const declinedCalls = JSON.parse(localStorage.getItem('cimega_declined_calls') || '[]');
+            if (isTarget && !declinedCalls.includes(callId)) {
+              incomingRingingCall = { id: callId, data };
+            }
+          }
+        } else if (data.status === 'active') {
+          let isRelevantGroup = false;
+          if (data.scope === 'kepsek' && this.currentTab === 'kepsek' && this.currentMode === 'group') {
+            isRelevantGroup = true;
+          } else if ((data.scope === 'school' || data.scope === 'group') && this.currentTab === 'school' && this.currentMode === 'group') {
+            isRelevantGroup = true;
+          }
+
+          if (isRelevantGroup && !myParticipantObj) {
+            activeGroupCall = { id: callId, data };
+          }
+        }
+      });
+
+      // Handle Ringing UI Overlay
+      if (incomingRingingCall) {
+        // Hanya pemicu jika kita tidak dalam panggilan aktif
+        if (localStorage.getItem('cimega_in_call') !== 'true') {
+          this.showIncomingCallOverlay(incomingRingingCall.id, incomingRingingCall.data);
+        }
+      } else {
+        this.hideIncomingCallOverlay();
+      }
+
+      // Handle Active Group Call Join Indicator
+      this.updateActiveCallIndicator(activeGroupCall);
+    };
+
+    // Listener 1: Panggilan di sekolah saat ini
+    this.unsubCallsSchool = onSnapshot(
+      query(collection(this.db, "call_sessions"), where("sekolah", "==", this.sekolah)),
+      handleChanges
+    );
+
+    // Listener 2: Panggilan direct target ke user saat ini (lintas sekolah)
+    this.unsubCallsDirect = onSnapshot(
+      query(collection(this.db, "call_sessions"), where("targetId", "==", this.currentUser.id)),
+      handleChanges
+    );
+  },
+
+  updateActiveCallIndicator: function(activeGroupCall) {
+    const btnCall = document.getElementById('btnChatCall');
+    const btnVideo = document.getElementById('btnChatVideo');
+    if (!btnCall || !btnVideo) return;
+
+    if (activeGroupCall) {
+      // Glow hijau pulsing jika ada panggilan grup aktif untuk digabung
+      btnCall.style.background = 'rgba(0, 230, 118, 0.25)';
+      btnCall.style.border = '1px solid #00e676';
+      btnCall.style.boxShadow = '0 0 10px rgba(0, 230, 118, 0.5)';
+      btnCall.classList.add('btn-call-active-glow');
+      btnCall.title = 'Gabung Panggilan Suara Aktif';
+      
+      btnVideo.style.background = 'rgba(0, 230, 118, 0.25)';
+      btnVideo.style.border = '1px solid #00e676';
+      btnVideo.style.boxShadow = '0 0 10px rgba(0, 230, 118, 0.5)';
+      btnVideo.classList.add('btn-call-active-glow');
+      btnVideo.title = 'Gabung Panggilan Video Aktif';
+    } else {
+      // Kembalikan ke warna cyan / magenta semula
+      btnCall.style.background = 'rgba(0,229,255,0.1)';
+      btnCall.style.border = '1px solid rgba(0,229,255,0.3)';
+      btnCall.style.boxShadow = 'none';
+      btnCall.classList.remove('btn-call-active-glow');
+      btnCall.title = 'Panggilan Suara';
+
+      btnVideo.style.background = 'rgba(255,0,255,0.1)';
+      btnVideo.style.border = '1px solid rgba(255,0,255,0.3)';
+      btnVideo.style.boxShadow = 'none';
+      btnVideo.classList.remove('btn-call-active-glow');
+      btnVideo.title = 'Panggilan Video';
+    }
+  },
+
+  showIncomingCallOverlay: function(callId, data) {
+    const existing = document.getElementById('cimegaIncomingCallOverlay');
+    if (existing) return;
+
+    this.playIncomingRing();
+
+    const overlay = document.createElement('div');
+    overlay.id = 'cimegaIncomingCallOverlay';
+    overlay.style.cssText = 'position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(4, 13, 26, 0.9); z-index:99999; display:flex; flex-direction:column; align-items:center; justify-content:center; backdrop-filter:blur(15px); font-family:"Plus Jakarta Sans", sans-serif;';
+    
+    const callText = data.type === 'video' ? 'Panggilan Video Masuk' : 'Panggilan Suara Masuk';
+    const sourceName = data.scope === 'group' || data.scope === 'school' || data.scope === 'kepsek' ? `Grup: ${data.callerName}` : data.callerName;
+
+    overlay.innerHTML = `
+      <div style="text-align:center; animation: fadein 0.3s ease;">
+        <div style="width:110px; height:110px; border-radius:50%; background:rgba(0,229,255,0.05); border:2.5px solid var(--cyan); box-shadow:0 0 25px rgba(0,229,255,0.25); display:flex; align-items:center; justify-content:center; font-size:42px; margin:0 auto 20px;">👤</div>
+        <h2 style="font-family:\'Orbitron\'; font-size:14px; letter-spacing:3px; color:var(--cyan); margin-bottom:12px; text-transform:uppercase;">${callText}</h2>
+        <h1 style="font-size:24px; font-weight:800; color:#fff; margin-bottom:30px; text-shadow:0 0 10px rgba(255,255,255,0.2);">${sourceName}</h1>
+        
+        <div style="display:flex; gap:35px; justify-content:center;">
+          <button id="btnDeclineCall" style="width:58px; height:58px; border-radius:50%; border:none; background:#ff3366; color:#fff; font-size:22px; cursor:pointer; box-shadow:0 0 15px rgba(255,51,102,0.4); display:flex; align-items:center; justify-content:center; transition:transform 0.15s;" onmousedown="this.style.transform=\'scale(0.9)\'" onmouseup="this.style.transform=\'scale(1)\'">✕</button>
+          <button id="btnAcceptCall" style="width:58px; height:58px; border-radius:50%; border:none; background:#00e676; color:#fff; font-size:22px; cursor:pointer; box-shadow:0 0 15px rgba(0,230,118,0.4); display:flex; align-items:center; justify-content:center; transition:transform 0.15s;" onmousedown="this.style.transform=\'scale(0.9)\'" onmouseup="this.style.transform=\'scale(1)\'">📞</button>
+        </div>
+      </div>
+    `;
+
+    document.body.appendChild(overlay);
+
+    document.getElementById('btnDeclineCall').onclick = async () => {
+      this.stopIncomingRing();
+      
+      const declinedCalls = JSON.parse(localStorage.getItem('cimega_declined_calls') || '[]');
+      declinedCalls.push(callId);
+      localStorage.setItem('cimega_declined_calls', JSON.stringify(declinedCalls));
+
+      if (data.scope === 'private') {
+        try {
+          await window._fb.updateDoc(window._fb.doc(this.db, "call_sessions", callId), { status: 'ended' });
+        } catch(e) {}
+      }
+      this.hideIncomingCallOverlay();
+    };
+
+    document.getElementById('btnAcceptCall').onclick = () => {
+      this.stopIncomingRing();
+      this.hideIncomingCallOverlay();
+
+      const api = window.cimegaConfig || window.cimegaAPI;
+      if (api && api.openCallWindow) {
+        api.openCallWindow({
+          sessionId: callId,
+          type: data.type,
+          scope: data.scope,
+          targetId: data.callerId,
+          targetName: data.callerName,
+          callerId: data.callerId,
+          callerName: data.callerName,
+          sekolah: this.sekolah
+        });
+      }
+    };
+  },
+
+  hideIncomingCallOverlay: function() {
+    this.stopIncomingRing();
+    const overlay = document.getElementById('cimegaIncomingCallOverlay');
+    if (overlay) overlay.remove();
+  },
+
+  startCall: async function(callType) {
+    if (localStorage.getItem('cimega_in_call') === 'true') {
+      if (window.showToast) window.showToast('warn', 'Panggilan Aktif', 'Anda sedang berada dalam panggilan lain.');
+      return;
+    }
+
+    const rnd = Math.random().toString(36).substring(2, 10);
+    const sessId = `${this.sekolah}_call_${Date.now()}_${rnd}`;
+    
+    let callScope = 'group';
+    let tId = null;
+    let tName = null;
+
+    if (this.currentMode === 'private') {
+      callScope = 'private';
+      tId = this.targetId;
+      tName = this.targetName;
+    } else {
+      callScope = this.currentTab === 'kepsek' ? 'kepsek' : 'school';
+      tName = this.currentTab === 'kepsek' ? 'Grup Forum Kepsek' : 'Grup Komunitas';
+    }
+
+    // Cek apakah ada panggilan grup/channel aktif, jika ya, langsung GABUNG saja
+    const { collection, getDocs, query, where } = window._fb;
+    let activeSessId = null;
+    let activeType = callType;
+    if (callScope !== 'private') {
+      try {
+        const qActive = query(collection(this.db, "call_sessions"),
+          where("sekolah", "==", this.sekolah),
+          where("scope", "==", callScope)
+        );
+        const snap = await getDocs(qActive);
+        snap.forEach(docSnap => {
+          const d = docSnap.data();
+          if (d.status === 'ringing' || d.status === 'active') {
+            activeSessId = docSnap.id;
+            activeType = d.type;
+          }
+        });
+      } catch(e) { console.error(e); }
+    }
+
+    const finalSessId = activeSessId || sessId;
+
+    const api = window.cimegaConfig || window.cimegaAPI;
+    if (api && api.openCallWindow) {
+      await api.openCallWindow({
+        sessionId: finalSessId,
+        type: activeType,
+        scope: callScope,
+        targetId: tId || '',
+        targetName: tName,
+        callerId: activeSessId ? callerId : this.currentUser.id, // Jika gabung, caller tetap si pembuat
+        callerName: activeSessId ? callerName : this.currentUser.nama,
+        sekolah: this.sekolah
+      });
+    }
   },
 
   decryptSafe: async function (p) { try { return p ? await window.CimegaCrypto.decrypt(p, this.schoolKey) : ''; } catch (e) { return p; } },

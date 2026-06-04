@@ -141,7 +141,7 @@ window.AdminMaster = {
             <div class="card" style="margin-bottom:20px; border-left:4px solid var(--cyan)">
                 <div style="padding:15px 20px; background:rgba(0,229,255,0.03); display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border)">
                     <div>
-                        <div style="font-family: Arial; font-size:14px; font-weight:700; color:#fff">
+                        <div style="font-family: 'Plus Jakarta Sans', sans-serif; font-size:14px; font-weight:700; color:#fff">
                             🏫 ${s.nama || '-'} <span style="color:var(--muted); font-size:11px; margin-left:10px">NPSN: ${s.npsn || '-'}</span>
                         </div>
                         <div style="font-size:11px; color:var(--muted); margin-top:4px">📍 ${s.alamat || 'Alamat belum diisi'}</div>

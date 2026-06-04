@@ -6,13 +6,21 @@
   <title>Dashboard - Cimega Smart Office</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
+    // ── ERROR HANDLER (Aman via IPC Bridge, tanpa window.require) ──
     window.onerror = function(message, source, lineno, colno, error) {
-      window.require && require('fs').appendFileSync('debug.log', `[ERROR] ${message} at ${source}:${lineno}:${colno}\n`);
+      const logMsg = `[ERROR] ${message} at ${source}:${lineno}:${colno}`;
+      if (window.cimegaConfig && window.cimegaConfig.logToTerminal) {
+        window.cimegaConfig.logToTerminal(logMsg, 'ERROR');
+      } else {
+        console.warn('[GLOBAL_ERROR]', logMsg);
+      }
     };
-    const origErr = console.error;
+    const _origConsoleError = console.error;
     console.error = function(...args) {
-      window.require && require('fs').appendFileSync('debug.log', `[CONSOLE_ERROR] ${args.join(' ')}\n`);
-      origErr.apply(console, args);
+      if (window.cimegaConfig && window.cimegaConfig.logToTerminal) {
+        window.cimegaConfig.logToTerminal('[CONSOLE_ERROR] ' + args.join(' '), 'ERROR');
+      }
+      _origConsoleError.apply(console, args);
     };
   </script>
   <link rel="stylesheet" href="../../index.css">
@@ -46,7 +54,7 @@
     }
 
     body {
-      font-family: Arial;
+      font-family: 'Plus Jakarta Sans', sans-serif;
       background: var(--dark);
       color: var(--text);
       display: flex;
@@ -97,7 +105,7 @@
     }
 
     .sidebar-logo-text {
-      font-family: Arial;
+      font-family: 'Plus Jakarta Sans', sans-serif;
       font-size: 10px;
       font-weight: 700;
       color: #fff;
@@ -119,7 +127,7 @@
 
     .user-name {
       font-size: 12px;
-      font-family: Arial;
+      font-family: 'Plus Jakarta Sans', sans-serif;
       font-weight: 600;
       color: #fff;
       white-space: nowrap;
@@ -132,7 +140,7 @@
       align-items: center;
       gap: 3px;
       font-size: 10px;
-      font-family: Arial;
+      font-family: 'Plus Jakarta Sans', sans-serif;
       padding: 2px 7px;
       border-radius: 20px;
       margin-top: 3px
@@ -165,7 +173,7 @@
 
     .user-sekolah {
       font-size: 10px;
-      font-family: Arial;
+      font-family: 'Plus Jakarta Sans', sans-serif;
       color: var(--muted);
       margin-top: 2px;
       white-space: nowrap;
@@ -183,7 +191,7 @@
 
     .nav-section {
       font-size: 10px;
-      font-family: Arial;
+      font-family: 'Plus Jakarta Sans', sans-serif;
       font-weight: 700;
       color: var(--muted);
       letter-spacing: 1.5px;
@@ -201,7 +209,7 @@
       transition: all .2s;
       margin-bottom: 1px;
       font-size: 12px;
-      font-family: Arial;
+      font-family: 'Plus Jakarta Sans', sans-serif;
       color: var(--muted)
     }
 
@@ -315,7 +323,7 @@
 
     .sm-title {
       font-size: 11px;
-      font-family: Arial;
+      font-family: 'Plus Jakarta Sans', sans-serif;
       color: #e0f4ff;
       white-space: nowrap;
       overflow: hidden;
@@ -326,7 +334,7 @@
 
     .sm-sub {
       font-size: 10px;
-      font-family: Arial;
+      font-family: 'Plus Jakarta Sans', sans-serif;
       color: var(--muted);
       margin-bottom: 4px
     }
@@ -355,7 +363,7 @@
 
     .school-tag {
       font-size: 10px;
-      font-family: Arial;
+      font-family: 'Plus Jakarta Sans', sans-serif;
       color: var(--muted);
       line-height: 1.4;
       padding: 5px 8px;
@@ -381,7 +389,7 @@
 
     .ps-title {
       font-size: 10px;
-      font-family: Arial;
+      font-family: 'Plus Jakarta Sans', sans-serif;
       color: var(--cyan);
       letter-spacing: 1px;
       text-transform: uppercase;
@@ -398,14 +406,14 @@
 
     .ps-label {
       font-size: 10px;
-      font-family: Arial;
+      font-family: 'Plus Jakarta Sans', sans-serif;
       color: var(--muted);
       margin-bottom: 2px
     }
 
     .ps-btn {
       font-size: 10px;
-      font-family: Arial;
+      font-family: 'Plus Jakarta Sans', sans-serif;
       padding: 2px 6px;
       border-radius: 4px;
       border: 1px solid rgba(0, 229, 255, 0.12);
@@ -432,7 +440,7 @@
       border-radius: 7px;
       color: #ff8899;
       font-size: 12px;
-      font-family: Arial;
+      font-family: 'Plus Jakarta Sans', sans-serif;
       cursor: pointer;
       transition: all .2s
     }
@@ -462,7 +470,7 @@
     }
 
     .topbar-title {
-      font-family: Arial;
+      font-family: 'Plus Jakarta Sans', sans-serif;
       font-size: 12px;
       font-weight: 700;
       color: #fff;
@@ -478,7 +486,7 @@
     .topbar-time {
       font-size: 11px;
       color: var(--muted);
-      font-family: Arial;
+      font-family: 'Plus Jakarta Sans', sans-serif;
       margin-left: 5px
     }
 
@@ -585,7 +593,7 @@
     }
 
     .card-title {
-      font-family: Arial;
+      font-family: 'Plus Jakarta Sans', sans-serif;
       font-size: 10px;
       color: var(--cyan);
       letter-spacing: 1px;
@@ -635,7 +643,7 @@
     }
 
     .stat-num {
-      font-family: Arial;
+      font-family: 'Plus Jakarta Sans', sans-serif;
       font-size: 20px;
       font-weight: 700;
       color: #fff
@@ -653,7 +661,7 @@
       border-radius: 8px;
       border: none;
       cursor: pointer;
-      font-family: Arial;
+      font-family: 'Plus Jakarta Sans', sans-serif;
       font-size: 12px;
       font-weight: 600;
       transition: all .2s;
@@ -725,7 +733,7 @@
       font-size: 10px;
       padding: 2px 8px;
       border-radius: 20px;
-      font-family: Arial;
+      font-family: 'Plus Jakarta Sans', sans-serif;
       font-weight: 600
     }
 
@@ -762,7 +770,7 @@
 
     /* SECTION */
     .section-title {
-      font-family: Arial;
+      font-family: 'Plus Jakarta Sans', sans-serif;
       font-size: 13px;
       font-weight: 700;
       color: #fff;
@@ -838,7 +846,7 @@
     }
 
     .welcome-info h2 {
-      font-family: Arial;
+      font-family: 'Plus Jakarta Sans', sans-serif;
       font-size: 14px;
       font-weight: 700;
       color: #fff;
@@ -855,7 +863,7 @@
       text-align: right;
       font-size: 11px;
       color: var(--muted);
-      font-family: Arial;
+      font-family: 'Plus Jakarta Sans', sans-serif;
     }
 
     .update-banner {
@@ -903,7 +911,7 @@
     }
 
     .menu-card-title {
-      font-family: Arial;
+      font-family: 'Plus Jakarta Sans', sans-serif;
       font-size: 10px;
       font-weight: 700;
       color: #fff;
@@ -928,7 +936,7 @@
       padding: 2px 7px;
       font-size: 9px;
       color: var(--cyan);
-      font-family: Arial;
+      font-family: 'Plus Jakarta Sans', sans-serif;
       box-shadow: 0 6px 20px rgba(255, 208, 0, 0.08)
     }
 
@@ -1236,7 +1244,7 @@
     }
 
     .modal-title {
-      font-family: Arial;
+      font-family: 'Plus Jakarta Sans', sans-serif;
       font-size: 12px;
       font-weight: 700;
       color: #fff
@@ -1275,14 +1283,14 @@
       color: var(--cyan);
       margin-bottom: 5px;
       font-weight: 600;
-      font-family: Arial;
+      font-family: 'Plus Jakarta Sans', sans-serif;
       padding: 9px 12px;
       background: rgba(0, 229, 255, 0.04);
       border: 1px solid rgba(0, 229, 255, 0.15);
       border-radius: 8px;
       color: var(--text);
       font-size: 12px;
-      font-family: Arial;
+      font-family: 'Plus Jakarta Sans', sans-serif;
       outline: none;
       transition: border .2s
     }
@@ -1348,7 +1356,7 @@
       backdrop-filter: blur(12px);
       border: 1px solid;
       font-size: 12px;
-      font-family: Arial;
+      font-family: 'Plus Jakarta Sans', sans-serif;
       min-width: 240px;
       max-width: 320px;
       animation: toastin .3s ease
@@ -1404,7 +1412,7 @@
       border: 1px solid var(--border);
       cursor: pointer;
       font-size: 12px;
-      font-family: Arial;
+      font-family: 'Plus Jakarta Sans', sans-serif;
       color: var(--muted);
       transition: all .2s;
       background: var(--card)
@@ -1481,7 +1489,7 @@
       padding: 10px 14px;
       border-radius: 12px;
       font-size: 12px;
-      font-family: Arial;
+      font-family: 'Plus Jakarta Sans', sans-serif;
       line-height: 1.7;
       white-space: pre-wrap;
       word-break: break-word
@@ -1530,7 +1538,7 @@
 
     .form-group-ai label {
       display: block;
-      font-family: Arial;
+      font-family: 'Plus Jakarta Sans', sans-serif;
       font-size: 10px;
       color: var(--cyan);
       margin-bottom: 8px;
@@ -1545,7 +1553,7 @@
       padding: 12px;
       color: var(--text);
       font-size: 13px;
-      font-family: Arial;
+      font-family: 'Plus Jakarta Sans', sans-serif;
       min-height: 80px;
       resize: vertical;
       transition: all 0.3s;
@@ -1571,7 +1579,7 @@
       color: #fff;
       padding: 12px 30px;
       border-radius: 30px;
-      font-family: Arial;
+      font-family: 'Plus Jakarta Sans', sans-serif;
       font-weight: 700;
       font-size: 12px;
       letter-spacing: 2px;
@@ -1762,7 +1770,7 @@
   <!-- NOTIF PANEL -->
   <div class="notif-panel" id="notifPanel">
     <div
-      style="padding:12px 14px;border-bottom:1px solid var(--border);font-family: Arial;font-size:10px;color:var(--cyan)">
+      style="padding:12px 14px;border-bottom:1px solid var(--border);font-family: 'Plus Jakarta Sans', sans-serif;font-size:10px;color:var(--cyan)">
       🔔 NOTIFIKASI</div>
     <div id="notifList">
       <div class="notif-item" style="color:var(--muted)">Memuat...</div>
@@ -1912,7 +1920,7 @@
               <div
                 style="width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--cyan));display:flex;align-items:center;justify-content:center;font-size:28px;margin:0 auto 14px"
                 id="profilAvatar">👤</div>
-              <div style="font-family: Arial;font-size:14px;color:#fff;margin-bottom:6px"
+              <div style="font-family: 'Plus Jakarta Sans', sans-serif;font-size:14px;color:#fff;margin-bottom:6px"
                 id="profilNama">—</div>
               <div id="profilRoleBadge" style="margin-bottom:8px"></div>
               <div style="font-size:12px;color:var(--muted)" id="profilSekolah">—</div>
@@ -2058,7 +2066,7 @@
           <div style="display:flex; align-items:center; gap:10px">
             <div class="back-btn" onclick="navTo(document.getElementById('nav-beranda'),'beranda','BERANDA',loadBeranda)" title="Kembali ke Beranda">←</div>
             <div>
-              <div style="font-family:Arial; font-size:13px; font-weight:700; color:#fff; letter-spacing:1px" id="admPageTitle">ADMINISTRASI</div>
+              <div style="font-family: 'Plus Jakarta Sans', sans-serif; font-size:13px; font-weight:700; color:#fff; letter-spacing:1px" id="admPageTitle">ADMINISTRASI</div>
               <div style="font-size:10px; color:var(--muted); margin-top:1px" id="admPageSub">Pilih administrasi di panel kiri</div>
             </div>
           </div>
@@ -2147,6 +2155,25 @@
   <script src="../../services/music.js"></script>
   <script src="../../services/updater.js"></script>
   
+  <!-- Core Features for 2026/2027 -->
+  <script src="../../features/dashboard/absensi/absensi_core.js"></script>
+  <script src="../../features/dashboard/absensi/absensi_ui.js"></script>
+  <script src="../../features/dashboard/jurnal_mengajar/jurnal_mengajar_core.js"></script>
+  <script src="../../features/dashboard/jurnal_mengajar/jurnal_mengajar_ui.js"></script>
+  <script src="../../features/dashboard/modul_ajar/modul_ajar_core.js"></script>
+  <script src="../../features/dashboard/modul_ajar/modul_ajar_ui.js"></script>
+  <script src="../../features/dashboard/generator_soal/generator_soal_core.js"></script>
+  <script src="../../features/dashboard/generator_soal/generator_soal_ui.js"></script>
+  <script src="../../features/dashboard/nilai_rapor/nilai_rapor_core.js"></script>
+  <script src="../../features/dashboard/nilai_rapor/nilai_rapor_template.js"></script>
+  <script src="../../features/dashboard/nilai_rapor/nilai_rapor_ui.js"></script>
+  <script src="../../features/dashboard/generator_surat/generator_surat_core.js"></script>
+  <script src="../../features/dashboard/generator_surat/generator_surat_templates.js"></script>
+  <script src="../../features/dashboard/generator_surat/generator_surat_ui.js"></script>
+
+  <!-- UI Modules & Router -->
+  <script src="../../features/dashboard/router.js"></script>
+
   <!-- Modular Dashboard Settings -->
   <script type="module" src="../../features/dashboard/settings.js"></script>
 </body>

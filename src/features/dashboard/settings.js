@@ -1,4 +1,7 @@
-// ── CIMEGA SMART OFFICE: DASHBOARD CORE ───────────────────────────
+/**
+ * @file settings.js
+ * @description Dashboard Core Logic
+ */
 
 let db, userData;
 let pageHistory = [], currentKat = '', currentDocId = '', currentDocName = '';
@@ -18,7 +21,7 @@ if (!userData?.role || userData.role === 'admin') {
   }
 }
 
-// ★ IDENTITY NORMALIZATION ★
+// Identity normalization
 if (!userData.roles) {
   userData.roles = userData.role ? [userData.role.toLowerCase().trim().replace(/[\s-]/g, '_')] : ['guru'];
 } else if (!Array.isArray(userData.roles)) {
@@ -37,13 +40,13 @@ function filterAiTabsByRole() {
   // This function is defined to satisfy calls in loadKontenDynamic.
 }
 
-// ── 1. CATEGORY METADATA ─────────────────────────────────────────
+// Category metadata
 let katMeta = {};
 
-// ★ GLOBAL API BRIDGE ★
+// API bridge
 const _api = window.cimegaConfig || window.cimegaAPI;
 
-// ── 2. GLOBAL EXPORTS & EARLY BINDING ────────────────────────────
+// Global exports
 window.showPage = showPage;
 window.goBack = goBack;
 window.openDocList = openDocList;
@@ -53,7 +56,7 @@ window.navToMenu = navToMenu;
 window.doLogout = doLogout;
 window.generateWithAI = generateWithAI;
 
-// ── 3. SYSTEM AUTOLOADER (Unified Bridge) ────────────────────────
+// System autoloader
 async function bootSystemAutoloader() {
   console.log('🚀 Autoloader: Memulai sinkronisasi template di latar belakang...');
   try {
@@ -99,7 +102,7 @@ async function bootSystemAutoloader() {
     console.warn('⚠️ Autoloader Partial Failure:', err.message);
   }
 }
-// ── 4. ROLE-BASED CATEGORY MAPPING (Fallback) ────────────────────
+// Role-based category mapping
 const katByRole = {
   guru: [],
   guru_pai: [],
@@ -123,7 +126,7 @@ function getOrderedKats(roles) {
   return KAT_ORDER.filter(k => merged.has(k));
 }
 
-// ── 5. DATA SYNCHRONIZATION (Firestore) ──────────────────────────
+// Data synchronization
 let _kontenUnsub = null;
 let _katUnsub = null;
 
@@ -144,7 +147,7 @@ function loadKontenDynamic() {
     if (katLoaded && kontenLoaded) refreshDashboardUI();
   };
 
-  // ★ CATEGORY LISTENER ★
+  // Listen Categories
   _katUnsub = onSnapshot(query(collection(db, 'kategori'), orderBy('urutan', 'asc')), snap => {
     snap.forEach(d => {
       const data = d.data();
@@ -278,13 +281,13 @@ function refreshDashboardUI() {
   filterAiTabsByRole();
 }
 
-// ── Clock ──────────────────────────────────
+// Clock
 setInterval(() => {
   const el = document.getElementById('topbarTime');
   if (el) el.textContent = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
 }, 1000);
 
-// ── Toast ──────────────────────────────────
+// Toast
 function showToast(type, title, msg) {
   const icons = { success: '✅', error: '❌', warn: '⚠️', info: 'ℹ️' };
   const t = document.createElement('div'); t.className = `toast ${type}`;
@@ -298,7 +301,7 @@ function showToast(type, title, msg) {
 function closeModal(id) { document.getElementById(id)?.classList.remove('show'); }
 function openModal(id) { document.getElementById(id)?.classList.add('show'); }
 
-// ── Navigation ─────────────────────────────
+// Navigation
 function showPage(id, title) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   const target = document.getElementById('page-' + id);
@@ -312,36 +315,36 @@ function goBack() {
 }
 function goBackToList() { showPage('doclist', 'DAFTAR DOKUMEN'); }
 
-// ── Sidebar ────────────────────────────────
+// Sidebar
 function buildSidebar() {
   const roles = userData.roles || ['guru'];
-  let html = `<div class="nav-section">Menu Utama</div>
-<div class="nav-item active" id="nav-beranda" onclick="navTo(this,'beranda','BERANDA',loadBeranda)"><span class="nav-icon">🏠</span>Beranda</div>`;
-
-  if (_menuDataDynamic.length > 0) {
-    html += `<div class="nav-section">Administrasi Digital</div>`;
-    _menuDataDynamic.forEach(m => {
-      html += `<div class="nav-item" onclick="navToMenu(this,'${m.id}')"><span class="nav-icon">${m.icon}</span><span style="flex:1;font-size:11px;line-height:1.2">${m.title}</span></div>`;
-    });
-  }
-
-  html += `<div class="nav-section">Kolaborasi</div>
-<div class="nav-item" onclick="navTo(this,'chat','CHAT SEKOLAH',()=>window.CimegaChat.init(db,'page-chat',{tab:'school'}))"><span class="nav-icon">💬</span>Chat Sekolah</div>
-<div class="nav-item" onclick="navTo(this,'sharing','BERBAGI DOKUMEN',()=>window.CimegaSharing.init())"><span class="nav-icon">📤</span>Berbagi Dokumen</div>`;
-
-  if (roles.includes('kepsek')) {
-    html += `<div class="nav-item" onclick="navTo(this,'chat','FORUM KEPSEK',()=>window.CimegaChat.init(db,'page-chat',{tab:'kepsek'}))"><span class="nav-icon">🏛️</span>Forum Kepsek</div>`;
-  }
-
-  html += `<div class="nav-section">Fitur AI</div>
-  <div class="nav-item" onclick="navTo(this,'ai','AI ASISTEN',()=>window.CimegaAIChatbot.renderTo('aiPanel-chat'))"><span class="nav-icon">✨</span>AI Asisten</div>`;
-
-  html += `<div class="nav-section">Lainnya</div>
-  <div class="nav-item" onclick="navTo(this,'profil','PROFIL SAYA',loadProfil)"><span class="nav-icon">👤</span>Profil Saya</div>`;
-
-  // ★ SIDEBAR FOOTER & PROFIL ★
   const sidebar = document.getElementById('sidebarNav');
-  if (sidebar) sidebar.innerHTML = html;
+  
+  if (sidebar) {
+      if (window.CimegaRouter) {
+          // Use the static 39-module cyber-glass router
+          let html = window.CimegaRouter.getSidebarMenuHtml(roles);
+          
+          // Append kolaborasi & AI
+          html += `<div class="nav-section">Kolaborasi</div>
+          <div class="nav-item" onclick="navTo(this,'chat','CHAT SEKOLAH',()=>window.CimegaChat.init(db,'page-chat',{tab:'school'}))"><span class="nav-icon">💬</span>Chat Sekolah</div>
+          <div class="nav-item" onclick="navTo(this,'sharing','BERBAGI DOKUMEN',()=>window.CimegaSharing.init())"><span class="nav-icon">📤</span>Berbagi Dokumen</div>`;
+
+          if (roles.includes('kepsek')) {
+            html += `<div class="nav-item" onclick="navTo(this,'chat','FORUM KEPSEK',()=>window.CimegaChat.init(db,'page-chat',{tab:'kepsek'}))"><span class="nav-icon">🏛️</span>Forum Kepsek</div>`;
+          }
+
+          html += `<div class="nav-section">Fitur AI</div>
+          <div class="nav-item" onclick="navTo(this,'ai','AI ASISTEN',()=>window.CimegaAIChatbot.renderTo('aiPanel-chat'))"><span class="nav-icon">✨</span>AI Asisten</div>`;
+
+          html += `<div class="nav-section">Lainnya</div>
+          <div class="nav-item" onclick="navTo(this,'profil','PROFIL SAYA',loadProfil)"><span class="nav-icon">👤</span>Profil Saya</div>`;
+          
+          sidebar.innerHTML = html;
+      } else {
+          sidebar.innerHTML = '<div style="color:var(--danger);padding:10px;">Router Error: Tidak dapat memuat daftar modul 2026/2027.</div>';
+      }
+  }
 }
 function navTo(el, pageId, title, fn) {
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
@@ -368,7 +371,7 @@ function navToMenu(el, menuId) {
   }
 }
 
-// ── SPLIT-VIEW ADMINISTRASI: PANEL KIRI RENDERER ────────────────
+// Split-view Left Panel
 function renderAdmLeftPanel(katId) {
   const leftEl = document.getElementById('admLeftList');
   const titleEl = document.getElementById('admPageTitle');
@@ -410,7 +413,7 @@ function renderAdmLeftPanel(katId) {
   }).join('');
 }
 
-// ── SPLIT-VIEW: KLIK ITEM DI PANEL KIRI ─────────────────────────
+// Split-view Left Panel click handler
 // Signature baru: hanya pakai index (data diambil dari _currentAdmKatId cache)
 var _currentAdmKatId = '';
 function openAdmItem(itemIndex) {
@@ -436,7 +439,7 @@ function openAdmItem(itemIndex) {
   var renderBody = document.getElementById('admRenderBody');
   if (renderBody) renderBody.innerHTML = '<div style="text-align:center;padding:40px;color:var(--muted)"><div class="spinner"></div><p style="margin-top:12px;font-size:11px">Memuat modul...</p></div>';
 
-  // ── PRIORITY CHAIN ──────────────────────────────────────────────
+  // Priority Chain
   // LAYER 0 (TERCEPAT): Cek data.modul.koding_html dari cache konten (ditulis oleh modul_builder.js)
   if (docData.modul && docData.modul.koding_html && docData.modul.koding_html.trim() !== '') {
     console.log('✅ [LAYER 0] Modul ditemukan via cache konten.modul:', docData.id);
@@ -480,7 +483,7 @@ function openAdmItem(itemIndex) {
   renderDocInPanel(katId, docName, docData.id);
 }
 
-// ── RENDER MODUL DINAMIS KE PANEL KANAN ─────────────────────────
+// Render dynamic module to right panel
 function renderDynamicModuleInPanel(modulData) {
   var renderBody = document.getElementById('admRenderBody');
   if (!renderBody) {
@@ -525,7 +528,7 @@ function renderDynamicModuleInPanel(modulData) {
   }
 }
 
-// ── RENDER DOKUMEN KE PANEL KANAN (dengan Dynamic Module Detection) ─────
+// Render document to right panel
 async function renderDocInPanel(katId, docName, kontenId) {
   var renderBody = document.getElementById('admRenderBody');
   if (!renderBody) return;
@@ -656,7 +659,7 @@ async function renderDocInPanel(katId, docName, kontenId) {
   }
 }
 
-// ── HELPER EDIT/SIMPAN/CETAK/UNDUH PANEL KANAN ──────────────────
+// Right panel actions (edit/save/print/download)
 
 function toggleAdmEdit() {
   const ce = document.getElementById('admDocContent');
@@ -718,7 +721,7 @@ window.saveAdmDoc = saveAdmDoc;
 window.printAdmDoc = printAdmDoc;
 window.downloadAdmDoc = downloadAdmDoc;
 
-// ── setupUser ──────────────────────────────
+// Setup User Profile
 function setupUser() {
   // Advanced Resilience: Normalize roles and expand specialized roles to base roles
   let rawRoles = userData.roles || (userData.role ? [userData.role] : ['guru']);
@@ -764,8 +767,8 @@ function setupUser() {
     pustakawan: { cls: 'role-guru', label: '📚 Pustakawan' },
     gpk: { cls: 'role-guru', label: '♿ Guru GPK Inklusif' },
     ekskul: { cls: 'role-guru', label: '🎭 Pembina Ekskul' },
-    koordinator: { cls: 'role-kepsek', label: '🎯 Koordinator P5' },
-    fasilitator: { cls: 'role-guru', label: '🌱 Fasilitator P5' },
+    koordinator: { cls: 'role-kepsek', label: '🎯 Koordinator Kokurikuler' },
+    fasilitator: { cls: 'role-guru', label: '🌱 Fasilitator Kokurikuler' },
   };
 
   const rb = document.getElementById('sidebarRole');
@@ -786,7 +789,7 @@ function setupUser() {
     }
   }
 
-  // ★ IDENTITY DISCOVERY & ASSIGNMENTS ★
+  // Identity Discovery
   const elSidebarAssignment = document.getElementById('sidebarAssignment');
   if (elSidebarAssignment) {
     if (userData.teaching_assignments) {
@@ -1140,8 +1143,8 @@ function downloadDoc() {
   const content = contentEl.innerHTML;
   const title = currentDocName || 'Dokumen';
   const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${title}</title>
-<style>body{font-family:'Times New Roman',serif;font-size:12pt;line-height:1.6;color:#000;padding:2cm;max-width:21cm;margin:0 auto}</style>
-</head><body><h2 style="font-family:Arial">${title}</h2><hr/>${content}</body></html>`;
+<style>body{font-family: 'Plus Jakarta Sans', sans-serif;font-size:12pt;line-height:1.6;color:#000;padding:2cm;max-width:21cm;margin:0 auto}</style>
+</head><body><h2 style="font-family: 'Plus Jakarta Sans', sans-serif>${title}</h2><hr/>${content}</body></html>`;
   const blob = new Blob([html], { type: 'text/html' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a'); a.href = url; a.download = title + '.html'; a.click();
@@ -1158,7 +1161,7 @@ function printDoc() {
   const mg = margins[pageSettings.margin] || '2.54cm';
   const sz = pageSettings.size === 'F4' ? '21.59cm 33.02cm' : 'A4';
   w.document.write(`<!DOCTYPE html><html><head><title>${title}</title>
-<style>@page{size:${sz};margin:${mg}}body{font-family:'Times New Roman',serif;font-size:12pt;line-height:1.6;color:#000}</style>
+<style>@page{size:${sz};margin:${mg}}body{font-family: 'Plus Jakarta Sans', sans-serif;font-size:12pt;line-height:1.6;color:#000}</style>
 </head><body>${content}</body></html>`);
   w.document.close(); setTimeout(() => { w.print(); w.close(); }, 400);
 }
@@ -1357,7 +1360,7 @@ function downloadSharedDoc() {
   const d = allShared.find(x => x.id === currentShareDocId);
   if (!d) return;
   const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${d.docName}</title>
-<style>body{font-family:'Times New Roman',serif;font-size:12pt;line-height:1.6;padding:2cm}</style>
+<style>body{font-family: 'Plus Jakarta Sans', sans-serif;font-size:12pt;line-height:1.6;padding:2cm}</style>
 </head><body><h2>${d.docName}</h2><p><em>Dibuat oleh: ${d.sharedBy}</em></p><hr/>${d.content}</body></html>`;
   const blob = new Blob([html], { type: 'text/html' });
   const url = URL.createObjectURL(blob);
@@ -1447,7 +1450,7 @@ async function loadMonitor() {
       <div style="font-size:11px;color:var(--muted);margin-top:2px">${roles.join(' · ')}</div>
     </div>
     <div style="text-align:right">
-      <div style="font-family: Arial;font-size:16px;color:var(--cyan)">${docs.length}</div>
+      <div style="font-family: 'Plus Jakarta Sans', sans-serif;font-size:16px;color:var(--cyan)">${docs.length}</div>
       <div style="font-size:10px;color:var(--muted)">Dokumen</div>
     </div>
   </div>`;
@@ -1598,7 +1601,7 @@ async function loadRekap() {
       html += `<div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid rgba(0,229,255,0.07)">
     <div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--cyan));display:flex;align-items:center;justify-content:center;font-size:16px">👤</div>
     <div style="flex:1"><div style="font-size:12px;font-weight:700;color:#fff">${g.nama || '-'}</div><div style="font-size:10px;color:var(--muted)">${roles.join(' · ')}</div></div>
-    <div style="text-align:right"><div style="font-family: Arial;font-size:16px;color:var(--cyan)">${docs.length}</div><div style="font-size:10px;color:var(--muted)">Dokumen</div></div></div>`;
+    <div style="text-align:right"><div style="font-family: 'Plus Jakarta Sans', sans-serif;font-size:16px;color:var(--cyan)">${docs.length}</div><div style="font-size:10px;color:var(--muted)">Dokumen</div></div></div>`;
     });
     el.innerHTML = html + '</div></div>';
   } catch (e) { el.innerHTML = '<div class="empty-state"><p>Gagal memuat rekap</p></div>'; }
@@ -1626,7 +1629,7 @@ function loadBeranda() {
   ].map(s => `
     <div class="stat-card">
       <div class="stat-icon">${s.icon}</div>
-      <div class="stat-num" style="font-family: Arial">${s.num}</div>
+      <div class="stat-num" style="font-family: 'Plus Jakarta Sans', sans-serif>${s.num}</div>
       <div class="stat-label">${s.label}</div>
     </div>`).join('');
 
@@ -1634,7 +1637,7 @@ function loadBeranda() {
     statsHtml += `
     <div class="stat-card" style="cursor:pointer;border-color:rgba(255,208,0,0.3)" onclick="navTo(null,'keuangan','KEUANGAN',loadLaporanKeu)">
       <div class="stat-icon">💰</div>
-      <div class="stat-num" style="font-family: Arial">${(_kontenCache['keuangan'] || []).length}</div>
+      <div class="stat-num" style="font-family: 'Plus Jakarta Sans', sans-serif>${(_kontenCache['keuangan'] || []).length}</div>
       <div class="stat-label">Keuangan</div>
     </div>`;
   }
@@ -1960,7 +1963,7 @@ async function initApp() {
     const {
       getFirestore, collection, doc, getDoc, getDocs, addDoc,
       updateDoc, deleteDoc, onSnapshot, query, where, orderBy,
-      serverTimestamp, Timestamp
+      serverTimestamp, Timestamp, writeBatch, limit
     } = fbFs;
 
     // ── Safe init Firebase app ────────────────────────────────
@@ -1968,16 +1971,142 @@ async function initApp() {
     try { fbApp = getApp(); } catch (_) { fbApp = initializeApp(firebaseConfig); }
     db = getFirestore(fbApp);
 
+    // Fetch school profile
+    let schoolProfile = null;
+    if (userData && userData.sekolah) {
+      try {
+        const schoolDoc = await getDoc(doc(db, 'sekolah', userData.sekolah));
+        if (schoolDoc.exists()) {
+          schoolProfile = { id: schoolDoc.id, ...schoolDoc.data() };
+          window._schoolProfile = schoolProfile;
+          console.log('✅ Settings: School profile loaded →', schoolProfile.nama_sekolah);
+        }
+      } catch (e) {
+        console.warn('⚠️ Gagal memuat profil sekolah:', e.message);
+      }
+    }
+
     // ── CRITICAL: expose db + helpers ke window._fb ──────────
     // Semua fungsi Firestore harus ada di sini agar loadKontenDynamic() tidak crash
     window._fb = {
       db,
       collection, doc, getDoc, getDocs, addDoc,
       updateDoc, deleteDoc, onSnapshot, query, where, orderBy,
-      serverTimestamp, Timestamp
+      serverTimestamp, Timestamp, writeBatch, limit
     };
     window.db = db;
     window._userData = userData;
+
+    // Extend db with Firestore compat methods for modular JS compatibility
+    if (db && !db.collection) {
+      const fs = window._fb;
+      db.collection = function(path) {
+        const colRef = fs.collection(db, path);
+        return {
+          doc(docPath) {
+            const docRef = fs.doc(db, path, docPath);
+            const wrappedDoc = {
+              _nativeRef: docRef,
+              get() { return fs.getDoc(docRef); },
+              set(data, options) { return fs.setDoc(docRef, data, options); },
+              update(data) { return fs.updateDoc(docRef, data); },
+              delete() { return fs.deleteDoc(docRef); }
+            };
+            return wrappedDoc;
+          },
+          add(data) {
+            return fs.addDoc(colRef, data);
+          },
+          where(field, op, val) {
+            let queries = [colRef, fs.where(field, op, val)];
+            const builder = {
+              where(f, o, v) {
+                queries.push(fs.where(f, o, v));
+                return builder;
+              },
+              orderBy(f, dir = 'asc') {
+                queries.push(fs.orderBy(f, dir));
+                return builder;
+              },
+              limit(num) {
+                queries.push(fs.limit(num));
+                return builder;
+              },
+              async get() {
+                const q = fs.query(...queries);
+                return fs.getDocs(q);
+              }
+            };
+            return builder;
+          },
+          orderBy(field, dir = 'asc') {
+            let queries = [colRef, fs.orderBy(field, dir)];
+            const builder = {
+              where(f, o, v) {
+                queries.push(fs.where(f, o, v));
+                return builder;
+              },
+              orderBy(f, d = 'asc') {
+                queries.push(fs.orderBy(f, d));
+                return builder;
+              },
+              limit(num) {
+                queries.push(fs.limit(num));
+                return builder;
+              },
+              async get() {
+                const q = fs.query(...queries);
+                return fs.getDocs(q);
+              }
+            };
+            return builder;
+          },
+          async get() {
+            return fs.getDocs(colRef);
+          }
+        };
+      };
+      
+      db.doc = function(path) {
+        const docRef = fs.doc(db, path);
+        return {
+          _nativeRef: docRef,
+          get() { return fs.getDoc(docRef); },
+          set(data, options) { return fs.setDoc(docRef, data, options); },
+          update(data) { return fs.updateDoc(docRef, data); },
+          delete() { return fs.deleteDoc(docRef); }
+        };
+      };
+      
+      db.batch = function() {
+        const operations = [];
+        return {
+          set(docRef, data, options) {
+            operations.push({ type: 'set', ref: docRef._nativeRef || docRef, data, options });
+          },
+          update(docRef, data) {
+            operations.push({ type: 'update', ref: docRef._nativeRef || docRef, data });
+          },
+          delete(docRef) {
+            operations.push({ type: 'delete', ref: docRef._nativeRef || docRef });
+          },
+          async commit() {
+            const nativeBatch = fs.writeBatch(db);
+            operations.forEach(op => {
+              const rawRef = op.ref._nativeRef || op.ref;
+              if (op.type === 'set') {
+                nativeBatch.set(rawRef, op.data, op.options);
+              } else if (op.type === 'update') {
+                nativeBatch.update(rawRef, op.data);
+              } else if (op.type === 'delete') {
+                nativeBatch.delete(rawRef);
+              }
+            });
+            return nativeBatch.commit();
+          }
+        };
+      };
+    }
 
     console.log('✅ Settings: Firebase ready →', firebaseConfig.projectId);
 

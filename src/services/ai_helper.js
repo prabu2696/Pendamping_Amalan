@@ -4,17 +4,7 @@ window.CimegaAI = {
   // ★ ROLE CAPABILITIES MAPPING ★
   ROLE_CAPABILITIES: {
     'guru': {
-      label: 'Guru Kelas',
-      domains: [],
-      prohibited: []
-    },
-    'guru_pai': {
-      label: 'Guru PAI',
-      domains: [],
-      prohibited: []
-    },
-    'guru_pjok': {
-      label: 'Guru PJOK',
+      label: 'Guru (Kelas/Mapel)',
       domains: [],
       prohibited: []
     },
@@ -38,27 +28,6 @@ window.CimegaAI = {
       domains: [],
       prohibited: []
     },
-    'pustakawan': {
-      label: 'Pustakawan',
-      domains: [],
-      prohibited: []
-    },
-    'gpk': {
-      label: 'GPK (Inklusif)',
-      domains: [],
-      prohibited: []
-    },
-    'ekskul': {
-      label: 'Pembina Ekskul',
-      domains: [],
-      prohibited: []
-    },
-    'koordinator': {
-      label: 'Koordinator P5',
-      domains: [],
-      prohibited: []
-    }
-  },
 
   // ── 0. SAFETY FILTER: RED FLAGS ──
   FORBIDDEN_WORDS: [
@@ -86,6 +55,12 @@ window.CimegaAI = {
       return { safe: false, msg: "Mohon maaf, saya memiliki standar etika yang ketat untuk menolak segala bentuk perundungan (bullying) atau konten tidak pantas. Mari jaga integritas lingkungan pendidikan kita. 🙏" };
     }
 
+    // 4. Cek Multi-Tenant & Isolation
+    const crossSchool = ['sekolah lain', 'instansi lain', 'sdn lain', 'data sekolah sebelah', 'sekolah berbeda', 'sekolah b', 'sekolah c', 'cross-tenant', 'pindah instansi'];
+    if (crossSchool.some(k => lowText.includes(k))) {
+      return { safe: false, msg: "Mohon maaf, sebagai Co-Pilot AI Cimega, wewenang saya dibatasi hanya untuk sekolah aktif saat ini. Saya dilarang mengakses atau membahas data dari sekolah/instansi lain demi menjaga kerahasiaan data. 🔒" };
+    }
+
     return { safe: true };
   },
 
@@ -95,8 +70,9 @@ window.CimegaAI = {
 2. PERSONALITY: Cerdas, Analitis, Bijaksana, dan Empatik. Anda bukan sekadar pemberi template, tapi penasihat yang mampu memberikan solusi administratif yang inovatif.
 3. KEMAMPUAN: Anda memahami seluruh koridor Kurikulum Merdeka dan Manajemen Sekolah. Berikan saran yang mendalam, logis, dan profesional.
 4. SISI KEMANUSIAAN: Pahami kondisi psikologis pengguna (stres, lelah) dan berikan dukungan mental yang tulus sebelum kembali ke solusi teknis.
-5. FILTER TEGAS: Tolak mutlak topik SARA, Pornografi, Kekerasan (Bom/Senjata), Hinaan, Bullying, dan Koding umum.
-6. KONTEKS: Manfaatkan riwayat percakapan untuk memberikan respon yang berkesinambungan tanpa mengulang instruksi awal.`,
+5. FILTER TEGAS: Tolak mutlak topik SARA, Pornografi, Kekerasan (Bom/Senjata), Hinaan, Bullying, Koding umum, dan data instansi lain.
+6. ISOLASI DATA (MULTI-TENANT & ROLE PRIVACY): Anda beroperasi secara terisolasi penuh. Anda dilarang memberikan, menebak, atau membahas data dari sekolah lain atau data dari pengguna/peran lain di instansi ini. Akses Anda terbatas hanya untuk melayani pengguna saat ini.
+7. KONTEKS: Manfaatkan riwayat percakapan untuk memberikan respon yang berkesinambungan tanpa mengulang instruksi awal.`,
 
   // ── 2. CONTEXT EXTRACTION & LIVE DATA ──
   getSchoolStats: async function(userData) {
@@ -249,98 +225,5 @@ PRINSIP OPERASIONAL:
   }
 };
 
-console.log('✅ Cimega AI Helper loaded.');
+console.log('✅ Cimega AI Helper v2.0 loaded. [Kokurikuler Ready, Modul Builder REMOVED]');
 
-// ─────────────────────────────────────────────────────────────────────────────
-// ── AI DEBUGGER — MODUL BUILDER (Admin Panel Only) ───────────────────────────
-// Menganalisis koding HTML & JS yang dimasukkan admin ke Modul Builder.
-// Dipanggil via tombol "🧪 DEBUG AI" sebelum admin menekan "💾 SIMPAN MODUL".
-// ─────────────────────────────────────────────────────────────────────────────
-window.CimegaAIDebugger = {
-
-    /**
-     * Tampilkan hasil analisis di dalam modal popup
-     * @param {string} result - Teks hasil analisis dari AI
-     */
-    showResult: function(result) {
-        // Hapus modal lama jika ada
-        const oldModal = document.getElementById('debugger-result-modal');
-        if (oldModal) oldModal.remove();
-
-        const modal = document.createElement('div');
-        modal.id = 'debugger-result-modal';
-        modal.style.cssText = `
-            position:fixed; inset:0; z-index:99999;
-            background:rgba(0,0,0,0.75); backdrop-filter:blur(6px);
-            display:flex; align-items:center; justify-content:center;
-        `;
-        modal.innerHTML = `
-            <div style="background:rgba(4,20,45,0.98); border:1px solid rgba(0,229,255,0.3);
-                        border-radius:16px; padding:28px; max-width:640px; width:90%;
-                        box-shadow:0 20px 60px rgba(0,0,0,0.8); font-family:Arial;">
-                <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:18px;">
-                    <div style="display:flex; align-items:center; gap:10px;">
-                        <span style="font-size:20px;">🧪</span>
-                        <span style="font-family:'Orbitron',Arial; font-size:13px; color:#00e5ff; font-weight:700; letter-spacing:1px;">HASIL ANALISIS AI DEBUGGER</span>
-                    </div>
-                    <button onclick="document.getElementById('debugger-result-modal').remove()"
-                            style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.15);
-                                   color:#fff; border-radius:8px; padding:4px 12px; cursor:pointer; font-size:13px;">✕</button>
-                </div>
-                <div style="background:rgba(0,0,0,0.4); border:1px solid rgba(0,229,255,0.1);
-                            border-radius:10px; padding:16px; max-height:340px; overflow-y:auto;
-                            font-size:12px; line-height:1.7; color:#ddeeff; white-space:pre-wrap;">${result}</div>
-                <div style="margin-top:14px; text-align:right;">
-                    <button onclick="document.getElementById('debugger-result-modal').remove()"
-                            style="background:linear-gradient(135deg,rgba(0,229,255,0.2),rgba(0,180,200,0.1));
-                                   border:1px solid rgba(0,229,255,0.4); color:#00e5ff;
-                                   border-radius:8px; padding:8px 20px; cursor:pointer; font-size:12px;">
-                        Tutup
-                    </button>
-                </div>
-            </div>`;
-        document.body.appendChild(modal);
-    },
-
-    /**
-     * Analisis kode HTML & JS dari Modul Builder menggunakan AI
-     */
-    analyzeCode: async function() {
-        const htmlContent = document.getElementById('builder-html')?.value || '';
-        const jsContent   = document.getElementById('builder-js')?.value   || '';
-
-        if (!htmlContent.trim() && !jsContent.trim()) {
-            if (window.showToast) window.showToast('warn', 'Kosong', 'Isi kolom HTML atau JavaScript terlebih dahulu.');
-            return;
-        }
-
-        if (window.showToast) window.showToast('info', 'Menganalisis...', 'AI sedang memeriksa koding Anda...');
-
-        const systemPrompt = `Anda adalah Senior Software Engineer dan Code Reviewer profesional.
-TUGAS: Lakukan inspeksi koding HTML dan JavaScript dari Modul Builder sistem administrasi sekolah.
-Cari: bug, tag HTML tidak tertutup, error sintaks, variabel tidak terdefinisi, atau referensi ID yang tidak sinkron antara HTML dan JavaScript.
-
-ATURAN KETAT (HEMAT TOKEN):
-1. DILARANG menulis ulang (rewrite) atau memperbaiki kode secara utuh.
-2. Berikan hasil dalam poin-poin singkat dan spesifik (sebutkan nama variabel/ID/baris yang bermasalah).
-3. Jika koding 100% valid, balas HANYA dengan: "✅ STATUS AMAN: Tidak ditemukan error kritikal. Kodingan siap di-deploy."`;
-
-        const userPrompt = `[KODING HTML]\n${htmlContent || '(Kosong)'}\n\n[KODING JAVASCRIPT]\n${jsContent || '(Kosong)'}\n\nLakukan inspeksi sekarang.`;
-
-        try {
-            const res = await window.CimegaAI.ask({
-                system: systemPrompt,
-                messages: [{ role: 'user', content: userPrompt }],
-                maxTokens: 400
-            });
-
-            if (res.error) throw new Error(res.error);
-            this.showResult(res.text);
-        } catch (error) {
-            console.error('[CimegaAIDebugger] Error:', error);
-            if (window.showToast) window.showToast('error', 'Gagal', 'AI Debugger tidak dapat terhubung: ' + error.message);
-        }
-    }
-};
-
-console.log('✅ Cimega AI Debugger loaded (Admin Modul Builder).');

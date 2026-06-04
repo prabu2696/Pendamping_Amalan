@@ -171,11 +171,11 @@ window.ModulOversight = {
     <meta charset="UTF-8">
     <title>Bukti Pengawasan - ${title}</title>
     <style>
-        body { font-family: 'Times New Roman', serif; font-size: 12pt; line-height: 1.6; color: #000; padding: 2cm; max-width: 21cm; margin: 0 auto; background: #fff; }
-        .oversight-header { border-bottom: 2px solid #000; margin-bottom: 20px; padding-bottom: 10px; font-family: Arial; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 12pt; line-height: 1.6; color: #000; padding: 2cm; max-width: 21cm; margin: 0 auto; background: #fff; }
+        .oversight-header { border-bottom: 2px solid #000; margin-bottom: 20px; padding-bottom: 10px; font-family: 'Plus Jakarta Sans', sans-serif; }
         .oversight-header h2 { margin: 0 0 10px 0; font-size: 16pt; text-transform: uppercase; }
         .oversight-meta { font-size: 10pt; color: #555; display: grid; grid-template-columns: 1fr 1fr; gap: 5px; }
-        .watermark { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-45deg); font-size: 80px; opacity: 0.05; color: red; font-family: Arial; pointer-events: none; white-space: nowrap; }
+        .watermark { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-45deg); font-size: 80px; opacity: 0.05; color: red; font-family: 'Plus Jakarta Sans', sans-serif; pointer-events: none; white-space: nowrap; }
     </style>
 </head>
 <body>
