@@ -768,7 +768,7 @@ ipcMain.handle('get-music-list', () => {
       .map(([f, fullPath]) => ({
         id: f,
         title: f.replace(/\.(mp3|ogg|wav|aac|m4a|flac)$/i, '').trim(),
-        url: url.pathToFileURL(path.join(musicDir, f)).href,
+        url: url.pathToFileURL(fullPath).href,
       }))
       .sort((a, b) => a.title.toLowerCase() < b.title.toLowerCase() ? -1 : 1);
   } catch (e) {
