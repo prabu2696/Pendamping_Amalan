@@ -37,7 +37,7 @@ window.NilaiRaporUI = {
 
              <!-- Table container -->
              <div id="nr-tabel-nilai" style="margin-top: 15px;">
-                 <div style="text-align:center;padding:40px;color:var(--muted);background:rgba(255,255,255,0.01);border:1px dashed rgba(255,255,255,0.1);border-radius:10px;">
+                 <div style="text-align:center;padding:40px;color:var(--muted);background:rgba(255,255,255,0.01);border:1px solid rgba();border-radius:10px;">
                      Pilih Kelas dan Semester di atas untuk memuat daftar nilai siswa.
                  </div>
              </div>

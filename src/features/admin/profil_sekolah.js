@@ -75,7 +75,7 @@ const ProfilSekolah = {
     const logoUrl = data.logo_url || '';
     const logoHtml = logoUrl
       ? `<img src="${logoUrl}" style="height:72px;width:72px;object-fit:contain;" onerror="this.style.display='none'">`
-      : `<div style="width:72px;height:72px;border:2px dashed rgba(0,229,255,0.3);border-radius:8px;display:flex;align-items:center;justify-content:center;color:#5a8aaa;font-size:10px;">Logo</div>`;
+      : `<div style="width:72px;height:72px;border:2px solid rgba();border-radius:8px;display:flex;align-items:center;justify-content:center;color:#5a8aaa;font-size:10px;">Logo</div>`;
 
     preview.innerHTML = `
       <div style="display:flex;align-items:center;gap:16px;padding:16px;background:white;border-radius:8px;color:#111;">

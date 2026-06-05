@@ -96,7 +96,7 @@ window.CimegaRouter = {
     const mod = this.modules.find(m => m.id === id);
     if(!mod) return;
 
-    showPage('doclist', mod.title.toUpperCase());
+    showPage('administrasi', mod.title.toUpperCase());
     const renderBody = document.getElementById('admRenderBody');
     if(!renderBody) return;
 
@@ -235,7 +235,7 @@ window.CimegaRouter = {
 
   // === DYNAMIC PREVIEW ENGINE FOR AI CHAT AGENT PROMPTS ===
   renderGenericAIResult(title, content, exportType = 'word') {
-    showPage('doclist', title.toUpperCase());
+    showPage('administrasi', title.toUpperCase());
     const renderBody = document.getElementById('admRenderBody');
     if (!renderBody) return;
 

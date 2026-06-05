@@ -166,7 +166,7 @@ window.CimegaSharing = {
 
     if (this.filesList.length === 0) {
       container.innerHTML = `
-        <div style="grid-column:1/-1; text-align:center; padding:60px; color:var(--muted); background:rgba(255,255,255,0.02); border-radius:20px; border:1px dashed rgba(255,255,255,0.05)">
+        <div style="grid-column:1/-1; text-align:center; padding:60px; color:var(--muted); background:rgba(255,255,255,0.02); border-radius:20px; border:1px solid rgba()">
           <div style="font-size:48px; margin-bottom:15px; opacity:0.5">📂</div>
           <div style="font-family:'Orbitron'; font-size:12px; letter-spacing:1px">BELUM ADA DOKUMEN</div>
           <p style="font-size:11px; margin-top:5px">Mulai bagikan file pertama untuk institusi Anda.</p>

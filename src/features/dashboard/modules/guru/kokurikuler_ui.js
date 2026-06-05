@@ -56,35 +56,35 @@ window.KokurikulerUI = {
       const fieldId = `field_g_kokurikuler_${idx}`;
       let inputHtml = '';
       if (field.type === 'select') {
-        const optionsHtml = field.options.map(opt => `<option>\${opt}</option>`).join('');
+        const optionsHtml = field.options.map(opt => `<option>${opt}</option>`).join('');
         inputHtml = `
-          <select id="\${fieldId}" class="cyber-select" data-label="\${field.label}" \${field.required ? 'required' : ''}>
-            <option value="">-- Pilih \${field.label} --</option>
-            \${optionsHtml}
+          <select id="${fieldId}" class="cyber-select" data-label="${field.label}" ${field.required ? 'required' : ''}>
+            <option value="">-- Pilih ${field.label} --</option>
+            ${optionsHtml}
           </select>
         `;
       } else if (field.type === 'textarea') {
         inputHtml = `
-          <textarea id="\${fieldId}" class="cyber-input" placeholder="\${field.placeholder || ''}" data-label="\${field.label}" \${field.required ? 'required' : ''}></textarea>
+          <textarea id="${fieldId}" class="cyber-input" placeholder="${field.placeholder || ''}" data-label="${field.label}" ${field.required ? 'required' : ''}></textarea>
         `;
       } else if (field.type === 'number') {
         inputHtml = `
-          <input id="\${fieldId}" type="number" class="cyber-input" placeholder="\${field.placeholder || ''}" data-label="\${field.label}" \${field.required ? 'required' : ''}/>
+          <input id="${fieldId}" type="number" class="cyber-input" placeholder="${field.placeholder || ''}" data-label="${field.label}" ${field.required ? 'required' : ''}/>
         `;
       } else if (field.type === 'date') {
         inputHtml = `
-          <input id="\${fieldId}" type="date" class="cyber-input" data-label="\${field.label}" \${field.required ? 'required' : ''}/>
+          <input id="${fieldId}" type="date" class="cyber-input" data-label="${field.label}" ${field.required ? 'required' : ''}/>
         `;
       } else {
         inputHtml = `
-          <input id="\${fieldId}" type="text" class="cyber-input" placeholder="\${field.placeholder || ''}" data-label="\${field.label}" \${field.required ? 'required' : ''}/>
+          <input id="${fieldId}" type="text" class="cyber-input" placeholder="${field.placeholder || ''}" data-label="${field.label}" ${field.required ? 'required' : ''}/>
         `;
       }
       const gridStyle = field.type === 'textarea' ? 'grid-column: 1 / -1;' : '';
       return `
-        <div class="cyber-group" style="\${gridStyle}">
-          <label class="cyber-label">\${field.label} \${field.required ? '<span style="color:#00e5ff">*</span>' : ''}</label>
-          \${inputHtml}
+        <div class="cyber-group" style="${gridStyle}">
+          <label class="cyber-label">${field.label} ${field.required ? '<span style="color:#00e5ff">*</span>' : ''}</label>
+          ${inputHtml}
         </div>
       `;
     }).join('');
@@ -95,8 +95,8 @@ window.KokurikulerUI = {
              <div style="display:flex; align-items:center; gap:12px;">
                  <div style="font-size:24px; background:rgba(0,229,255,0.1); width:45px; height:45px; display:flex; align-items:center; justify-content:center; border-radius:10px; border:1px solid rgba(0,229,255,0.3); box-shadow: 0 0 15px rgba(0,229,255,0.1)">🌱</div>
                  <div style="display:flex; flex-direction:column;">
-                     <span style="font-size:18px; font-weight:700; letter-spacing:1px; color:#fff; text-shadow: 0 0 10px rgba(0,229,255,0.3); font-family:'Plus Jakarta Sans', sans-serif;">\${'Modul Kokurikuler'}</span>
-                     <span style="font-size:11px; color:rgba(0,229,255,0.8); text-transform:uppercase; letter-spacing:2px; font-family:'Plus Jakarta Sans', sans-serif;">\${'Perencanaan Pembelajaran'}</span>
+                     <span style="font-size:18px; font-weight:700; letter-spacing:1px; color:#fff; text-shadow: 0 0 10px rgba(0,229,255,0.3); font-family:'Plus Jakarta Sans', sans-serif;">${'Modul Kokurikuler'}</span>
+                     <span style="font-size:11px; color:rgba(0,229,255,0.8); text-transform:uppercase; letter-spacing:2px; font-family:'Plus Jakarta Sans', sans-serif;">${'Perencanaan Pembelajaran'}</span>
                  </div>
              </div>
              <div style="font-size:11px; font-weight:700; color:#0b0e14; background:linear-gradient(90deg, #00e5ff, #0099ff); padding:6px 12px; border-radius:20px; box-shadow: 0 0 15px rgba(0,229,255,0.4); font-family:'Plus Jakarta Sans', sans-serif;">T.A 2026/2027</div>
@@ -104,11 +104,11 @@ window.KokurikulerUI = {
          
          <div style="flex:1; overflow-y:auto; padding-right:15px;" class="custom-scrollbar">
              <div style="background:rgba(255,255,255,0.02); border-left:3px solid #00e5ff; padding:12px 15px; border-radius:0 8px 8px 0; color:#a0c0d0; font-size:12px; margin-bottom:25px; line-height:1.6; font-family:'Plus Jakarta Sans', sans-serif;">
-                 \${'Penguatan karakter siswa'}. Isi formulir parameter di bawah ini. Semua field yang memiliki label menyala (*) wajib diisi sebelum eksekusi AI Deep Learning Cimega dimulai.
+                 ${'Penguatan karakter siswa'}. Isi formulir parameter di bawah ini. Semua field yang memiliki label menyala (*) wajib diisi sebelum eksekusi AI Deep Learning Cimega dimulai.
              </div>
              
              <div class="cyber-grid" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
-                 \${fieldsHtml}
+                 ${fieldsHtml}
              </div>
              
              <div class="cyber-group" style="margin-top:30px; grid-column: 1 / -1;">
@@ -134,7 +134,7 @@ window.KokurikulerUI = {
     window.KokurikulerCore.loadDraft().then(draft => {
       if (draft && draft.payloadData) {
         this.schema.forEach((field, idx) => {
-          const el = document.getElementById(`field_g_kokurikuler_\${idx}`);
+          const el = document.getElementById(`field_g_kokurikuler_${idx}`);
           if (el && draft.payloadData[field.label] !== undefined) {
             el.value = draft.payloadData[field.label];
           }
@@ -152,7 +152,7 @@ window.KokurikulerUI = {
     const payloadData = {};
     let isValid = true;
     this.schema.forEach((field, idx) => {
-      const el = document.getElementById(`field_g_kokurikuler_\${idx}`);
+      const el = document.getElementById(`field_g_kokurikuler_${idx}`);
       if (el) {
         const val = el.value.trim();
         if (field.required && !val) {
@@ -249,7 +249,7 @@ window.KokurikulerUI = {
              <div style="display:flex; align-items:center; gap:12px;">
                  <div style="font-size:24px; background:rgba(0,229,255,0.1); width:45px; height:45px; display:flex; align-items:center; justify-content:center; border-radius:10px; border:1px solid rgba(0,229,255,0.3); box-shadow: 0 0 15px rgba(0,229,255,0.1)">✨</div>
                  <div style="display:flex; flex-direction:column;">
-                     <span style="font-size:18px; font-weight:700; letter-spacing:1px; color:#fff; text-shadow: 0 0 10px rgba(0,229,255,0.3); font-family:'Plus Jakarta Sans', sans-serif;">PREVIEW EDITOR: \${'Modul Kokurikuler'}</span>
+                     <span style="font-size:18px; font-weight:700; letter-spacing:1px; color:#fff; text-shadow: 0 0 10px rgba(0,229,255,0.3); font-family:'Plus Jakarta Sans', sans-serif;">PREVIEW EDITOR: ${'Modul Kokurikuler'}</span>
                      <span style="font-size:11px; color:rgba(0,229,255,0.8); text-transform:uppercase; letter-spacing:2px; font-family:'Plus Jakarta Sans', sans-serif;">HASIL GENERASI AI DOKUMEN</span>
                  </div>
              </div>
@@ -261,7 +261,7 @@ window.KokurikulerUI = {
                   <span>📝 Editor Dokumen (Dapat diedit langsung)</span>
                   <span>MODE MARKDOWN</span>
                </div>
-               <textarea id="ai-result-editor" class="cyber-input" style="flex:1; width:100%; height:100%; font-family: 'Courier New', Courier, monospace; font-size:13px; line-height:1.6; resize:none; background:rgba(0,0,0,0.35); border-color:rgba(0,229,255,0.2); color:#e0f0ff;" oninput="window.KokurikulerUI.updatePreview()">\${text.trim()}</textarea>
+               <textarea id="ai-result-editor" class="cyber-input" style="flex:1; width:100%; height:100%; font-family: 'Courier New', Courier, monospace; font-size:13px; line-height:1.6; resize:none; background:rgba(0,0,0,0.35); border-color:rgba(0,229,255,0.2); color:#e0f0ff;" oninput="window.KokurikulerUI.updatePreview()">${text.trim()}</textarea>
             </div>
             <div style="flex:1; display:flex; flex-direction:column; background:rgba(255,255,255,0.01); border:1px solid rgba(0,229,255,0.15); border-radius:8px; padding:12px; overflow:hidden;">
                <div style="font-size:11px; text-transform:uppercase; color:#ff00ff; font-weight:600; margin-bottom:8px; font-family:'Plus Jakarta Sans', sans-serif;">
@@ -279,7 +279,7 @@ window.KokurikulerUI = {
                  <button class="cyber-button" onclick="window.KokurikulerUI.saveFinalDocument()">
                      <span>💾</span> Simpan Dokumen
                  </button>
-                 \${exportButtonHtml}
+                 ${exportButtonHtml}
                  <button class="cyber-button primary" onclick="window.KokurikulerUI.printDocument()">
                      <span>🖨️</span> Cetak / PDF
                  </button>
@@ -315,8 +315,8 @@ window.KokurikulerUI = {
       <div style="text-align: center; border-bottom: 3px double #000; padding-bottom: 10px; margin-bottom: 20px; font-family: 'Times New Roman', Times, serif;">
         <h2 style="margin: 0; font-size: 14px; text-transform: uppercase; font-weight: normal; line-height: 1.2;">PEMERINTAH KABUPATEN TASIKMALAYA</h2>
         <h1 style="margin: 3px 0; font-size: 16px; text-transform: uppercase; font-weight: bold; line-height: 1.2;">DINAS PENDIDIKAN DAN KEBUDAYAAN</h1>
-        <h1 style="margin: 3px 0; font-size: 18px; text-transform: uppercase; font-weight: bold; letter-spacing: 0.5px; line-height: 1.2;">\${schoolProfile.nama_sekolah}</h1>
-        <p style="margin: 2px 0; font-size: 11px; font-style: italic;">Alamat: \${schoolProfile.alamat || 'Cimega'} | NPSN: \${schoolProfile.npsn || '-'}</p>
+        <h1 style="margin: 3px 0; font-size: 18px; text-transform: uppercase; font-weight: bold; letter-spacing: 0.5px; line-height: 1.2;">${schoolProfile.nama_sekolah}</h1>
+        <p style="margin: 2px 0; font-size: 11px; font-style: italic;">Alamat: ${schoolProfile.alamat || 'Cimega'} | NPSN: ${schoolProfile.npsn || '-'}</p>
       </div>
     `;
 
@@ -329,15 +329,15 @@ window.KokurikulerUI = {
             <p style="margin: 0;">Mengetahui,</p>
             <p style="margin: 0; font-weight: bold;">Kepala Sekolah</p>
             <div style="height: 60px;"></div>
-            <p style="margin: 0; font-weight: bold; text-decoration: underline;">\${schoolProfile.kepala_sekolah || '_____________________'}</p>
-            <p style="margin: 0;">NIP. \${schoolProfile.nip_kepsek || '_____________________'}</p>
+            <p style="margin: 0; font-weight: bold; text-decoration: underline;">${schoolProfile.kepala_sekolah || '_____________________'}</p>
+            <p style="margin: 0;">NIP. ${schoolProfile.nip_kepsek || '_____________________'}</p>
           </div>
           <div style="text-align: center; width: 200px;">
-            <p style="margin: 0;">Tasikmalaya, \${today}</p>
+            <p style="margin: 0;">Tasikmalaya, ${today}</p>
             <p style="margin: 0; font-weight: bold;">Pembuat Dokumen</p>
             <div style="height: 60px;"></div>
-            <p style="margin: 0; font-weight: bold; text-decoration: underline;">\${window._userData?.displayName || 'Guru/Staf'}</p>
-            <p style="margin: 0;">NIP. \${window._userData?.nip || '_____________________'}</p>
+            <p style="margin: 0; font-weight: bold; text-decoration: underline;">${window._userData?.displayName || 'Guru/Staf'}</p>
+            <p style="margin: 0;">NIP. ${window._userData?.nip || '_____________________'}</p>
           </div>
         </div>
       `;
@@ -345,11 +345,11 @@ window.KokurikulerUI = {
 
     preview.innerHTML = `
       <div style="background:#fff; color:#000; padding:10px; box-sizing:border-box;">
-        \${kop}
+        ${kop}
         <div style="font-size:12px; line-height:1.6; text-align:justify; color:#000;">
-          \${htmlContent}
+          ${htmlContent}
         </div>
-        \${signatureHtml}
+        ${signatureHtml}
       </div>
     `;
   },
@@ -398,12 +398,12 @@ window.KokurikulerUI = {
           </style>
         </head>
         <body>
-          \${preview.innerHTML}
+          ${preview.innerHTML}
         </body>
         </html>
       `;
       const cleanFileName = 'Modul_Kokurikuler';
-      const fileName = \`\${cleanFileName}_\${Date.now()}.doc\`;
+      const fileName = `${cleanFileName}_${Date.now()}.doc`;
       const res = await api.saveHTML(docHtml, fileName);
       if (res && res.success) {
         window.showToast?.('success', 'Word Berhasil', 'Dokumen disimpan.');
@@ -434,12 +434,12 @@ window.KokurikulerUI = {
           </style>
         </head>
         <body>
-          \${preview.innerHTML}
+          ${preview.innerHTML}
         </body>
         </html>
       `;
       const cleanFileName = 'Modul_Kokurikuler';
-      const fileName = \`\${cleanFileName}_\${Date.now()}.xls\`;
+      const fileName = `${cleanFileName}_${Date.now()}.xls`;
       const res = await api.saveHTML(xlsHtml, fileName);
       if (res && res.success) {
         window.showToast?.('success', 'Excel Berhasil', 'Spreadsheet disimpan.');
@@ -482,12 +482,12 @@ window.KokurikulerUI = {
           </style>
         </head>
         <body>
-          \${preview.innerHTML}
+          ${preview.innerHTML}
         </body>
         </html>
       `;
       const cleanFileName = 'Modul_Kokurikuler';
-      const res = await api.generatePDF(printHtml, \`\${cleanFileName}_\${Date.now()}\`, { landscape: false });
+      const res = await api.generatePDF(printHtml, `${cleanFileName}_${Date.now()}`, { landscape: false });
       if (res && res.success) {
         window.showToast?.('success', 'PDF Selesai', 'Dokumen berhasil diekspor.');
         if (api.openFile) await api.openFile(res.filePath);
