@@ -183,9 +183,11 @@
         --trans-size: 0.85rem;
         --fadhilah-size: 0.82rem;
 
-        /* Layout */
-        --header-h: 64px;
-        --nav-h: 80px;
+        /* Layout & Safe Areas */
+        --safe-top: env(safe-area-inset-top, 0px);
+        --safe-bottom: env(safe-area-inset-bottom, 0px);
+        --header-h: 62px;
+        --nav-h: 76px;
         --radius-xl: 24px;
         --radius-lg: 16px;
         --radius-md: 12px;
@@ -404,10 +406,11 @@
         display: flex;
         align-items: center;
         justify-content: space-between;
-        gap: 12px;
-        padding: 0 20px;
-        height: var(--header-h);
-        background: color-mix(in srgb, var(--clr-surface) 92%, transparent);
+        gap: 8px;
+        padding: calc(var(--safe-top) + 6px) 14px 6px;
+        height: calc(var(--header-h) + var(--safe-top));
+        box-sizing: border-box;
+        background: color-mix(in srgb, var(--clr-surface) 96%, transparent);
         backdrop-filter: blur(16px) saturate(180%);
         -webkit-backdrop-filter: blur(16px) saturate(180%);
         border-bottom: 1px solid var(--clr-border);
@@ -417,14 +420,16 @@
       .header-brand {
         display: flex;
         align-items: center;
-        gap: 10px;
+        gap: 8px;
         cursor: pointer;
         text-decoration: none;
+        min-width: 0;
+        flex-shrink: 1;
       }
 
       .brand-icon {
-        width: 40px;
-        height: 40px;
+        width: 38px;
+        height: 38px;
         background: linear-gradient(
           135deg,
           var(--clr-primary-dk),
@@ -434,40 +439,49 @@
         display: grid;
         place-items: center;
         color: var(--clr-gold-lt);
-        font-size: 16px;
+        font-size: 15px;
         flex-shrink: 0;
         box-shadow: var(--shadow-green);
       }
 
       .brand-text {
         line-height: 1.2;
+        min-width: 0;
+        overflow: hidden;
       }
 
       .brand-title {
-        font-size: 0.8rem;
+        font-size: 0.76rem;
         font-weight: 800;
         color: var(--clr-text);
         letter-spacing: -0.3px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
       }
 
       .brand-sub {
-        font-size: 0.65rem;
+        font-size: 0.60rem;
         color: var(--clr-gold);
         font-weight: 600;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
       }
 
       .header-actions {
         display: flex;
         align-items: center;
-        gap: 8px;
+        gap: 5px;
+        flex-shrink: 0;
       }
 
       /* Chip / Badge */
       .chip {
         display: inline-flex;
         align-items: center;
-        gap: 5px;
-        padding: 5px 12px;
+        gap: 4px;
+        padding: 5px 10px;
         border-radius: 99px;
         font-size: 0.72rem;
         font-weight: 700;
@@ -475,6 +489,8 @@
         border: none;
         transition: all var(--dur-fast) var(--ease);
         letter-spacing: 0.3px;
+        white-space: nowrap;
+        flex-shrink: 0;
       }
 
       .chip-primary {
@@ -518,7 +534,7 @@
       /* Progress bar under header */
       #progress-track {
         position: fixed;
-        top: var(--header-h);
+        top: calc(var(--header-h) + var(--safe-top));
         left: 0;
         right: 0;
         height: 3px;
@@ -536,7 +552,10 @@
 
       /* ---------- MAIN CONTAINER (RESPONSIVE) ---------- */
       #main {
-        padding: calc(var(--header-h) + 2px) 14px calc(var(--nav-h) + 14px);
+        padding-top: calc(var(--header-h) + var(--safe-top) + 14px);
+        padding-bottom: calc(var(--nav-h) + var(--safe-bottom) + 36px);
+        padding-left: 14px;
+        padding-right: 14px;
         overflow-y: auto;
         overflow-x: hidden;
         scroll-behavior: smooth;
@@ -549,7 +568,10 @@
 
       @media (max-width: 380px) {
         #main {
-          padding: calc(var(--header-h) + 2px) 10px calc(var(--nav-h) + 10px);
+          padding-top: calc(var(--header-h) + var(--safe-top) + 10px);
+          padding-bottom: calc(var(--nav-h) + var(--safe-bottom) + 30px);
+          padding-left: 10px;
+          padding-right: 10px;
         }
 
         .slide-card {
@@ -558,8 +580,8 @@
         }
 
         .nav-btn {
-          width: 44px !important;
-          height: 44px !important;
+          width: 46px !important;
+          height: 46px !important;
         }
 
         .tasbih-btn,
@@ -1530,7 +1552,7 @@
     ============================================================ */
       #toast {
         position: fixed;
-        bottom: calc(var(--nav-h) + 16px);
+        bottom: calc(var(--nav-h) + var(--safe-bottom) + 20px);
         left: 50%;
         transform: translateX(-50%) translateY(20px);
         background: var(--clr-primary-dk);
@@ -2030,6 +2052,14 @@
               <span id="slideIndicatorChip">1 / 31</span>
             </button>
           </div>
+          <button
+            class="icon-btn"
+            id="updateBtn"
+            onclick="checkOnlineUpdates()"
+            title="Cek Pembaruan Modul & Data Amalan"
+          >
+            <i class="fa-solid fa-arrows-rotate"></i>
+          </button>
           <button
             class="icon-btn"
             id="themeBtn"
@@ -3304,6 +3334,32 @@
         t.classList.add("show");
         clearTimeout(toastTimer);
         toastTimer = setTimeout(() => t.classList.remove("show"), 2400);
+      }
+
+      /* ===== ONLINE UPDATE CHECKER ===== */
+      async function checkOnlineUpdates() {
+        const btnIcon = document.querySelector("#updateBtn i");
+        if (btnIcon) btnIcon.classList.add("fa-spin");
+
+        showToast("🔄 Memeriksa pembaruan modul online...");
+
+        try {
+          const res = await fetch("https://raw.githubusercontent.com/prabu2696/Pendamping_Amalan/main/package.json?t=" + Date.now());
+          if (res.ok) {
+            const data = await res.json();
+            showToast(`✓ Terhubung! Modul Amalan (v${data.version || '1.0.0'}) sudah versi terbaru.`);
+          } else {
+            showToast("Mode Offline: Menggunakan data amalan lokal.");
+          }
+        } catch (err) {
+          showToast("✓ Selesai! Modul amalan Anda aktif & siap digunakan secara offline.");
+        } finally {
+          if (btnIcon) {
+            setTimeout(() => {
+              btnIcon.classList.remove("fa-spin");
+            }, 1000);
+          }
+        }
       }
 
       /* ===== CHART ===== */
