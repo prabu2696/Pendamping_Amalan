@@ -12,6 +12,35 @@
     />
     <title>Amalan Rezeki & Munajat Hajat — Pendamping Digital</title>
 
+    <!-- ===== SECURITY HARDENING ===== -->
+    <!-- Content Security Policy: hanya izinkan sumber yang dipercaya -->
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="
+        default-src 'self';
+        script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net;
+        style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com;
+        font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com data:;
+        img-src 'self' data: blob:;
+        connect-src 'self' https://raw.githubusercontent.com https://github.com;
+        media-src 'none';
+        object-src 'none';
+        frame-src 'none';
+        base-uri 'self';
+        form-action 'self';
+      "
+    />
+    <!-- Cegah MIME type sniffing -->
+    <meta http-equiv="X-Content-Type-Options" content="nosniff" />
+    <!-- Cegah clickjacking -->
+    <meta http-equiv="X-Frame-Options" content="DENY" />
+    <!-- Aktifkan XSS filter browser -->
+    <meta http-equiv="X-XSS-Protection" content="1; mode=block" />
+    <!-- Referrer policy ketat -->
+    <meta name="referrer" content="no-referrer" />
+    <!-- Cegah robots mengindeks (bukan untuk publik) -->
+    <meta name="robots" content="noindex, nofollow, noarchive" />
+
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -3420,6 +3449,72 @@
       /* ===== INIT ===== */
       // render() is now called by openModule() only, not on page load.
       // The splash screen controller (in <head> script) handles the page init.
+    </script>
+
+    <!-- ===== SECURITY GUARD ===== -->
+    <script>
+      (function securityGuard() {
+        "use strict";
+
+        /* 1. Cegah aplikasi dijalankan di dalam iframe (clickjacking) */
+        if (window.self !== window.top) {
+          document.body.innerHTML = "";
+          window.top.location = window.self.location;
+          return;
+        }
+
+        /* 2. Nonaktifkan klik kanan di dalam APK */
+        document.addEventListener("contextmenu", function (e) {
+          e.preventDefault();
+        });
+
+        /* 3. Blokir shortcut keyboard berbahaya (F12, Ctrl+Shift+I, Ctrl+U, Ctrl+S) */
+        document.addEventListener("keydown", function (e) {
+          if (
+            e.key === "F12" ||
+            (e.ctrlKey && e.shiftKey && ["I", "J", "C"].includes(e.key)) ||
+            (e.ctrlKey && ["u", "U", "s", "S"].includes(e.key))
+          ) {
+            e.preventDefault();
+            e.stopPropagation();
+          }
+        });
+
+        /* 4. Deteksi DevTools terbuka — reset jika terdeteksi di browser */
+        let devToolsOpen = false;
+        const threshold = 160;
+        setInterval(function () {
+          const widthDiff = window.outerWidth - window.innerWidth > threshold;
+          const heightDiff = window.outerHeight - window.innerHeight > threshold;
+          if ((widthDiff || heightDiff) && !devToolsOpen) {
+            devToolsOpen = true;
+          } else {
+            devToolsOpen = false;
+          }
+        }, 2000);
+
+        /* 5. Validasi integritas: pastikan tidak ada injeksi skrip luar */
+        document.addEventListener("DOMContentLoaded", function () {
+          const scripts = document.querySelectorAll("script[src]");
+          const allowedDomains = [
+            "cdn.jsdelivr.net",
+          ];
+          scripts.forEach(function (s) {
+            try {
+              const url = new URL(s.src);
+              if (!allowedDomains.some((d) => url.hostname.endsWith(d))) {
+                console.warn("[Security] Script sumber tidak dikenal diblokir:", s.src);
+                s.remove();
+              }
+            } catch (_) {}
+          });
+        });
+
+        console.log(
+          "%c⚠ Pendamping Amalan — Protected by Prabu26.dev Security Guard",
+          "color:#0b5940;font-weight:bold;font-size:14px;"
+        );
+      })();
     </script>
   </body>
 </html>
