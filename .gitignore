@@ -148,3 +148,7 @@ $RECYCLE.BIN/
 scratch/
 github_recovery_codes.txt
 .env
+
+www/
+android/
+*.apk

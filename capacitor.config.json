@@ -1,0 +1,8 @@
+{
+  "appId": "com.prabu26.pendampingamalan",
+  "appName": "Pendamping Amalan",
+  "webDir": "www",
+  "server": {
+    "androidScheme": "https"
+  }
+}
