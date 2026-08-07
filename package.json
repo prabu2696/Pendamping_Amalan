@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "Pendamping Amalan Digital — Amalan Rezeki & Munajat Hajat (Font LPMQ Isep Misbah Kemenag RI)",
   "main": "index.html",
-  "author": "Ust. Imam Alfida Nurhasby, S.Pd",
+  "author": "Prabu26.dev",
   "scripts": {
     "start": "npx serve ."
   },

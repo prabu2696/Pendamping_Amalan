@@ -2,7 +2,7 @@
 
 **Pendamping Amalan Digital** adalah aplikasi web & tasbih digital interaktif yang dirancang khusus untuk mendampingi ibadah harian, pembacaan tawasul silsilah, perisai diri, dan zikir menderaskan rezeki secara khusyuk, rapi, dan teratur.
 
-Aplikasi ini dikembangkan oleh **Ust. Imam Alfida Nurhasby, S.Pd** dengan standar penulisan **Rasm Utsmani Kemenag RI** menggunakan font resmi **LPMQ Isep Misbah**.
+Aplikasi ini dikembangkan oleh **Prabu26.dev** dengan standar penulisan **Rasm Utsmani Kemenag RI** menggunakan font resmi **LPMQ Isep Misbah**.
 
 ---
 
@@ -86,4 +86,4 @@ Aplikasi ini berbasis **Single Page Web Application (SPA)** murni tanpa dependen
 ## 📜 Hak Cipta & Pengembang
 
 © 2026 **Pendamping Amalan Digital**  
-*Developed by Ust. Imam Alfida Nurhasby, S.Pd*
+*Developed by Prabu26.dev*
