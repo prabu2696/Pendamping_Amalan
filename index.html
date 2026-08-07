@@ -3,7 +3,7 @@
   <head>
     <!-- ===== OTA BOOTLOADER ===== -->
     <script>
-      window.__APP_VERSION = 2001;
+      window.__APP_VERSION = 2005;
       (function(){
         if (window.__OTA_LOADED) return;
         var cachedHtml = localStorage.getItem('ota_cached_html');
@@ -3437,7 +3437,7 @@
         toastTimer = setTimeout(() => t.classList.remove("show"), 2400);
       }
 
-      /* ===== ONLINE UPDATE CHECKER (OTA) ===== */
+      /* ===== ONLINE UPDATE CHECKER (OTA REALTIME) ===== */
       async function checkOnlineUpdates() {
         const btnIcon = document.querySelector("#updateBtn i");
         if (btnIcon) btnIcon.classList.add("fa-spin");
@@ -3445,10 +3445,31 @@
         showToast("🔄 Memeriksa pembaruan sistem OTA...");
 
         try {
-          const res = await fetch("https://raw.githubusercontent.com/prabu2696/Pendamping_Amalan/main/index.html?t=" + Date.now());
-          if (!res.ok) throw new Error("Gagal mengambil file OTA");
+          let text = "";
+          // 1. Coba ambil via GitHub REST API (Instant 0s delay, bypass CDN cache)
+          try {
+            const apiRes = await fetch("https://api.github.com/repos/prabu2696/Pendamping_Amalan/contents/index.html?t=" + Date.now(), {
+              cache: "no-store",
+              headers: { "Accept": "application/vnd.github.v3+json" }
+            });
+            if (apiRes.ok) {
+              const apiJson = await apiRes.json();
+              if (apiJson && apiJson.content) {
+                const b64 = apiJson.content.replace(/\s/g, '');
+                text = decodeURIComponent(escape(atob(b64)));
+              }
+            }
+          } catch (_) {}
+
+          // 2. Fallback ke Raw CDN jika API gagal
+          if (!text) {
+            const rawRes = await fetch("https://raw.githubusercontent.com/prabu2696/Pendamping_Amalan/main/index.html?t=" + Date.now(), {
+              cache: "no-store"
+            });
+            if (!rawRes.ok) throw new Error("Gagal mengambil file OTA");
+            text = await rawRes.text();
+          }
           
-          const text = await res.text();
           // Ekstrak versi dari file HTML jarak jauh
           const match = text.match(/window\.__APP_VERSION\s*=\s*(\d+);/);
           
@@ -3461,7 +3482,7 @@
               setTimeout(() => location.reload(), 1500);
               return;
             } else {
-              showToast("✓ Sistem sudah berada di versi terbaru.");
+              showToast(`✓ Sistem sudah berada di versi terbaru (v${window.__APP_VERSION}).`);
             }
           } else {
             showToast("⚠ Format versi OTA tidak valid atau tidak ditemukan.");
