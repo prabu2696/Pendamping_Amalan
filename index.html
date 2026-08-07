@@ -3,7 +3,7 @@
   <head>
     <!-- ===== OTA BOOTLOADER ===== -->
     <script>
-      window.__APP_VERSION = 2005;
+      window.__APP_VERSION = 3000;
       (function(){
         if (window.__OTA_LOADED) return;
         var cachedHtml = localStorage.getItem('ota_cached_html');
@@ -38,7 +38,7 @@
         style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com;
         font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com data:;
         img-src 'self' data: blob:;
-        connect-src 'self' https://raw.githubusercontent.com https://github.com;
+        connect-src 'self' https://raw.githubusercontent.com https://github.com https://api.github.com;
         media-src 'none';
         object-src 'none';
         frame-src 'none';
@@ -237,7 +237,7 @@
         /* Arabic & Latin Sizes */
         --arabic-font:
           "LPMQ Isep Misbah", "Amiri Quran", "Scheherazade New", "Noto Naskh Arabic", serif;
-        --arabic-size: clamp(1.8rem, 6vw, 2.2rem);
+        --arabic-size: clamp(1.35rem, 4.5vw, 1.8rem);
         --arabic-lh: 2.15;
         --latin-size: clamp(0.85rem, 3vw, 1rem);
         --trans-size: clamp(0.8rem, 2.8vw, 0.95rem);
@@ -3334,7 +3334,7 @@
         const arPercent = ARABIC_SCALES[arabicScaleIdx];
         const ltPercent = LATIN_SCALES[latinScaleIdx];
 
-        const baseAr = 2.4;
+        const baseAr = 1.8;
         const baseLt = 0.88;
         const baseTrans = 0.85;
         const baseFadh = 0.82;
@@ -3448,9 +3448,12 @@
           let text = "";
           // 1. Coba ambil via GitHub REST API (Instant 0s delay, bypass CDN cache)
           try {
-            const apiRes = await fetch("https://api.github.com/repos/prabu2696/Pendamping_Amalan/contents/index.html?t=" + Date.now(), {
+            const apiRes = await fetch("https://api.github.com/repos/prabu2696/Pendamping_Amalan/contents/index.html?t=" + Date.now() + "&r=" + Math.random().toString(36).substring(2), {
               cache: "no-store",
-              headers: { "Accept": "application/vnd.github.v3+json" }
+              headers: { 
+                "Accept": "application/vnd.github.v3+json",
+                "Cache-Control": "no-cache, no-store, must-revalidate"
+              }
             });
             if (apiRes.ok) {
               const apiJson = await apiRes.json();
@@ -3461,10 +3464,11 @@
             }
           } catch (_) {}
 
-          // 2. Fallback ke Raw CDN jika API gagal
+          // 2. Fallback ke Raw CDN dengan Random Cache Buster
           if (!text) {
-            const rawRes = await fetch("https://raw.githubusercontent.com/prabu2696/Pendamping_Amalan/main/index.html?t=" + Date.now(), {
-              cache: "no-store"
+            const rawRes = await fetch("https://raw.githubusercontent.com/prabu2696/Pendamping_Amalan/main/index.html?t=" + Date.now() + "&cb=" + Math.random().toString(36).substring(2), {
+              cache: "no-store",
+              headers: { "Cache-Control": "no-cache, no-store, must-revalidate" }
             });
             if (!rawRes.ok) throw new Error("Gagal mengambil file OTA");
             text = await rawRes.text();
