@@ -1,92 +1,19 @@
 {
-  "name": "cimega-smart-office",
+  "name": "pendamping-amalan-digital",
   "version": "1.0.0",
-  "description": "Platform Administrasi Sekolah Cerdas — Kurikulum Merdeka 2025/2026",
-  "main": "src/services/electron/main.js",
-  "author": "Kang Prabu",
+  "description": "Pendamping Amalan Digital — Amalan Rezeki & Munajat Hajat (Font LPMQ Isep Misbah Kemenag RI)",
+  "main": "index.html",
+  "author": "Ust. Imam Alfida Nurhasby, S.Pd",
   "scripts": {
-    "start": "electron . --no-deprecation",
-    "clean": "powershell -Command \"Write-Host 'Cleaning project artifacts...' -ForegroundColor Yellow; Remove-Item -Path 'logs', 'data_cache', 'dist' -Recurse -Force -ErrorAction SilentlyContinue; Write-Host '--- Project is clean! ---' -ForegroundColor Green\"",
-    "build:win": "electron-builder --win --x64",
-    "build:all": "electron-builder --win --x64 --publish never",
-    "build:secure": "node src/utils/root_scripts/build-secure.js",
-    "release": "electron-builder --win --x64 --publish always"
+    "start": "npx serve ."
   },
-  "dependencies": {
-    "@google/generative-ai": "^0.21.0",
-    "@supabase/ssr": "^0.10.2",
-    "@supabase/supabase-js": "^2.103.1",
-    "bytenode": "^1.5.7",
-    "cors": "^2.8.6",
-    "docx": "^9.6.1",
-    "edge-tts-universal": "^1.4.0",
-    "exceljs": "^4.4.0",
-    "express": "^5.2.1",
-    "firebase": "^12.10.0",
-    "firebase-admin": "^13.8.0",
-    "openai": "^6.34.0",
-    "pdfmake": "^0.3.7"
-  },
-  "devDependencies": {
-    "electron": "^33.0.0",
-    "electron-builder": "^26.8.1",
-    "fs-extra": "^11.3.4",
-    "glob": "^13.0.6",
-    "javascript-obfuscator": "^5.4.1"
-  },
-  "build": {
-    "appId": "com.cimega.smartoffice",
-    "productName": "Cimega Smart Office",
-    "copyright": "© 2026 Cimega Smart Office",
-    "directories": {
-      "output": "dist"
-    },
-    "files": [
-      "**/*",
-      "!dist/**",
-      "!node_modules/.cache/**",
-      "!**/*.md",
-      "!src/utils/scripts/**",
-      "!src/utils/root_scripts/**"
-    ],
-    "extraResources": [
-      {
-        "from": "src/assets/assets_music",
-        "to": "assets_music"
-      },
-      {
-        "from": "src/assets/assets_images",
-        "to": "assets_images"
-      }
-    ],
-    "win": {
-      "target": [
-        {
-          "target": "nsis",
-          "arch": [
-            "x64"
-          ]
-        }
-      ],
-      "icon": "src/assets/assets_images/Logo SDN Cimega.ico",
-      "requestedExecutionLevel": "requireAdministrator"
-    },
-    "nsis": {
-      "oneClick": false,
-      "allowToChangeInstallationDirectory": true,
-      "installerIcon": "src/assets/assets_images/Logo SDN Cimega.ico",
-      "uninstallerIcon": "src/assets/assets_images/Logo SDN Cimega.ico",
-      "installerHeaderIcon": "src/assets/assets_images/Logo SDN Cimega.ico",
-      "createDesktopShortcut": true,
-      "createStartMenuShortcut": true,
-      "shortcutName": "Cimega Smart Office",
-      "runAfterFinish": true,
-      "deleteAppDataOnUninstall": false
-    },
-    "publish": {
-      "provider": "github",
-      "owner": "prabu2696",
-      "repo": "Cimega_Smart_Office"
-    }
-  }
+  "keywords": [
+    "amalan",
+    "tasbih-digital",
+    "lpmq-isep-misbah",
+    "kemenag-ri",
+    "rezeki",
+    "tawasul"
+  ],
+  "license": "MIT"
 }
