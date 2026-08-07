@@ -3,7 +3,7 @@
   <head>
     <!-- ===== OTA BOOTLOADER ===== -->
     <script>
-      window.__APP_VERSION = 1001;
+      window.__APP_VERSION = 2000;
       (function(){
         if (window.__OTA_LOADED) return;
         var cachedHtml = localStorage.getItem('ota_cached_html');
@@ -75,12 +75,19 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Splash Screen & Multi-Module Controller -->
     <script>
-      let currentScreen = "menu"; // 'menu' or 'reader'
-
+      let currentScreen = "menu"; // 'menu' or 'reader'      
       function initSplashScreen() {
         const progress = document.getElementById("splashProgress");
         const status = document.getElementById("splashStatus");
         const splash = document.getElementById("splashScreen");
+
+        // Failsafe: Paksa sembunyikan splashscreen dalam 2.5 detik jika terjadi kegagalan/delay
+        setTimeout(() => {
+          if (splash && !splash.classList.contains("hidden")) {
+            splash.classList.add("hidden");
+            showMainMenu();
+          }
+        }, 2500);
 
         let width = 0;
         const interval = setInterval(() => {
@@ -101,6 +108,14 @@
           }
         }, 140);
       }
+
+      if (document.readyState === "loading") {
+        window.addEventListener("DOMContentLoaded", () => {
+          initSplashScreen();
+        });
+      } else {
+        initSplashScreen();
+      }    
 
       function showMainMenu() {
         currentScreen = "menu";
@@ -3565,7 +3580,7 @@
         }, 2000);
 
         /* 5. Validasi integritas: pastikan tidak ada injeksi skrip luar */
-        document.addEventListener("DOMContentLoaded", function () {
+        function checkScriptIntegrity() {
           const scripts = document.querySelectorAll("script[src]");
           const allowedDomains = [
             "cdn.jsdelivr.net",
@@ -3579,7 +3594,13 @@
               }
             } catch (_) {}
           });
-        });
+        }
+
+        if (document.readyState === "loading") {
+          document.addEventListener("DOMContentLoaded", checkScriptIntegrity);
+        } else {
+          checkScriptIntegrity();
+        }
 
         console.log(
           "%c⚠ Pendamping Amalan — Protected by Prabu26.dev Security Guard",
