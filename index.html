@@ -206,11 +206,11 @@
         /* Arabic & Latin Sizes */
         --arabic-font:
           "LPMQ Isep Misbah", "Amiri Quran", "Scheherazade New", "Noto Naskh Arabic", serif;
-        --arabic-size: 2.4rem;
+        --arabic-size: clamp(1.8rem, 6vw, 2.2rem);
         --arabic-lh: 2.15;
-        --latin-size: 0.88rem;
-        --trans-size: 0.85rem;
-        --fadhilah-size: 0.82rem;
+        --latin-size: clamp(0.85rem, 3vw, 1rem);
+        --trans-size: clamp(0.8rem, 2.8vw, 0.95rem);
+        --fadhilah-size: clamp(0.75rem, 2.5vw, 0.85rem);
 
         /* Layout & Safe Areas */
         --safe-top: env(safe-area-inset-top, 0px);
@@ -595,32 +595,72 @@
         box-sizing: border-box;
       }
 
+      @media (max-width: 600px) {
+        #main {
+          padding-top: calc(var(--header-h) + var(--safe-top) + 12px);
+          padding-bottom: calc(var(--nav-h) + var(--safe-bottom) + 32px);
+          padding-left: 12px;
+          padding-right: 12px;
+        }
+
+        .slide-card {
+          padding: 18px 16px;
+          border-radius: var(--radius-lg);
+        }
+
+        .header-brand {
+          gap: 6px;
+        }
+
+        .brand-icon {
+          width: 34px;
+          height: 34px;
+          font-size: 13px;
+        }
+
+        .brand-title {
+          font-size: 0.72rem;
+        }
+
+        .chip {
+          padding: 4px 8px;
+          font-size: 0.68rem;
+        }
+
+        .icon-btn {
+          width: 32px;
+          height: 32px;
+          font-size: 13px;
+        }
+      }
+
       @media (max-width: 380px) {
         #main {
           padding-top: calc(var(--header-h) + var(--safe-top) + 10px);
           padding-bottom: calc(var(--nav-h) + var(--safe-bottom) + 30px);
-          padding-left: 10px;
-          padding-right: 10px;
+          padding-left: 8px;
+          padding-right: 8px;
         }
 
         .slide-card {
-          padding: 16px 14px !important;
+          padding: 16px 12px !important;
           border-radius: var(--radius-lg) !important;
         }
 
         .nav-btn {
-          width: 46px !important;
-          height: 46px !important;
+          width: 44px !important;
+          height: 44px !important;
         }
 
         .tasbih-btn,
         .lanjut-btn {
-          height: 48px !important;
+          height: 46px !important;
           padding: 0 12px !important;
+          font-size: 0.75rem !important;
         }
 
         .tasbih-count {
-          font-size: 1.5rem !important;
+          font-size: 1.3rem !important;
         }
       }
 
