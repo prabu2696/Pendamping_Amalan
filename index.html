@@ -3,7 +3,7 @@
   <head>
     <!-- ===== OTA BOOTLOADER ===== -->
     <script>
-      window.__APP_VERSION = 3000;
+      window.__APP_VERSION = 3001;
       (function(){
         if (window.__OTA_LOADED) return;
         var cachedHtml = localStorage.getItem('ota_cached_html');
@@ -346,14 +346,30 @@
         text-rendering: optimizeLegibility;
         -webkit-font-smoothing: antialiased;
         direction: rtl;
-        text-align: justify;
-        text-justify: inter-word;
+        text-align: right;
+        text-align-last: right;
         font-size: var(--arabic-size);
         line-height: var(--arabic-lh);
-        word-spacing: 2px;
+        word-spacing: 1px;
         padding: 4px 0;
         letter-spacing: 0;
         color: var(--clr-primary-dk);
+      }
+
+      /* View Mode filtering for Slide 2 (Adab) & custom blocks */
+      html[data-view-mode="arabic"] .latin-block,
+      html[data-view-mode="arabic"] .trans-block,
+      html[data-view-mode="arabic"] .lt-sm,
+      html[data-view-mode="arabic"] .lt-body,
+      html[data-view-mode="arabic"] .lt-section,
+      html[data-view-mode="arabic"] .lt-label {
+        display: none !important;
+      }
+
+      html[data-view-mode="latin"] .arabic-block,
+      html[data-view-mode="latin"] .ar,
+      html[data-view-mode="latin"] .ar-center {
+        display: none !important;
       }
 
       [data-theme="dark"] .ar {
@@ -808,18 +824,6 @@
         padding: 18px 20px;
         position: relative;
         overflow: hidden;
-      }
-
-      .arabic-block::after {
-        content: "✦";
-        position: absolute;
-        bottom: -16px;
-        right: -8px;
-        font-size: 5rem;
-        color: color-mix(in srgb, var(--clr-primary) 6%, transparent);
-        pointer-events: none;
-        font-family: var(--arabic-font);
-        line-height: 1;
       }
 
       /* Latin block */
@@ -2227,7 +2231,6 @@
                 >
               </div>
               <div class="tasbih-count" id="tasbihCount">0</div>
-              <div class="tasbih-plus">+</div>
             </button>
             <button
               class="reset-btn-nav"
@@ -2836,13 +2839,18 @@
       const TASBIH_IDS = new Set([25, 26, 27, 28]);
       let idx = 0;
       let counts = new Array(SLIDES.length).fill(0);
-      let viewMode = "all";
       let aaOn = true;
-      let isDark = false;
+      let isDark = localStorage.getItem("pad_is_dark") === "1";
+      let soundOn = localStorage.getItem("pad_sound_on") !== "0";
+      let viewMode = localStorage.getItem("pad_view_mode") || "all";
 
       /* ===== HAPTIC ===== */
-      function vibrate(p = [40]) {
-        if (navigator.vibrate) navigator.vibrate(p);
+      function vibrate(p = [50]) {
+        try {
+          if (navigator.vibrate) {
+            navigator.vibrate(p);
+          }
+        } catch (_) {}
       }
 
       /* ===== RENDER ===== */
@@ -3380,13 +3388,16 @@
       /* ===== VIEW MODE ===== */
       function setView(m) {
         viewMode = m;
+        localStorage.setItem("pad_view_mode", m);
+        document.documentElement.setAttribute("data-view-mode", m);
         ["All", "Arabic", "Latin"].forEach((x) => {
-          document
-            .getElementById("pill" + x)
-            .classList.toggle(
+          const btn = document.getElementById("pill" + x);
+          if (btn) {
+            btn.classList.toggle(
               "active",
-              m === x.toLowerCase() || (m === "all" && x === "All"),
+              m === x.toLowerCase() || (m === "all" && x === "All")
             );
+          }
         });
         render();
       }
@@ -3394,27 +3405,68 @@
       /* ===== THEME ===== */
       function toggleTheme() {
         isDark = !isDark;
+        localStorage.setItem("pad_is_dark", isDark ? "1" : "0");
+        applyTheme();
+      }
+
+      function applyTheme() {
         document.documentElement.setAttribute(
           "data-theme",
-          isDark ? "dark" : "light",
+          isDark ? "dark" : "light"
         );
         const btn = document.getElementById("themeBtn");
-        btn.innerHTML = isDark
-          ? '<i class="fa-solid fa-sun"></i>'
-          : '<i class="fa-solid fa-moon"></i>';
-        btn.classList.toggle("active", isDark);
+        if (btn) {
+          btn.innerHTML = isDark
+            ? '<i class="fa-solid fa-sun"></i>'
+            : '<i class="fa-solid fa-moon"></i>';
+          btn.classList.toggle("active", isDark);
+        }
       }
 
       /* ===== SOUND ===== */
       function toggleSound() {
         soundOn = !soundOn;
-        const btn = document.getElementById("soundBtn");
-        btn.innerHTML = soundOn
-          ? '<i class="fa-solid fa-volume-high"></i>'
-          : '<i class="fa-solid fa-volume-xmark"></i>';
-        btn.classList.toggle("active", !soundOn);
-        document.getElementById("soundToggle").classList.toggle("on", soundOn);
+        localStorage.setItem("pad_sound_on", soundOn ? "1" : "0");
+        applySoundUI();
       }
+
+      function applySoundUI() {
+        const btn = document.getElementById("soundBtn");
+        if (btn) {
+          btn.innerHTML = soundOn
+            ? '<i class="fa-solid fa-volume-high"></i>'
+            : '<i class="fa-solid fa-volume-xmark"></i>';
+          btn.classList.toggle("active", !soundOn);
+        }
+        const toggle = document.getElementById("soundToggle");
+        if (toggle) toggle.classList.toggle("on", soundOn);
+      }
+
+      function initSavedSettings() {
+        document.documentElement.setAttribute("data-theme", isDark ? "dark" : "light");
+        document.documentElement.setAttribute("data-view-mode", viewMode);
+        if (document.readyState === "loading") {
+          window.addEventListener("DOMContentLoaded", syncSettingsUI);
+        } else {
+          syncSettingsUI();
+        }
+      }
+
+      function syncSettingsUI() {
+        applyTheme();
+        applySoundUI();
+        ["All", "Arabic", "Latin"].forEach((x) => {
+          const pill = document.getElementById("pill" + x);
+          if (pill) {
+            pill.classList.toggle(
+              "active",
+              viewMode === x.toLowerCase() || (viewMode === "all" && x === "All")
+            );
+          }
+        });
+      }
+
+      initSavedSettings();
       function toggleSoundSetting() {
         toggleSound();
       }
