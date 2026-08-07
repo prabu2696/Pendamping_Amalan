@@ -263,9 +263,13 @@
         padding: 0;
       }
 
+      html, body {
+        height: 100%;
+        overflow: hidden;
+      }
+
       html {
         font-size: 16px;
-        scroll-behavior: smooth;
       }
 
       body {
@@ -276,15 +280,10 @@
           sans-serif;
         background: var(--clr-bg);
         color: var(--clr-text);
-        min-height: 100dvh;
-        overflow-x: hidden;
         -webkit-tap-highlight-color: transparent;
         transition:
           background var(--dur-slow) var(--ease),
           color var(--dur-slow) var(--ease);
-        scroll-behavior: smooth;
-        -webkit-overflow-scrolling: touch;
-        touch-action: pan-y pinch-zoom;
       }
 
       /* ============================================================
@@ -420,17 +419,18 @@
        LAYOUT SHELL
     ============================================================ */
       #app {
-        display: grid;
-        grid-template-rows: var(--header-h) 1fr var(--nav-h);
-        min-height: 100dvh;
+        display: flex;
+        flex-direction: column;
+        height: 100%;
         max-width: 900px;
         margin: 0 auto;
+        position: relative;
       }
 
       /* ---------- HEADER ---------- */
       #header {
-        position: sticky;
-        top: 0;
+        position: relative;
+        flex-shrink: 0;
         z-index: 200;
         display: flex;
         align-items: center;
@@ -562,7 +562,7 @@
 
       /* Progress bar under header */
       #progress-track {
-        position: fixed;
+        position: absolute;
         top: calc(var(--header-h) + var(--safe-top));
         left: 0;
         right: 0;
@@ -581,8 +581,9 @@
 
       /* ---------- MAIN CONTAINER (RESPONSIVE) ---------- */
       #main {
-        padding-top: calc(var(--header-h) + var(--safe-top) + 14px);
-        padding-bottom: calc(var(--nav-h) + var(--safe-bottom) + 36px);
+        flex: 1;
+        padding-top: 14px;
+        padding-bottom: 24px;
         padding-left: 14px;
         padding-right: 14px;
         overflow-y: auto;
@@ -597,8 +598,8 @@
 
       @media (max-width: 600px) {
         #main {
-          padding-top: calc(var(--header-h) + var(--safe-top) + 12px);
-          padding-bottom: calc(var(--nav-h) + var(--safe-bottom) + 32px);
+          padding-top: 12px;
+          padding-bottom: 20px;
           padding-left: 12px;
           padding-right: 12px;
         }
@@ -636,8 +637,8 @@
 
       @media (max-width: 380px) {
         #main {
-          padding-top: calc(var(--header-h) + var(--safe-top) + 10px);
-          padding-bottom: calc(var(--nav-h) + var(--safe-bottom) + 30px);
+          padding-top: 10px;
+          padding-bottom: 16px;
           padding-left: 8px;
           padding-right: 8px;
         }
@@ -666,13 +667,13 @@
 
       @media (min-width: 640px) {
         #main {
-          padding: calc(var(--header-h) + 2px) 32px calc(var(--nav-h) + 20px);
+          padding: 24px 32px;
         }
       }
 
       @media (min-width: 900px) {
         #main {
-          padding: calc(var(--header-h) + 2px) 48px calc(var(--nav-h) + 28px);
+          padding: 32px 48px;
         }
 
         #app {
@@ -1071,10 +1072,8 @@
        BOTTOM NAV
     ============================================================ */
       #nav-bar {
-        position: fixed;
-        bottom: 0;
-        left: 0;
-        right: 0;
+        position: relative;
+        flex-shrink: 0;
         z-index: 200;
         background: color-mix(in srgb, var(--clr-surface) 95%, transparent);
         backdrop-filter: blur(20px) saturate(200%);
