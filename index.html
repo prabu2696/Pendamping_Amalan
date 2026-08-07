@@ -1,6 +1,22 @@
 <!doctype html>
 <html lang="id" data-theme="light">
   <head>
+    <!-- ===== OTA BOOTLOADER ===== -->
+    <script>
+      window.__APP_VERSION = 1000;
+      (function(){
+        if (window.__OTA_LOADED) return;
+        var cachedHtml = localStorage.getItem('ota_cached_html');
+        var cachedVersion = parseInt(localStorage.getItem('ota_cached_version') || '0', 10);
+        if (cachedHtml && cachedVersion > window.__APP_VERSION) {
+          window.__OTA_LOADED = true;
+          document.open();
+          document.write("<script>window.__OTA_LOADED = true; window.__APP_VERSION = " + cachedVersion + ";<\/script>" + cachedHtml);
+          document.close();
+        }
+      })();
+    </script>
+
     <meta charset="UTF-8" />
     <meta
       name="viewport"
@@ -3406,23 +3422,37 @@
         toastTimer = setTimeout(() => t.classList.remove("show"), 2400);
       }
 
-      /* ===== ONLINE UPDATE CHECKER ===== */
+      /* ===== ONLINE UPDATE CHECKER (OTA) ===== */
       async function checkOnlineUpdates() {
         const btnIcon = document.querySelector("#updateBtn i");
         if (btnIcon) btnIcon.classList.add("fa-spin");
 
-        showToast("🔄 Memeriksa pembaruan modul online...");
+        showToast("🔄 Memeriksa pembaruan sistem OTA...");
 
         try {
-          const res = await fetch("https://raw.githubusercontent.com/prabu2696/Pendamping_Amalan/main/package.json?t=" + Date.now());
-          if (res.ok) {
-            const data = await res.json();
-            showToast(`✓ Terhubung! Modul Amalan (v${data.version || '1.0.0'}) sudah versi terbaru.`);
+          const res = await fetch("https://raw.githubusercontent.com/prabu2696/Pendamping_Amalan/main/index.html?t=" + Date.now());
+          if (!res.ok) throw new Error("Gagal mengambil file OTA");
+          
+          const text = await res.text();
+          // Ekstrak versi dari file HTML jarak jauh
+          const match = text.match(/window\.__APP_VERSION\s*=\s*(\d+);/);
+          
+          if (match && match[1]) {
+            const remoteVersion = parseInt(match[1], 10);
+            if (remoteVersion > window.__APP_VERSION) {
+              localStorage.setItem("ota_cached_html", text);
+              localStorage.setItem("ota_cached_version", remoteVersion);
+              showToast("✨ Pembaruan diunduh! Memuat ulang sistem...");
+              setTimeout(() => location.reload(), 1500);
+              return;
+            } else {
+              showToast("✓ Sistem sudah berada di versi terbaru.");
+            }
           } else {
-            showToast("Mode Offline: Menggunakan data amalan lokal.");
+            showToast("⚠ Format versi OTA tidak valid atau tidak ditemukan.");
           }
         } catch (err) {
-          showToast("✓ Selesai! Modul amalan Anda aktif & siap digunakan secara offline.");
+          showToast("✓ Anda sedang offline. Sistem berjalan sempurna.");
         } finally {
           if (btnIcon) {
             setTimeout(() => {
