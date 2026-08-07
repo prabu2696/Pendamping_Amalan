@@ -145,3 +145,6 @@ $RECYCLE.BIN/
 # package-lock.json SENGAJA tidak di-ignore agar versi dependensi
 # antar developer/lingkungan tetap konsisten (reproducible builds).
 # ================================================================
+scratch/
+github_recovery_codes.txt
+.env

@@ -1,0 +1,3370 @@
+<!doctype html>
+<html lang="id" data-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover"
+    />
+    <meta
+      name="description"
+      content="Pendamping digital amalan rezeki & munajat hajat dengan tasbih otomatis, font Quran Amiri, desain premium."
+    />
+    <title>Amalan Rezeki & Munajat Hajat — Pendamping Digital</title>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Amiri+Quran&family=Amiri:wght@400;700&family=Inter:wght@300;400;500;600;700;800&family=Noto+Naskh+Arabic:wght@400;500;600;700&family=Scheherazade+New:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Icons -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+    />
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Splash Screen & Multi-Module Controller -->
+    <script>
+      let currentScreen = "menu"; // 'menu' or 'reader'
+
+      function initSplashScreen() {
+        const progress = document.getElementById("splashProgress");
+        const status = document.getElementById("splashStatus");
+        const splash = document.getElementById("splashScreen");
+
+        let width = 0;
+        const interval = setInterval(() => {
+          width += 12;
+          if (progress) progress.style.width = Math.min(width, 100) + "%";
+          if (width === 36 && status)
+            status.textContent = "Menyiapkan Teks Arab & Tajwid...";
+          if (width === 72 && status)
+            status.textContent = "Membuka Katalog Amalan...";
+          if (width === 96 && status) status.textContent = "Selesai ✓";
+
+          if (width >= 100) {
+            clearInterval(interval);
+            setTimeout(() => {
+              if (splash) splash.classList.add("hidden");
+              showMainMenu();
+            }, 400);
+          }
+        }, 140);
+      }
+
+      function showMainMenu() {
+        currentScreen = "menu";
+        const main = document.getElementById("main");
+        if (!main) return;
+
+        main.innerHTML = `
+          <div id="mainMenuScreen" style="max-width:900px;margin:0 auto;width:100%;box-sizing:border-box;">
+            <div class="menu-hero">
+              <div class="menu-hero-title">🕌 Selamat Datang di Pendamping Amalan</div>
+              <div class="menu-hero-sub">
+                Silakan pilih modul amalan di bawah ini untuk memulai munajat dan wirid harian Anda dengan lebih khusyuk dan terarah.
+              </div>
+            </div>
+
+            <div style="font-size:0.75rem;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--clr-text-subtle);margin-bottom:14px">
+              <i class="fa-solid fa-layer-group"></i> Katalog Amalan &amp; Modul Spiritual
+            </div>
+
+            <div class="modules-grid">
+
+              <div class="module-card active" onclick="openModule(0)" style="cursor:pointer">
+                <div>
+                  <span class="module-badge active"><i class="fa-solid fa-circle-check"></i>&nbsp; Modul Aktif</span>
+                  <div class="module-title">📖 Amalan Rezeki &amp; Munajat Hajat</div>
+                  <div class="module-desc">
+                    31 Slide lengkap: Adab &amp; Persiapan, Pembersihan Diri, Benteng Pagar Gaib, Tawasul 11 Masyayikh, Shalawat Adrikni &amp; Ismul A'dhom, Zikir 313×, dan Doa Gabungan Rezeki.
+                  </div>
+                </div>
+                <div class="module-btn">
+                  <span>Buka &amp; Mulai Pembacaan</span> <i class="fa-solid fa-arrow-right"></i>
+                </div>
+              </div>
+
+              <div class="module-card disabled" style="pointer-events:none;user-select:none;text-align:center;align-items:center;justify-content:center;padding:28px 20px">
+                <i class="fa-regular fa-file" style="font-size:2.2rem;color:var(--clr-border);margin-bottom:10px;display:block"></i>
+                <div class="module-title" style="color:var(--clr-text-subtle);font-size:0.88rem">No Card</div>
+              </div>
+
+              <div class="module-card disabled" style="pointer-events:none;user-select:none;text-align:center;align-items:center;justify-content:center;padding:28px 20px">
+                <i class="fa-regular fa-file" style="font-size:2.2rem;color:var(--clr-border);margin-bottom:10px;display:block"></i>
+                <div class="module-title" style="color:var(--clr-text-subtle);font-size:0.88rem">No Card</div>
+              </div>
+
+              <div class="module-card disabled" style="pointer-events:none;user-select:none;text-align:center;align-items:center;justify-content:center;padding:28px 20px">
+                <i class="fa-regular fa-file" style="font-size:2.2rem;color:var(--clr-border);margin-bottom:10px;display:block"></i>
+                <div class="module-title" style="color:var(--clr-text-subtle);font-size:0.88rem">No Card</div>
+              </div>
+
+            </div>
+
+            <div style="margin-top:20px;text-align:center;font-size:0.72rem;color:var(--clr-text-subtle);line-height:1.6">
+              <i class="fa-solid fa-circle-info"></i>
+              © 2026 Pendamping Amalan • Developed by Ust. Imam Alfida Nurhasby, S.Pd
+            </div>
+          </div>
+        `;
+
+        const navBar = document.getElementById("nav-bar");
+        if (navBar) navBar.style.display = "none";
+        const progressTrack = document.getElementById("progress-track");
+        if (progressTrack) progressTrack.style.display = "none";
+        const slideChipWrap = document.getElementById("slideChipWrap");
+        if (slideChipWrap) slideChipWrap.style.display = "none";
+      }
+
+      function openModule(moduleIdx) {
+        if (moduleIdx === 0) {
+          currentScreen = "reader";
+          const main = document.getElementById("main");
+          if (main) {
+            main.innerHTML = `<div id="slideCard" class="slide-card"></div>`;
+          }
+          const navBar = document.getElementById("nav-bar");
+          if (navBar) navBar.style.display = "flex";
+          const progressTrack = document.getElementById("progress-track");
+          if (progressTrack) progressTrack.style.display = "block";
+          const slideChipWrap = document.getElementById("slideChipWrap");
+          if (slideChipWrap) slideChipWrap.style.display = "inline-flex";
+          if (typeof goToSlide === "function") goToSlide(0);
+        }
+      }
+
+      window.addEventListener("DOMContentLoaded", () => {
+        initSplashScreen();
+      });
+    </script>
+
+    <style>
+      /* ============================================================
+       DESIGN TOKENS
+    ============================================================ */
+      @font-face {
+        font-family: 'LPMQ Isep Misbah';
+        src: url('./public/fonts/LPMQ-IsepMisbah.ttf') format('truetype');
+        font-weight: normal;
+        font-style: normal;
+        font-display: swap;
+      }
+
+      :root {
+        /* Palette */
+        --clr-bg: #f5f0e8;
+        --clr-surface: #fffdf8;
+        --clr-surface2: #f0ead6;
+        --clr-border: #e2d9c5;
+        --clr-primary: #0b5940;
+        --clr-primary-lt: #147a55;
+        --clr-primary-dk: #073d2b;
+        --clr-gold: #c27c15;
+        --clr-gold-lt: #e8971a;
+        --clr-gold-dk: #9a6010;
+        --clr-text: #1c2b22;
+        --clr-text-muted: #2d4536;
+        --clr-text-subtle: #456150;
+        --clr-success: #15803d;
+        --clr-danger: #b91c1c;
+
+        /* Arabic & Latin Sizes */
+        --arabic-font:
+          "LPMQ Isep Misbah", "Amiri Quran", "Scheherazade New", "Noto Naskh Arabic", serif;
+        --arabic-size: 2.4rem;
+        --arabic-lh: 2.15;
+        --latin-size: 0.88rem;
+        --trans-size: 0.85rem;
+        --fadhilah-size: 0.82rem;
+
+        /* Layout */
+        --header-h: 64px;
+        --nav-h: 80px;
+        --radius-xl: 24px;
+        --radius-lg: 16px;
+        --radius-md: 12px;
+        --radius-sm: 8px;
+
+        /* Shadows */
+        --shadow-sm: 0 1px 4px rgba(0, 0, 0, 0.06);
+        --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.09);
+        --shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.12);
+        --shadow-gold: 0 4px 20px rgba(194, 124, 21, 0.25);
+        --shadow-green: 0 4px 20px rgba(11, 89, 64, 0.25);
+
+        /* Transition */
+        --ease: cubic-bezier(0.4, 0, 0.2, 1);
+        --dur-fast: 160ms;
+        --dur-med: 280ms;
+        --dur-slow: 420ms;
+      }
+
+      [data-theme="dark"] {
+        --clr-bg: #0c1811;
+        --clr-surface: #132218;
+        --clr-surface2: #1c3328;
+        --clr-border: #2a4035;
+        --clr-primary: #1db97b;
+        --clr-primary-lt: #25d68e;
+        --clr-primary-dk: #15985f;
+        --clr-gold: #f0a837;
+        --clr-gold-lt: #f7c05a;
+        --clr-gold-dk: #c68820;
+        --clr-text: #e8f5ee;
+        --clr-text-muted: #bbf7d0;
+        --clr-text-subtle: #86efac;
+      }
+
+      /* ============================================================
+       RESET & BASE
+    ============================================================ */
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      html {
+        font-size: 16px;
+        scroll-behavior: smooth;
+      }
+
+      body {
+        font-family:
+          "Inter",
+          system-ui,
+          -apple-system,
+          sans-serif;
+        background: var(--clr-bg);
+        color: var(--clr-text);
+        min-height: 100dvh;
+        overflow-x: hidden;
+        -webkit-tap-highlight-color: transparent;
+        transition:
+          background var(--dur-slow) var(--ease),
+          color var(--dur-slow) var(--ease);
+        scroll-behavior: smooth;
+        -webkit-overflow-scrolling: touch;
+        touch-action: pan-y pinch-zoom;
+      }
+
+      /* ============================================================
+       SCROLLBAR
+    ============================================================ */
+      ::-webkit-scrollbar {
+        width: 5px;
+      }
+
+      ::-webkit-scrollbar-track {
+        background: transparent;
+      }
+
+      ::-webkit-scrollbar-thumb {
+        background: var(--clr-border);
+        border-radius: 99px;
+      }
+
+      /* ============================================================
+       ARABIC TEXT
+    ============================================================ */
+      .ar {
+        font-family: var(--arabic-font);
+        font-feature-settings:
+          "mark" 1,
+          "mkmk" 1,
+          "liga" 1,
+          "calt" 1;
+        text-rendering: optimizeLegibility;
+        -webkit-font-smoothing: antialiased;
+        direction: rtl;
+        text-align: justify;
+        text-justify: inter-word;
+        font-size: var(--arabic-size);
+        line-height: var(--arabic-lh);
+        word-spacing: 2px;
+        padding: 4px 0;
+        letter-spacing: 0;
+        color: var(--clr-primary-dk);
+      }
+
+      [data-theme="dark"] .ar {
+        color: var(--clr-primary);
+      }
+
+      .ar-center {
+        text-align: center;
+      }
+
+      /* ============================================================
+       KEYFRAME ANIMATIONS
+    ============================================================ */
+      @keyframes fadeUp {
+        from {
+          opacity: 0;
+          transform: translateY(18px);
+        }
+
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+        }
+
+        to {
+          opacity: 1;
+        }
+      }
+
+      @keyframes ripple {
+        0% {
+          transform: scale(1);
+          opacity: 0.6;
+        }
+
+        100% {
+          transform: scale(3.5);
+          opacity: 0;
+        }
+      }
+
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      @keyframes bouncePop {
+        0% {
+          transform: scale(1);
+        }
+
+        40% {
+          transform: scale(1.14);
+        }
+
+        70% {
+          transform: scale(0.93);
+        }
+
+        100% {
+          transform: scale(1);
+        }
+      }
+
+      @keyframes shimmer {
+        0% {
+          background-position: -200% center;
+        }
+
+        100% {
+          background-position: 200% center;
+        }
+      }
+
+      @keyframes progressPulse {
+        0%,
+        100% {
+          opacity: 1;
+        }
+
+        50% {
+          opacity: 0.6;
+        }
+      }
+
+      /* ============================================================
+       LAYOUT SHELL
+    ============================================================ */
+      #app {
+        display: grid;
+        grid-template-rows: var(--header-h) 1fr var(--nav-h);
+        min-height: 100dvh;
+        max-width: 900px;
+        margin: 0 auto;
+      }
+
+      /* ---------- HEADER ---------- */
+      #header {
+        position: sticky;
+        top: 0;
+        z-index: 200;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 0 20px;
+        height: var(--header-h);
+        background: color-mix(in srgb, var(--clr-surface) 92%, transparent);
+        backdrop-filter: blur(16px) saturate(180%);
+        -webkit-backdrop-filter: blur(16px) saturate(180%);
+        border-bottom: 1px solid var(--clr-border);
+        transition: background var(--dur-slow) var(--ease);
+      }
+
+      .header-brand {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        cursor: pointer;
+        text-decoration: none;
+      }
+
+      .brand-icon {
+        width: 40px;
+        height: 40px;
+        background: linear-gradient(
+          135deg,
+          var(--clr-primary-dk),
+          var(--clr-primary)
+        );
+        border-radius: var(--radius-md);
+        display: grid;
+        place-items: center;
+        color: var(--clr-gold-lt);
+        font-size: 16px;
+        flex-shrink: 0;
+        box-shadow: var(--shadow-green);
+      }
+
+      .brand-text {
+        line-height: 1.2;
+      }
+
+      .brand-title {
+        font-size: 0.8rem;
+        font-weight: 800;
+        color: var(--clr-text);
+        letter-spacing: -0.3px;
+      }
+
+      .brand-sub {
+        font-size: 0.65rem;
+        color: var(--clr-gold);
+        font-weight: 600;
+      }
+
+      .header-actions {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      /* Chip / Badge */
+      .chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 5px 12px;
+        border-radius: 99px;
+        font-size: 0.72rem;
+        font-weight: 700;
+        cursor: pointer;
+        border: none;
+        transition: all var(--dur-fast) var(--ease);
+        letter-spacing: 0.3px;
+      }
+
+      .chip-primary {
+        background: color-mix(in srgb, var(--clr-primary) 12%, transparent);
+        color: var(--clr-primary);
+        border: 1px solid
+          color-mix(in srgb, var(--clr-primary) 25%, transparent);
+      }
+
+      .chip-primary:hover {
+        background: color-mix(in srgb, var(--clr-primary) 20%, transparent);
+      }
+
+      /* Icon Button */
+      .icon-btn {
+        width: 36px;
+        height: 36px;
+        border-radius: var(--radius-sm);
+        border: 1px solid var(--clr-border);
+        background: var(--clr-surface);
+        color: var(--clr-text-muted);
+        cursor: pointer;
+        display: grid;
+        place-items: center;
+        font-size: 14px;
+        transition: all var(--dur-fast) var(--ease);
+      }
+
+      .icon-btn:hover {
+        background: var(--clr-surface2);
+        color: var(--clr-text);
+        border-color: var(--clr-primary);
+      }
+
+      .icon-btn.active {
+        background: var(--clr-primary);
+        color: #fff;
+        border-color: var(--clr-primary);
+      }
+
+      /* Progress bar under header */
+      #progress-track {
+        position: fixed;
+        top: var(--header-h);
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: var(--clr-border);
+        z-index: 199;
+        overflow: hidden;
+      }
+
+      #progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, var(--clr-primary), var(--clr-gold));
+        transition: width 0.4s var(--ease);
+        border-radius: 0 99px 99px 0;
+      }
+
+      /* ---------- MAIN CONTAINER (RESPONSIVE) ---------- */
+      #main {
+        padding: calc(var(--header-h) + 2px) 14px calc(var(--nav-h) + 14px);
+        overflow-y: auto;
+        overflow-x: hidden;
+        scroll-behavior: smooth;
+        -webkit-overflow-scrolling: touch;
+        touch-action: pan-y pinch-zoom;
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
+      }
+
+      @media (max-width: 380px) {
+        #main {
+          padding: calc(var(--header-h) + 2px) 10px calc(var(--nav-h) + 10px);
+        }
+
+        .slide-card {
+          padding: 16px 14px !important;
+          border-radius: var(--radius-lg) !important;
+        }
+
+        .nav-btn {
+          width: 44px !important;
+          height: 44px !important;
+        }
+
+        .tasbih-btn,
+        .lanjut-btn {
+          height: 48px !important;
+          padding: 0 12px !important;
+        }
+
+        .tasbih-count {
+          font-size: 1.5rem !important;
+        }
+      }
+
+      @media (min-width: 640px) {
+        #main {
+          padding: calc(var(--header-h) + 2px) 32px calc(var(--nav-h) + 20px);
+        }
+      }
+
+      @media (min-width: 900px) {
+        #main {
+          padding: calc(var(--header-h) + 2px) 48px calc(var(--nav-h) + 28px);
+        }
+
+        #app {
+          box-shadow: 0 0 60px rgba(0, 0, 0, 0.12);
+        }
+      }
+
+      /* ---------- SLIDE CARD ---------- */
+      .slide-card {
+        background: var(--clr-surface);
+        border: 1px solid var(--clr-border);
+        border-radius: var(--radius-xl);
+        padding: 24px 22px;
+        box-shadow: var(--shadow-md);
+        animation: fadeUp var(--dur-med) var(--ease) both;
+        position: relative;
+        overflow: hidden;
+      }
+
+      @media (min-width: 640px) {
+        .slide-card {
+          padding: 32px 36px;
+        }
+      }
+
+      /* Top decorative bar */
+      .slide-card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, var(--clr-primary), var(--clr-gold));
+      }
+
+      /* Category badge */
+      .cat-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 4px 11px;
+        border-radius: 99px;
+        font-size: 0.65rem;
+        font-weight: 800;
+        letter-spacing: 0.8px;
+        text-transform: uppercase;
+        background: color-mix(in srgb, var(--clr-primary) 10%, transparent);
+        color: var(--clr-primary);
+        border: 1px solid
+          color-mix(in srgb, var(--clr-primary) 22%, transparent);
+      }
+
+      .slide-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 14px;
+      }
+
+      .slide-title {
+        font-size: 1.25rem;
+        font-weight: 800;
+        color: var(--clr-text);
+        letter-spacing: -0.4px;
+        line-height: 1.3;
+        margin-top: 14px;
+      }
+
+      @media (min-width: 640px) {
+        .slide-title {
+          font-size: 1.5rem;
+        }
+      }
+
+      .slide-subtitle {
+        font-size: 0.78rem;
+        color: var(--clr-text-muted);
+        margin-top: 4px;
+        font-style: italic;
+      }
+
+      /* Divider */
+      .divider {
+        height: 1px;
+        background: var(--clr-border);
+        margin: 14px 0;
+      }
+
+      /* Arabic block */
+      .arabic-block {
+        background: linear-gradient(
+          135deg,
+          color-mix(in srgb, var(--clr-primary) 6%, transparent),
+          color-mix(in srgb, var(--clr-gold) 4%, transparent)
+        );
+        border: 1px solid
+          color-mix(in srgb, var(--clr-primary) 18%, transparent);
+        border-radius: var(--radius-lg);
+        padding: 18px 20px;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .arabic-block::after {
+        content: "✦";
+        position: absolute;
+        bottom: -16px;
+        right: -8px;
+        font-size: 5rem;
+        color: color-mix(in srgb, var(--clr-primary) 6%, transparent);
+        pointer-events: none;
+        font-family: var(--arabic-font);
+        line-height: 1;
+      }
+
+      /* Latin block */
+      .latin-block {
+        background: var(--clr-surface2);
+        border-left: 3px solid var(--clr-gold);
+        border-radius: 0 var(--radius-md) var(--radius-md) 0;
+        padding: 14px 16px;
+      }
+
+      .latin-label {
+        font-size: 0.62rem;
+        font-weight: 800;
+        letter-spacing: 0.8px;
+        text-transform: uppercase;
+        color: var(--clr-gold);
+        margin-bottom: 6px;
+      }
+
+      .latin-text {
+        font-size: var(--latin-size, 0.88rem);
+        color: var(--clr-text);
+        line-height: 1.65;
+        font-style: italic;
+        text-align: justify;
+        text-justify: inter-word;
+      }
+
+      /* Translation block */
+      .trans-block {
+        padding: 12px 14px;
+        border-radius: var(--radius-sm);
+        background: color-mix(in srgb, var(--clr-gold) 6%, transparent);
+        font-size: var(--trans-size, 0.85rem);
+        color: var(--clr-text);
+        line-height: 1.6;
+        text-align: justify;
+        text-justify: inter-word;
+      }
+
+      .trans-label {
+        font-size: 0.62rem;
+        font-weight: 800;
+        letter-spacing: 0.8px;
+        text-transform: uppercase;
+        color: var(--clr-gold-dk);
+        margin-bottom: 5px;
+      }
+
+      /* Fadhilah note */
+      .fadhilah-box {
+        display: flex;
+        gap: 12px;
+        align-items: flex-start;
+        background: color-mix(in srgb, var(--clr-gold) 8%, transparent);
+        border: 1px solid color-mix(in srgb, var(--clr-gold) 25%, transparent);
+        border-radius: var(--radius-lg);
+        padding: 14px 16px;
+        margin-top: 10px;
+      }
+
+      .fadhilah-icon {
+        width: 32px;
+        height: 32px;
+        border-radius: var(--radius-sm);
+        background: var(--clr-gold);
+        color: #fff;
+        display: grid;
+        place-items: center;
+        font-size: 13px;
+        flex-shrink: 0;
+      }
+
+      .fadhilah-text {
+        font-size: var(--fadhilah-size, 0.82rem);
+        color: var(--clr-text);
+        line-height: 1.6;
+        flex: 1;
+        text-align: justify;
+        text-justify: inter-word;
+      }
+
+      /* ── Scalable Latin text utility classes ─────────────────────
+         All sizes are relative to --latin-size so they follow the
+         settings slider without needing inline font-size overrides.
+      ──────────────────────────────────────────────────────────────── */
+      /* lt-section  ≈ 0.92rem  — section headings inside slides    */
+      .lt-section  { font-size: calc(var(--latin-size, 0.88rem) * 1.045); }
+      /* lt-label    ≈ 0.88rem  — description / intro paragraphs    */
+      .lt-label    { font-size: var(--latin-size, 0.88rem); }
+      /* lt-body     ≈ 0.85rem  — body paragraphs & list items       */
+      .lt-body     { font-size: calc(var(--latin-size, 0.88rem) * 0.965); }
+      /* lt-sm       ≈ 0.82rem  — secondary / transliteration notes  */
+      .lt-sm       { font-size: calc(var(--latin-size, 0.88rem) * 0.932); }
+      /* lt-xs       ≈ 0.80rem  — fine-print / sub-labels            */
+      .lt-xs       { font-size: calc(var(--latin-size, 0.88rem) * 0.909); }
+
+      /* ============================================================
+       COUNTER RING (Progress Circle on desktop)
+    ============================================================ */
+      .counter-ring-wrap {
+        display: flex;
+        justify-content: center;
+        margin: 8px 0 12px;
+      }
+
+      .ring-svg {
+        overflow: visible;
+      }
+
+      .ring-bg {
+        stroke: var(--clr-border);
+        fill: none;
+      }
+
+      .ring-fill {
+        fill: none;
+        stroke: url(#ringGrad);
+        stroke-linecap: round;
+        transition: stroke-dashoffset 0.35s var(--ease);
+        transform: rotate(-90deg);
+        transform-origin: center;
+      }
+
+      .ring-count-text {
+        font-size: 2.2rem;
+        font-weight: 800;
+        fill: var(--clr-primary);
+        font-family: "Inter", sans-serif;
+        dominant-baseline: middle;
+        text-anchor: middle;
+      }
+
+      .ring-target-text {
+        font-size: 0.9rem;
+        fill: var(--clr-text-subtle);
+        font-family: "Inter", sans-serif;
+        dominant-baseline: middle;
+        text-anchor: middle;
+      }
+
+      /* ============================================================
+       GRID CARDS (for Home / Adab slides)
+    ============================================================ */
+      .info-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 14px;
+      }
+
+      @media (min-width: 480px) {
+        .info-grid {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+
+      @media (min-width: 720px) {
+        .info-grid {
+          grid-template-columns: repeat(3, 1fr);
+        }
+      }
+
+      .info-card {
+        background: linear-gradient(
+          135deg,
+          var(--clr-primary-dk),
+          var(--clr-primary)
+        );
+        border-radius: var(--radius-lg);
+        padding: 20px 18px;
+        color: #fff;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .info-card::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(
+          135deg,
+          transparent 50%,
+          rgba(255, 255, 255, 0.06)
+        );
+        pointer-events: none;
+      }
+
+      .info-card-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: var(--radius-sm);
+        background: rgba(255, 255, 255, 0.15);
+        display: grid;
+        place-items: center;
+        font-size: 18px;
+        color: var(--clr-gold-lt);
+        margin-bottom: 12px;
+      }
+
+      .info-card-title {
+        font-size: 0.88rem;
+        font-weight: 700;
+        margin-bottom: 6px;
+      }
+
+      .info-card-text {
+        font-size: 0.75rem;
+        color: rgba(255, 255, 255, 0.75);
+        line-height: 1.65;
+      }
+
+      /* Chart */
+      .chart-box {
+        background: var(--clr-surface2);
+        border-radius: var(--radius-lg);
+        padding: 20px 16px 12px;
+        border: 1px solid var(--clr-border);
+      }
+
+      .chart-title {
+        font-size: 0.72rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.7px;
+        color: var(--clr-text-muted);
+        text-align: center;
+        margin-bottom: 16px;
+      }
+
+      .chart-wrap {
+        position: relative;
+        height: 240px;
+        max-width: 380px;
+        margin: 0 auto;
+      }
+
+      /* Bismillah hero */
+      .bismillah-hero {
+        text-align: center;
+        padding: 16px 0 8px;
+      }
+
+      .bismillah-hero .ar {
+        font-size: clamp(1.8rem, 5vw, 2.8rem);
+        color: var(--clr-primary-dk);
+      }
+
+      .hero-desc {
+        font-size: 0.85rem;
+        color: var(--clr-text-muted);
+        line-height: 1.8;
+        text-align: center;
+        max-width: 480px;
+        margin: 14px auto 0;
+      }
+
+      /* Finish card */
+      .finish-card {
+        text-align: center;
+        padding: 20px 0;
+      }
+
+      .finish-icon {
+        width: 72px;
+        height: 72px;
+        border-radius: 50%;
+        background: linear-gradient(
+          135deg,
+          var(--clr-primary),
+          var(--clr-gold)
+        );
+        display: grid;
+        place-items: center;
+        font-size: 28px;
+        color: #fff;
+        margin: 0 auto 16px;
+        box-shadow: var(--shadow-green);
+      }
+
+      /* ============================================================
+       BOTTOM NAV
+    ============================================================ */
+      #nav-bar {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        z-index: 200;
+        height: var(--nav-h);
+        background: color-mix(in srgb, var(--clr-surface) 95%, transparent);
+        backdrop-filter: blur(20px) saturate(200%);
+        -webkit-backdrop-filter: blur(20px) saturate(200%);
+        border-top: 1px solid var(--clr-border);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0 16px;
+        /* safe area inset for iPhone notch */
+        padding-bottom: env(safe-area-inset-bottom);
+      }
+
+      .nav-inner {
+        width: 100%;
+        max-width: 900px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+      }
+
+      /* Prev / Next buttons */
+      .nav-btn {
+        width: 52px;
+        height: 52px;
+        border-radius: var(--radius-lg);
+        border: 1.5px solid var(--clr-border);
+        background: var(--clr-surface);
+        color: var(--clr-text-muted);
+        cursor: pointer;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 2px;
+        font-size: 15px;
+        flex-shrink: 0;
+        transition: all var(--dur-fast) var(--ease);
+        box-shadow: var(--shadow-sm);
+      }
+
+      .nav-btn:hover:not(:disabled) {
+        background: var(--clr-primary);
+        color: #fff;
+        border-color: var(--clr-primary);
+      }
+
+      .nav-btn:active:not(:disabled) {
+        transform: scale(0.93);
+      }
+
+      .nav-btn:disabled {
+        opacity: 0.3;
+        cursor: not-allowed;
+      }
+
+      .nav-btn span {
+        font-size: 0.6rem;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+      }
+
+      /* Tasbih counter (center) */
+      .tasbih-btn {
+        flex: 1;
+        height: 56px;
+        border-radius: var(--radius-lg);
+        border: none;
+        cursor: pointer;
+        background: linear-gradient(
+          135deg,
+          var(--clr-primary-dk) 0%,
+          var(--clr-primary) 60%,
+          var(--clr-primary-lt) 100%
+        );
+        color: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 18px;
+        gap: 10px;
+        box-shadow: var(--shadow-green);
+        transition: all var(--dur-fast) var(--ease);
+        position: relative;
+        overflow: hidden;
+      }
+
+      .tasbih-btn.done {
+        background: linear-gradient(
+          135deg,
+          var(--clr-gold-dk) 0%,
+          var(--clr-gold) 60%,
+          var(--clr-gold-lt) 100%
+        );
+        box-shadow: var(--shadow-gold);
+      }
+
+      .tasbih-btn:active {
+        transform: scale(0.97);
+      }
+
+      .tasbih-btn:hover {
+        filter: brightness(1.08);
+      }
+
+      .tasbih-left {
+        display: flex;
+        flex-direction: column;
+        text-align: left;
+      }
+
+      .tasbih-label {
+        font-size: 0.6rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+        color: rgba(255, 255, 255, 0.6);
+      }
+
+      .tasbih-target {
+        font-size: 0.72rem;
+        font-weight: 600;
+        color: rgba(255, 255, 255, 0.85);
+        margin-top: 1px;
+      }
+
+      .tasbih-count {
+        font-size: 2rem;
+        font-weight: 900;
+        font-variant-numeric: tabular-nums;
+        letter-spacing: -1px;
+        color: var(--clr-gold-lt);
+        transition: transform var(--dur-fast) var(--ease);
+      }
+
+      .tasbih-btn.done .tasbih-count {
+        color: #fff;
+      }
+
+      .tasbih-plus {
+        width: 36px;
+        height: 36px;
+        border-radius: var(--radius-sm);
+        background: rgba(255, 255, 255, 0.15);
+        display: grid;
+        place-items: center;
+        font-size: 20px;
+        font-weight: 700;
+        flex-shrink: 0;
+      }
+
+      /* Ripple effect */
+      .ripple-container {
+        position: absolute;
+        inset: 0;
+        overflow: hidden;
+        pointer-events: none;
+      }
+
+      .ripple {
+        position: absolute;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.25);
+        animation: ripple 0.6s var(--ease) forwards;
+      }
+
+      /* Lanjutkan button — shown on non-tasbih slides */
+      .lanjut-btn {
+        flex: 1;
+        height: 56px;
+        border-radius: var(--radius-lg);
+        border: 1.5px solid var(--clr-border);
+        background: var(--clr-surface);
+        color: var(--clr-text-muted);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        font-size: 0.88rem;
+        font-weight: 700;
+        letter-spacing: 0.3px;
+        transition: all var(--dur-fast) var(--ease);
+        box-shadow: var(--shadow-sm);
+      }
+
+      .lanjut-btn:hover {
+        background: var(--clr-surface2);
+        border-color: var(--clr-primary);
+        color: var(--clr-primary);
+      }
+
+      .lanjut-btn:active {
+        transform: scale(0.97);
+      }
+
+      .lanjut-btn i {
+        font-size: 0.9rem;
+      }
+
+      /* ============================================================
+       SLIDE LIST MODAL
+    ============================================================ */
+      .modal-overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 300;
+        background: rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        display: flex;
+        align-items: flex-end;
+        justify-content: center;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity var(--dur-med) var(--ease);
+      }
+
+      .modal-overlay.open {
+        opacity: 1;
+        pointer-events: all;
+      }
+
+      @media (min-width: 640px) {
+        .modal-overlay {
+          align-items: center;
+        }
+      }
+
+      .modal-sheet {
+        background: var(--clr-surface);
+        border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+        width: 100%;
+        max-width: 520px;
+        max-height: 88dvh;
+        display: flex;
+        flex-direction: column;
+        box-shadow: var(--shadow-lg);
+        transform: translateY(40px);
+        transition: transform var(--dur-med) var(--ease);
+        border: 1px solid var(--clr-border);
+        border-bottom: none;
+      }
+
+      @media (min-width: 640px) {
+        .modal-sheet {
+          border-radius: var(--radius-xl);
+          border-bottom: 1px solid var(--clr-border);
+          max-height: 80dvh;
+        }
+      }
+
+      .modal-overlay.open .modal-sheet {
+        transform: translateY(0);
+      }
+
+      .modal-handle {
+        width: 44px;
+        height: 5px;
+        background: var(--clr-border);
+        border-radius: 99px;
+        margin: 12px auto 0;
+        flex-shrink: 0;
+      }
+
+      @media (min-width: 640px) {
+        .modal-handle {
+          display: none;
+        }
+      }
+
+      .modal-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 16px 20px;
+        border-bottom: 1px solid var(--clr-border);
+        flex-shrink: 0;
+      }
+
+      .modal-head h3 {
+        font-size: 0.95rem;
+        font-weight: 800;
+        color: var(--clr-text);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .modal-list {
+        overflow-y: auto;
+        padding: 12px;
+        flex: 1;
+      }
+
+      .slide-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 12px 14px;
+        border-radius: var(--radius-lg);
+        cursor: pointer;
+        transition: background var(--dur-fast) var(--ease);
+        gap: 12px;
+        margin-bottom: 6px;
+      }
+
+      .slide-item:hover {
+        background: var(--clr-surface2);
+      }
+
+      .slide-item.active {
+        background: linear-gradient(
+          135deg,
+          var(--clr-primary-dk),
+          var(--clr-primary)
+        );
+        color: #fff;
+      }
+
+      .slide-item-num {
+        width: 28px;
+        height: 28px;
+        border-radius: var(--radius-sm);
+        background: var(--clr-surface2);
+        display: grid;
+        place-items: center;
+        font-size: 0.72rem;
+        font-weight: 800;
+        color: var(--clr-text-muted);
+        flex-shrink: 0;
+      }
+
+      .slide-item.active .slide-item-num {
+        background: rgba(255, 255, 255, 0.2);
+        color: var(--clr-gold-lt);
+      }
+
+      .slide-item-info {
+        flex: 1;
+        min-width: 0;
+      }
+
+      .slide-item-cat {
+        font-size: 0.6rem;
+        font-weight: 700;
+        letter-spacing: 0.6px;
+        text-transform: uppercase;
+        color: var(--clr-gold);
+        margin-bottom: 2px;
+      }
+
+      .slide-item.active .slide-item-cat {
+        color: var(--clr-gold-lt);
+      }
+
+      .slide-item-name {
+        font-size: 0.82rem;
+        font-weight: 600;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .slide-item-prog {
+        font-size: 0.7rem;
+        font-weight: 700;
+        font-variant-numeric: tabular-nums;
+        color: var(--clr-text-muted);
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+      }
+
+      .slide-item.active .slide-item-prog {
+        color: rgba(255, 255, 255, 0.7);
+      }
+
+      /* ============================================================
+       SETTINGS MODAL
+    ============================================================ */
+      .settings-group {
+        margin-bottom: 20px;
+      }
+
+      .settings-label {
+        font-size: 0.68rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.7px;
+        color: var(--clr-text-muted);
+        margin-bottom: 10px;
+      }
+
+      .toggle-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 12px 14px;
+        background: var(--clr-surface2);
+        border-radius: var(--radius-md);
+        margin-bottom: 8px;
+      }
+
+      .toggle-label {
+        font-size: 0.84rem;
+        font-weight: 600;
+      }
+
+      .toggle-sub {
+        font-size: 0.7rem;
+        color: var(--clr-text-muted);
+      }
+
+      /* Toggle switch */
+      .toggle-switch {
+        width: 44px;
+        height: 24px;
+        border-radius: 99px;
+        background: var(--clr-border);
+        cursor: pointer;
+        position: relative;
+        transition: background var(--dur-fast) var(--ease);
+        flex-shrink: 0;
+        border: none;
+      }
+
+      .toggle-switch::before {
+        content: "";
+        position: absolute;
+        top: 3px;
+        left: 3px;
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        background: #fff;
+        transition: transform var(--dur-fast) var(--ease);
+        box-shadow: var(--shadow-sm);
+      }
+
+      .toggle-switch.on {
+        background: var(--clr-primary);
+      }
+
+      .toggle-switch.on::before {
+        transform: translateX(20px);
+      }
+
+      /* Select */
+      .styled-select {
+        width: 100%;
+        padding: 10px 14px;
+        border-radius: var(--radius-md);
+        border: 1.5px solid var(--clr-border);
+        background: var(--clr-surface);
+        color: var(--clr-text);
+        font-size: 0.84rem;
+        font-weight: 600;
+        font-family: "Inter", sans-serif;
+        appearance: none;
+        cursor: pointer;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%236B7A6E' viewBox='0 0 16 16'%3E%3Cpath d='M8 10.6l-4.3-4.3.7-.7L8 9.2l3.6-3.6.7.7z'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 12px center;
+        padding-right: 36px;
+      }
+
+      .styled-select:focus {
+        outline: none;
+        border-color: var(--clr-primary);
+      }
+
+      /* Font size row */
+      .fontsize-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        background: var(--clr-surface2);
+        border-radius: var(--radius-md);
+        padding: 10px 14px;
+      }
+
+      .fontsize-btn {
+        width: 36px;
+        height: 36px;
+        border-radius: var(--radius-sm);
+        border: 1.5px solid var(--clr-border);
+        background: var(--clr-surface);
+        color: var(--clr-text);
+        cursor: pointer;
+        font-size: 1rem;
+        font-weight: 800;
+        display: grid;
+        place-items: center;
+        transition: all var(--dur-fast) var(--ease);
+      }
+
+      .fontsize-btn:hover {
+        background: var(--clr-primary);
+        color: #fff;
+        border-color: var(--clr-primary);
+      }
+
+      .fontsize-val {
+        flex: 1;
+        text-align: center;
+        font-size: 0.84rem;
+        font-weight: 700;
+        color: var(--clr-primary);
+      }
+
+      /* View mode pills */
+      .pill-group {
+        display: flex;
+        gap: 6px;
+      }
+
+      .pill {
+        flex: 1;
+        padding: 8px 10px;
+        border-radius: var(--radius-sm);
+        border: 1.5px solid var(--clr-border);
+        background: var(--clr-surface);
+        color: var(--clr-text-muted);
+        cursor: pointer;
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-align: center;
+        transition: all var(--dur-fast) var(--ease);
+      }
+
+      .pill.active {
+        background: var(--clr-primary);
+        color: #fff;
+        border-color: var(--clr-primary);
+      }
+
+      /* ============================================================
+       TOAST NOTIFICATION
+    ============================================================ */
+      #toast {
+        position: fixed;
+        bottom: calc(var(--nav-h) + 16px);
+        left: 50%;
+        transform: translateX(-50%) translateY(20px);
+        background: var(--clr-primary-dk);
+        color: #fff;
+        padding: 10px 20px;
+        border-radius: 99px;
+        font-size: 0.78rem;
+        font-weight: 600;
+        opacity: 0;
+        pointer-events: none;
+        transition: all 0.3s var(--ease);
+        white-space: nowrap;
+        box-shadow: var(--shadow-md);
+        z-index: 999;
+      }
+
+      #toast.show {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+      }
+
+      /* ============================================================
+       AUTO-ADVANCE INDICATOR
+    ============================================================ */
+      .aa-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        font-size: 0.62rem;
+        font-weight: 700;
+        letter-spacing: 0.4px;
+        padding: 3px 8px;
+        border-radius: 99px;
+        background: color-mix(in srgb, var(--clr-gold) 12%, transparent);
+        color: var(--clr-gold-dk);
+        border: 1px solid color-mix(in srgb, var(--clr-gold) 30%, transparent);
+      }
+
+      /* ============================================================
+       RESET COUNTER TINY BUTTON
+    ============================================================ */
+      .reset-btn-nav {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 44px;
+        height: 48px;
+        border-radius: var(--radius-md);
+        border: 1.5px solid var(--clr-border);
+        background: var(--clr-surface);
+        color: var(--clr-text-subtle);
+        font-size: 1rem;
+        cursor: pointer;
+        transition: all var(--dur-fast) var(--ease);
+        flex-shrink: 0;
+      }
+      .reset-btn-nav:hover {
+        color: var(--clr-danger);
+        border-color: var(--clr-danger);
+        background: color-mix(in srgb, var(--clr-danger) 8%, transparent);
+      }
+      .reset-btn-nav:active {
+        transform: scale(0.92);
+      }
+
+      /* ============================================================
+       UTILITY
+    ============================================================ */
+      .space-y-4 > * + * {
+        margin-top: 16px;
+      }
+
+      .space-y-3 > * + * {
+        margin-top: 12px;
+      }
+
+      .flex-between {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .flex-center {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      /* Slide-number badge in top-right of card */
+      .slide-num-badge {
+        font-size: 0.68rem;
+        font-weight: 800;
+        color: var(--clr-text-subtle);
+        white-space: nowrap;
+      }
+
+      /* ============================================================
+       RESPONSIVE — PC sidebar tweak
+    ============================================================ */
+      @media (min-width: 900px) {
+        /* On wide screens, sidebar layout for ring counter */
+        .pc-grid {
+          display: grid;
+          grid-template-columns: 1fr 200px;
+          gap: 24px;
+          align-items: start;
+        }
+
+        .pc-ring {
+          display: flex;
+          flex-direction: column;
+          gap: 10px;
+          align-items: center;
+        }
+      }
+
+      @media (max-width: 899px) {
+        .pc-grid {
+          display: flex;
+          flex-direction: column;
+          gap: 16px;
+        }
+
+        .pc-ring {
+          display: none;
+        }
+
+        /* ring hidden on mobile — counter in nav bar */
+      }
+
+      /* Hide on mobile only */
+      .hide-mobile {
+        display: none;
+      }
+
+      @media (min-width: 640px) {
+        .hide-mobile {
+          display: flex;
+        }
+      }
+
+      /* ============================================================
+       DARK MODE FIXES
+    ============================================================ */
+      [data-theme="dark"] .info-card {
+        background: linear-gradient(135deg, #0a2e1e, #104432);
+      }
+
+      [data-theme="dark"] .styled-select {
+        background-color: var(--clr-surface2);
+      }
+
+      /* ============================================================
+         HOLOGRAM SPLASH SCREEN & MULTI-MODULE MENU CSS
+      ============================================================ */
+      #splashScreen {
+        position: fixed;
+        inset: 0;
+        z-index: 99999;
+        background: radial-gradient(
+          circle at center,
+          #0f2027,
+          #203a43,
+          #2c5364
+        );
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+        color: #fff;
+        text-align: center;
+        transition:
+          opacity 0.6s var(--ease),
+          visibility 0.6s var(--ease);
+        overflow: hidden;
+      }
+
+      #splashScreen.hidden {
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+      }
+
+      /* Hologram Projection FX */
+      .holo-container {
+        position: relative;
+        width: 140px;
+        height: 140px;
+        display: grid;
+        place-items: center;
+        margin-bottom: 52px;
+      }
+
+      .holo-logo {
+        width: 100px;
+        height: 100px;
+        object-fit: contain;
+        border-radius: 50%;
+        position: relative;
+        z-index: 2;
+        filter: drop-shadow(0 0 15px rgba(0, 230, 180, 0.8));
+        animation: holoFloat 3s ease-in-out infinite alternate;
+      }
+
+      .holo-ring-1 {
+        position: absolute;
+        inset: -10px;
+        border: 2px dashed rgba(0, 240, 200, 0.6);
+        border-radius: 50%;
+        animation: holoSpin 8s linear infinite;
+      }
+
+      .holo-ring-2 {
+        position: absolute;
+        inset: -22px;
+        border: 1px solid rgba(0, 240, 200, 0.3);
+        border-radius: 50%;
+        box-shadow: 0 0 20px rgba(0, 240, 200, 0.4);
+        animation: holoPulse 2s ease-in-out infinite alternate;
+      }
+
+      @keyframes holoFloat {
+        0% {
+          transform: translateY(0px) scale(1);
+          filter: drop-shadow(0 0 12px rgba(0, 240, 200, 0.7));
+        }
+
+        100% {
+          transform: translateY(-8px) scale(1.03);
+          filter: drop-shadow(0 0 25px rgba(0, 240, 200, 0.95));
+        }
+      }
+
+      @keyframes holoSpin {
+        0% {
+          transform: rotate(0deg);
+        }
+
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+
+      @keyframes holoPulse {
+        0% {
+          transform: scale(0.98);
+          opacity: 0.4;
+        }
+
+        100% {
+          transform: scale(1.05);
+          opacity: 0.9;
+        }
+      }
+
+      .splash-title {
+        font-size: clamp(1.2rem, 4vw, 1.6rem);
+        font-weight: 900;
+        letter-spacing: 1px;
+        color: #00f0c8;
+        text-shadow: 0 0 12px rgba(0, 240, 200, 0.5);
+        margin-bottom: 10px;
+      }
+
+      .splash-author {
+        font-size: 0.82rem;
+        color: rgba(255, 255, 255, 0.8);
+        margin-bottom: 24px;
+        letter-spacing: 0.5px;
+      }
+
+      .splash-loader {
+        width: 180px;
+        height: 4px;
+        background: rgba(255, 255, 255, 0.15);
+        border-radius: 99px;
+        overflow: hidden;
+        margin: 0 auto 12px;
+      }
+
+      .splash-progress {
+        height: 100%;
+        width: 0%;
+        background: linear-gradient(90deg, #00f0c8, #ffd700);
+        transition: width 0.3s ease;
+        border-radius: 99px;
+      }
+
+      .splash-status {
+        font-size: 0.7rem;
+        color: rgba(255, 255, 255, 0.6);
+        letter-spacing: 0.8px;
+        text-transform: uppercase;
+      }
+
+      /* MAIN MENU DASHBOARD SCREEN */
+      #mainMenuScreen {
+        padding: 0 0 16px;
+        max-width: 900px;
+        margin: 0 auto;
+        width: 100%;
+        box-sizing: border-box;
+      }
+
+      .menu-hero {
+        background: linear-gradient(
+          135deg,
+          var(--clr-primary-dk),
+          var(--clr-primary)
+        );
+        border-radius: var(--radius-xl);
+        padding: 16px 18px;
+        color: #fff;
+        margin-bottom: 16px;
+        box-shadow: var(--shadow-md);
+        position: relative;
+        overflow: hidden;
+      }
+
+      .menu-hero-title {
+        font-size: clamp(1.1rem, 3.5vw, 1.4rem);
+        font-weight: 800;
+        margin-bottom: 6px;
+      }
+
+      .menu-hero-sub {
+        font-size: 0.82rem;
+        color: rgba(255, 255, 255, 0.8);
+        line-height: 1.5;
+      }
+
+      .modules-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 12px;
+      }
+
+      @media (min-width: 600px) {
+        .modules-grid {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+
+      .module-card {
+        background: var(--clr-surface);
+        border: 1.5px solid var(--clr-border);
+        border-radius: var(--radius-lg);
+        padding: 20px;
+        transition: all var(--dur-fast) var(--ease);
+        cursor: pointer;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .module-card:hover {
+        border-color: var(--clr-primary);
+        transform: translateY(-3px);
+        box-shadow: var(--shadow-md);
+      }
+
+      .module-card.active {
+        border-color: var(--clr-primary);
+        background: color-mix(
+          in srgb,
+          var(--clr-primary) 4%,
+          var(--clr-surface)
+        );
+      }
+
+      .module-card.disabled {
+        opacity: 0.65;
+        cursor: default;
+      }
+
+      .module-card.disabled:hover {
+        transform: none;
+        box-shadow: none;
+        border-color: var(--clr-border);
+      }
+
+      .module-badge {
+        align-self: flex-start;
+        font-size: 0.62rem;
+        font-weight: 800;
+        padding: 3px 9px;
+        border-radius: 99px;
+        text-transform: uppercase;
+        letter-spacing: 0.6px;
+        margin-bottom: 12px;
+      }
+
+      .module-badge.active {
+        background: color-mix(in srgb, var(--clr-primary) 15%, transparent);
+        color: var(--clr-primary);
+      }
+
+      .module-badge.coming {
+        background: color-mix(in srgb, var(--clr-gold) 15%, transparent);
+        color: var(--clr-gold-dk);
+      }
+
+      .module-title {
+        font-size: 1rem;
+        font-weight: 800;
+        color: var(--clr-text);
+        margin-bottom: 6px;
+      }
+
+      .module-desc {
+        font-size: 0.78rem;
+        color: var(--clr-text-subtle);
+        line-height: 1.55;
+        margin-bottom: 16px;
+      }
+
+      .module-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 0.8rem;
+        font-weight: 700;
+        color: var(--clr-primary);
+      }
+    </style>
+  </head>
+
+  <body>
+    <!-- ===== HOLOGRAM SPLASH SCREEN ===== -->
+    <div id="splashScreen">
+      <div class="holo-container">
+        <div class="holo-ring-1"></div>
+        <div class="holo-ring-2"></div>
+        <img
+          src="Logo_Pesantren.png"
+          alt="Logo Pesantren Hologram"
+          class="holo-logo"
+        />
+      </div>
+      <div class="splash-title">PENDAMPING AMALAN DIGITAL</div>
+      <div class="splash-author">
+        <i class="fa-solid fa-user-pen"></i> Created By: Ust. Imam Alfida
+        Nurhasby, S.Pd
+      </div>
+      <div class="splash-loader">
+        <div id="splashProgress" class="splash-progress"></div>
+      </div>
+      <div id="splashStatus" class="splash-status">
+        Memuat Modul & Font Tajwid...
+      </div>
+    </div>
+
+    <!-- App Shell -->
+    <div id="app">
+      <!-- ===== HEADER ===== -->
+      <header id="header">
+        <a class="header-brand" onclick="goToSlide(0)">
+          <div
+            class="brand-icon"
+            style="background: transparent; padding: 0; overflow: hidden"
+          >
+            <img
+              src="Logo_Pesantren.png"
+              alt="Logo Pesantren"
+              style="
+                width: 100%;
+                height: 100%;
+                object-fit: contain;
+                border-radius: 6px;
+              "
+            />
+          </div>
+          <div class="brand-text">
+            <div class="brand-title">PENDAMPING AMALAN</div>
+            <div class="brand-sub">
+              <i
+                class="fa-solid fa-user-pen"
+                style="font-size: 0.55rem; margin-right: 3px"
+              ></i
+              >Created By: Ust. Imam Alfida Nurhasby, S.Pd
+            </div>
+          </div>
+        </a>
+        <div class="header-actions">
+          <button
+            class="icon-btn"
+            onclick="showMainMenu()"
+            title="Beranda (Menu Utama Modul)"
+          >
+            <i class="fa-solid fa-house" style="font-size: 1.1rem"></i>
+          </button>
+          <div id="slideChipWrap" style="display: none">
+            <button class="chip chip-primary" onclick="openSlideModal()">
+              <i class="fa-solid fa-layer-group"></i>
+              <span id="slideIndicatorChip">1 / 31</span>
+            </button>
+          </div>
+          <button
+            class="icon-btn"
+            id="themeBtn"
+            onclick="toggleTheme()"
+            title="Ganti Mode Tampilan"
+          >
+            <i class="fa-solid fa-moon"></i>
+          </button>
+          <button
+            class="icon-btn"
+            onclick="toggleSettings()"
+            title="Pengaturan"
+          >
+            <i class="fa-solid fa-sliders"></i>
+          </button>
+        </div>
+      </header>
+
+      <!-- Progress Track (below header, fixed) -->
+      <div id="progress-track">
+        <div id="progress-fill"></div>
+      </div>
+
+      <!-- ===== MAIN ===== -->
+      <main id="main">
+        <div id="slideCard" class="slide-card">
+          <!-- Injected by JS -->
+        </div>
+      </main>
+
+      <!-- ===== BOTTOM NAV ===== -->
+      <nav id="nav-bar">
+        <div class="nav-inner">
+          <button class="nav-btn" id="prevBtn" onclick="prevSlide()" disabled>
+            <i class="fa-solid fa-chevron-left"></i>
+            <span>Prev</span>
+          </button>
+
+          <!-- TASBIH WRAPPER: Berdampingan Tombol Tasbih Digital & Tombol Reset -->
+          <div
+            id="tasbihWrap"
+            style="
+              display: none;
+              align-items: center;
+              gap: 8px;
+              flex: 1;
+              justify-content: center;
+              margin: 0 auto;
+              max-width: 440px;
+              width: 100%;
+            "
+          >
+            <button
+              class="tasbih-btn"
+              id="tasbihBtn"
+              onclick="tapCounter(event)"
+              style="flex: 1"
+            >
+              <div class="ripple-container" id="rippleCont"></div>
+              <div class="tasbih-left">
+                <span class="tasbih-label">Tasbih Digital</span>
+                <span class="tasbih-target" id="tasbihTarget"
+                  >Target: 313×</span
+                >
+              </div>
+              <div class="tasbih-count" id="tasbihCount">0</div>
+              <div class="tasbih-plus">+</div>
+            </button>
+            <button
+              class="reset-btn-nav"
+              id="resetBtnNav"
+              onclick="resetSlide()"
+              title="Reset Hitungan Tasbih"
+            >
+              <i class="fa-solid fa-rotate-left"></i>
+            </button>
+          </div>
+
+          <!-- LANJUTKAN: tampil di slide selain tasbih -->
+          <button
+            class="lanjut-btn"
+            id="lanjutBtn"
+            onclick="nextSlide()"
+            style="flex: 1; margin: 0 auto; max-width: 440px"
+          >
+            <i class="fa-solid fa-circle-right"></i>
+            <span id="lanjutLabel">Lanjutkan</span>
+            <i
+              class="fa-solid fa-chevron-right"
+              style="font-size: 0.75rem; opacity: 0.5"
+            ></i>
+          </button>
+
+          <button class="nav-btn" id="nextBtn" onclick="nextSlide()">
+            <i class="fa-solid fa-chevron-right"></i>
+            <span>Next</span>
+          </button>
+        </div>
+      </nav>
+    </div>
+
+    <!-- ===== SLIDE LIST MODAL ===== -->
+    <div class="modal-overlay" id="slideModal" onclick="closeSlideModal(event)">
+      <div class="modal-sheet" onclick="(e) => e.stopPropagation()">
+        <div class="modal-handle"></div>
+        <div class="modal-head">
+          <h3>
+            <i class="fa-solid fa-list-ol" style="color: var(--clr-gold)"></i>
+            Daftar Semua Slide
+          </h3>
+          <button class="icon-btn" onclick="closeSlideModal()">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+        <div class="modal-list" id="slideList"></div>
+      </div>
+    </div>
+
+    <!-- ===== SETTINGS MODAL ===== -->
+    <div
+      class="modal-overlay"
+      id="settingsModal"
+      onclick="closeSettings(event)"
+    >
+      <div
+        class="modal-sheet"
+        onclick="(e) => e.stopPropagation()"
+        style="max-width: 460px"
+      >
+        <div class="modal-handle"></div>
+        <div class="modal-head">
+          <h3>
+            <i class="fa-solid fa-sliders" style="color: var(--clr-gold)"></i>
+            Pengaturan & Tampilan
+          </h3>
+          <button class="icon-btn" onclick="closeSettings()">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+        <div class="modal-list" style="padding: 16px 16px 24px">
+          <!-- View Mode -->
+          <div class="settings-group">
+            <div class="settings-label">Mode Tampilan Teks</div>
+            <div class="pill-group">
+              <button class="pill active" id="pillAll" onclick="setView('all')">
+                Lengkap
+              </button>
+              <button class="pill" id="pillArabic" onclick="setView('arabic')">
+                Arab Saja
+              </button>
+              <button class="pill" id="pillLatin" onclick="setView('latin')">
+                Latin/Arti
+              </button>
+            </div>
+          </div>
+
+          <!-- Font Size Controls -->
+          <div class="settings-group" style="margin-top: 14px">
+            <div class="settings-label"><i class="fa-solid fa-font" style="margin-right:4px;color:var(--clr-gold)"></i> Ukuran Teks Arab</div>
+            <div class="size-control-row" style="display:flex;align-items:center;gap:8px;background:color-mix(in srgb, var(--clr-primary) 6%, transparent);border:1px solid var(--clr-border);padding:8px 12px;border-radius:var(--radius-md);margin-top:6px">
+              <button class="icon-btn" onclick="adjustFontSize('arabic', -1)" title="Perkecil Arab" style="width:36px;height:36px">
+                <i class="fa-solid fa-minus"></i>
+              </button>
+              <div id="arabicSizeLabel" style="flex:1;text-align:center;font-weight:800;font-size:0.9rem;color:var(--clr-primary-dk)">100%</div>
+              <button class="icon-btn" onclick="adjustFontSize('arabic', 1)" title="Perbesar Arab" style="width:36px;height:36px">
+                <i class="fa-solid fa-plus"></i>
+              </button>
+              <button class="icon-btn" onclick="resetFontSize('arabic')" title="Reset Ukuran Arab" style="width:36px;height:36px;color:var(--clr-text-subtle)">
+                <i class="fa-solid fa-rotate-left"></i>
+              </button>
+            </div>
+          </div>
+
+          <div class="settings-group" style="margin-top: 14px">
+            <div class="settings-label"><i class="fa-solid fa-align-left" style="margin-right:4px;color:var(--clr-gold)"></i> Ukuran Teks Latin &amp; Terjemah</div>
+            <div class="size-control-row" style="display:flex;align-items:center;gap:8px;background:color-mix(in srgb, var(--clr-primary) 6%, transparent);border:1px solid var(--clr-border);padding:8px 12px;border-radius:var(--radius-md);margin-top:6px">
+              <button class="icon-btn" onclick="adjustFontSize('latin', -1)" title="Perkecil Latin" style="width:36px;height:36px">
+                <i class="fa-solid fa-minus"></i>
+              </button>
+              <div id="latinSizeLabel" style="flex:1;text-align:center;font-weight:800;font-size:0.9rem;color:var(--clr-primary-dk)">100%</div>
+              <button class="icon-btn" onclick="adjustFontSize('latin', 1)" title="Perbesar Latin" style="width:36px;height:36px">
+                <i class="fa-solid fa-plus"></i>
+              </button>
+              <button class="icon-btn" onclick="resetFontSize('latin')" title="Reset Ukuran Latin" style="width:36px;height:36px;color:var(--clr-text-subtle)">
+                <i class="fa-solid fa-rotate-left"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Toggles -->
+          <div class="settings-group" style="margin-top: 14px">
+            <div class="settings-label">Opsi Lainnya</div>
+            <div class="toggle-row">
+              <div>
+                <div class="toggle-label">Pindah Otomatis (Auto-Advance)</div>
+                <div class="toggle-sub">Berpindah slide saat tasbih penuh</div>
+              </div>
+              <button
+                class="toggle-switch on"
+                id="aaToggle"
+                onclick="toggleAA()"
+              ></button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toast -->
+    <div id="toast"></div>
+
+    <!-- SVG Gradient Defs (for ring) -->
+    <svg width="0" height="0" style="position: absolute">
+      <defs>
+        <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="var(--clr-primary)" />
+          <stop offset="100%" stop-color="var(--clr-gold)" />
+        </linearGradient>
+      </defs>
+    </svg>
+
+    <!-- ============================================================
+       JAVASCRIPT APPLICATION
+  ============================================================ -->
+    <script>
+      /* ===== DATA ===== */
+                              const SLIDES = [
+        {
+          id: 0,
+          cat: "BERANDA",
+          target: 1,
+          title: "Amalan Rezeki & Munajat Hajat",
+          subtitle: "Pendamping Digital Tasbih Otomatis — Font LPMQ Isep Misbah Kemenag RI",
+          type: "home",
+        },
+        {
+          id: 1,
+          cat: "I. ADAB & PERSIAPAN",
+          target: 1,
+          title: "Adab & Tata Cara Sebelum Pembacaan",
+          subtitle:
+            "Panduan Lengkap Sebelum Bermunajat (Tahajud, Dhuha, Taubat)",
+          type: "adab",
+        },
+        {
+          id: 2,
+          cat: "II. MUQADDIMAH",
+          target: 1,
+          title: "Pembersihan Diri (Istighfar & Syahadat)",
+          subtitle: "Dibaca Masing-Masing 3x",
+          arabic:
+            "أَعُوْذُ بِاللّٰهِ مِنَ الشَّيْطَانِ الرَّجِيْمِ، بِسْمِ اللّٰهِ الرَّحْمٰنِ الرَّحِيْمِ ✦<br>أَسْتَغْفِرُ اللّٰهَ الْعَظِيْمَ، اَلَّذِيْ لَآ إِلٰهَ إِلَّا هُوَ، الْحَيُّ الْقَيُّوْمُ، وَأَتُوْبُ إِلَيْهِ (٣×) ✦<br>أَشْهَدُ أَنْ لَّآ إِلٰهَ إِلَّا اللّٰهُ، وَأَشْهَدُ أَنَّ مُحَمَّدًا رَّسُوْلُ اللّٰهِ (٣×) ✦<br>اَللّٰهُمَّ صَلِّ عَلَى سَيِّدِنَا مُحَمَّدٍ، وَعَلَى آلِ سَيِّدِنَا مُحَمَّدٍ (٣×) ✦<br>لَآ إِلٰهَ إِلَّا اللّٰهُ (٣×) ✦<br>اَللّٰهُ أَكْبَرُ (٣×) ✦",
+          latin:
+            "A'udzu billahi minasy-syaithanir-rajim, Bismillahir-rahmanir-rahim.<br>Astaghfirullahal-'azhiim, alladzii laa ilaaha illaa huwal-hayyul-qayyuumu, wa atuubu ilaih (3x).<br>Asyhadu allaa ilaaha illallah, wa asyhadu anna muhammadar-rasulullah (3x).<br>Allahumma shalli 'alaa sayyidinaa muhammadin, wa 'alaa aali sayyidinaa muhammad (3x).<br>Laa ilaaha illallah (3x).<br>Allahu akbar (3x).",
+          trans:
+            "Aku berlindung kepada Allah dari godaan setan yang terkutuk, Dengan nama Allah Yang Maha Pengasih Maha Penyayang.<br>Aku memohon ampun kepada Allah Yang Maha Agung, tiada Tuhan selain Dia Yang Mahahidup lagi Maha Berdiri Sendiri, dan aku bertaubat kepada-Nya (3x).<br>Aku bersaksi tiada Tuhan selain Allah, dan aku bersaksi bahwa Nabi Muhammad utusan Allah (3x).<br>Ya Allah limpahkanlah rahmat kepada junjungan kami Nabi Muhammad, dan keluarganya (3x).<br>Tiada Tuhan selain Allah (3x).<br>Allah Maha Besar (3x).",
+          fadhilah:
+            "Muqaddimah ini membersihkan hati dari dosa, menyambung ikatan tauhid, dan membuka pintu rahmat sebelum membaca surat-surat pelindung.",
+        },
+        {
+          id: 3,
+          cat: "III. BENTENG DIRI & KEBERKAHAN",
+          target: 1,
+          title: "Surah Al-Fatihah",
+          subtitle: "Pembuka Pintu Langit & Hajat",
+          arabic:
+            "بِسْمِ اللّٰهِ الرَّحْمٰنِ الرَّحِيْمِ ✦ اَلْحَمْدُ لِلّٰهِ رَبِّ الْعَالَمِيْنَ ✦ الرَّحْمٰنِ الرَّحِيْمِ ✦ مَالِكِ يَوْمِ الدِّيْنِ ✦ إِيَّاكَ نَعْبُدُ وَإِيَّاكَ نَسْتَعِيْنُ ✦ إِهْدِنَا الصِّرَاطَ الْمُسْتَقِيْمَ ✦ صِرَاطَ الَّذِيْنَ أَنْعَمْتَ عَلَيْهِمْ، غَيْرِ الْمَغْضُوْبِ عَلَيْهِمْ، وَلَا الضَّآلِّيْنَ ✦",
+          latin:
+            "Bismillahir-rahmanir-rahim. Alhamdu lillahi rabbil-'alamin. Ar-rahmanir-rahim. Maliki yaumid-din. Iyyaka na'budu wa iyyaka nasta'in. Ihdinas-siratal-mustaqim. Siratal-ladzina an'amta 'alaihim, ghairil-maghdubi 'alaihim, wa ladh-dhaalliin.",
+          trans:
+            "Dengan nama Allah Yang Maha Pengasih lagi Maha Penyayang. Segala puji bagi Allah Tuhan semesta alam. Yang Maha Pengasih lagi Maha Penyayang. Pemilik hari pembalasan. Hanya kepada Engkaulah kami menyembah dan hanya kepada Engkaulah kami memohon pertolongan. Tunjukilah kami jalan yang lurus. (Yaitu) jalan orang-orang yang telah Engkau beri nikmat kepadanya, bukan (jalan) mereka yang dimurkai, dan bukan (pula jalan) mereka yang sesat.",
+          fadhilah:
+            "Membaca Al-Fatihah sebagai Ummul Kitab adalah pembuka pintu rahmat dan pengabulan doa.",
+        },
+        {
+          id: 4,
+          cat: "III. BENTENG DIRI & KEBERKAHAN",
+          target: 1,
+          title: "Surah Al-Ikhlas",
+          subtitle: "Memurnikan Tauhid & Pagar Gaib",
+          arabic:
+            "بِسْمِ اللّٰهِ الرَّحْمٰنِ الرَّحِيْمِ ✦ قُلْ هُوَ اللّٰهُ أَحَدٌ ✦ اَللّٰهُ الصَّمَدُ ✦ لَمْ يَلِدْ وَلَمْ يُوْلَدْ ✦ وَلَمْ يَكُنْ لَّهٗ كُفُوًا أَحَدٌ ✦",
+          latin:
+            "Bismillahir-rahmanir-rahim. Qul huwallahu ahad. Allahus-samad. Lam yalid wa lam yulad. Wa lam yakul-lahu kufuwan ahad.",
+          trans:
+            'Dengan nama Allah Yang Maha Pengasih Maha Penyayang. Katakanlah (Muhammad): "Dialah Allah, Yang Maha Esa. Allah tempat meminta segala sesuatu. (Allah) tidak beranak dan tidak pula diperanakkan. Dan tidak ada sesuatu pun yang setara dengan Dia."',
+          fadhilah:
+            "Membaca Al-Ikhlas sebanding dengan sepertiga Al-Qur'an dan membangun perisai tauhid yang sangat kuat.",
+        },
+        {
+          id: 5,
+          cat: "III. BENTENG DIRI & KEBERKAHAN",
+          target: 1,
+          title: "Surah Al-Falaq",
+          subtitle: "Perlindungan dari Kejahatan Makhluk",
+          arabic:
+            "بِسْمِ اللّٰهِ الرَّحْمٰنِ الرَّحِيْمِ ✦ قُلْ أَعُوْذُ بِرَبِّ الْفَلَقِ ✦ مِنْ شَرِّ مَا خَلَقَ ✦ وَمِنْ شَرِّ غَاسِقٍ إِذَا وَقَبَ ✦ وَمِنْ شَرِّ النَّفَّاثَاتِ فِي الْعُقَدِ ✦ وَمِنْ شَرِّ حَاسِدٍ إِذَا حَسَدَ ✦",
+          latin:
+            "Bismillahir-rahmanir-rahim. Qul a'udzu birabbil-falaq. Min syarri maa khalaq. Wa min syarri ghaasiqin idzaa waqab. Wa min syarrin-naffaatsaati fil-'uqad. Wa min syarri haasidin idzaa hasad.",
+          trans:
+            'Dengan nama Allah Yang Maha Pengasih Maha Penyayang. Katakanlah: "Aku berlindung kepada Tuhan yang menguasai subuh (fajar), dari kejahatan (makhluk yang) Dia ciptakan, dan dari kejahatan malam apabila telah gelap gulita, dan dari kejahatan perempuan-perempuan (penyihir) yang meniup pada buhul-buhul (talinya), dan dari kejahatan orang yang dengki apabila dia dengki."',
+          fadhilah:
+            "Membentengi diri dari sihir, hasad (dengki), dan niat jahat yang mengganggu kelancaran rezeki dan hajat.",
+        },
+        {
+          id: 6,
+          cat: "III. BENTENG DIRI & KEBERKAHAN",
+          target: 1,
+          title: "Surah An-Nas",
+          subtitle: "Perlindungan dari Bisikan Setan",
+          arabic:
+            "بِسْمِ اللّٰهِ الرَّحْمٰنِ الرَّحِيْمِ ✦ قُلْ أَعُوْذُ بِرَبِّ النَّاسِ ✦ مَلِكِ النَّاسِ ✦ إِلٰهِ النَّاسِ ✦ مِنْ شَرِّ الْوَسْوَاسِ الْخَنَّاسِ ✦ الَّذِيْ يُوَسْوِسُ فِيْ صُدُوْرِ النَّاسِ ✦ مِنَ الْجِنَّةِ وَالنَّاسِ ✦",
+          latin:
+            "Bismillahir-rahmanir-rahim. Qul a'udzu birabbin-naas. Malikin-naas. Ilaahin-naas. Min syarril-waswaasil-khannaas. Alladzii yuwaswisu fii shuduurin-naas. Minal-jinnati wan-naas.",
+          trans:
+            'Dengan nama Allah Yang Maha Pengasih Maha Penyayang. Katakanlah: "Aku berlindung kepada Tuhannya manusia, Raja manusia, sembahan manusia, dari kejahatan (bisikan) setan yang bersembunyi, yang membisikkan (kejahatan) ke dalam dada manusia, dari (golongan) jin dan manusia."',
+          fadhilah:
+            "Membersihkan hati dan pikiran dari rasa ragu, cemas, dan was-was yang dihembuskan oleh golongan jin dan manusia.",
+        },
+        {
+          id: 7,
+          cat: "III. BENTENG DIRI & KEBERKAHAN",
+          target: 1,
+          title: "Surah Al-Qadr",
+          subtitle: "Mengundang Turunnya Malaikat & Keberkahan",
+          arabic:
+            "بِسْمِ اللّٰهِ الرَّحْمٰنِ الرَّحِيْمِ ✦ إِنَّآ أَنْزَلْنَاهُ فِيْ لَيْلَةِ الْقَدْرِ ✦ وَمَآ أَدْرَاكَ مَا لَيْلَةُ الْقَدْرِ ✦ لَيْلَةُ الْقَدْرِ خَيْرٌ مِّنْ أَلْفِ شَهْرٍ ✦ تَنَزَّلُ الْمَلَائِكَةُ وَالرُّوْحُ فِيْهَا، بِإِذْنِ رَبِّهِمْ مِّنْ كُلِّ أَمْرٍ ✦ سَلَامٌ هِيَ حَتَّى مَطْلَعِ الْفَجْرِ ✦",
+          latin:
+            "Bismillahir-rahmanir-rahim. Innaa anzalnaahu fii lailatil-qadr. Wa maa adraaka maa lailatul-qadr. Lailatul-qadri khairum min alfi syahr. Tanazzalul-malaa'ikatu war-ruuhu fiihaa, bi'idzni rabbihim min kulli amr. Salaamun hiya hattaa mathla'il-fajr.",
+          trans:
+            "Dengan nama Allah Yang Maha Pengasih Maha Penyayang. Sesungguhnya Kami telah menurunkannya (Al-Qur'an) pada malam kemuliaan. Tahukah kamu apakah malam kemuliaan itu? Malam kemuliaan itu lebih baik dari seribu bulan. Pada malam itu turun malaikat-malaikat dan malaikat Jibril dengan izin Tuhannya untuk mengatur segala urusan. Sejahteralah (malam itu) sampai terbit fajar.",
+          fadhilah:
+            "Surah Al-Qadr mendatangkan keberkahan luar biasa, mengundang malaikat turun membawa kedamaian dan rahmat ke tempat kita berdoa.",
+        },
+        {
+          id: 8,
+          cat: "III. BENTENG DIRI & KEBERKAHAN",
+          target: 1,
+          title: "Ayat Kursi & Al-Baqarah 163",
+          subtitle: "Puncak Pagar Gaib & Keselamatan",
+          arabic:
+            "وَإِلٰهُكُمْ إِلٰهٌ وَّاحِدٌ، لَآ إِلٰهَ إِلَّا هُوَ، الرَّحْمٰنُ الرَّحِيْمُ ✦<br>اَللّٰهُ لَآ إِلٰهَ إِلَّا هُوَ، الْحَيُّ الْقَيُّوْمُ، لَا تَأْخُذُهٗ سِنَةٌ وَّلَا نَوْمٌ، لَهٗ مَا فِي السَّمَاوَاتِ وَمَا فِي الْأَرْضِ، مَنْ ذَا الَّذِيْ يَشْفَعُ عِنْدَهٗٓ إِلَّا بِإِذْنِهٖ، يَعْلَمُ مَا بَيْنَ أَيْدِيْهِمْ وَمَا خَلْفَهُمْ، وَلَا يُحِيْطُوْنَ بِشَيْءٍ مِّنْ عِلْمِهٖٓ إِلَّا بِمَا شَآءَ، وَسِعَ كُرْسِيُّهُ السَّمَاوَاتِ وَالْأَرْضَ، وَلَا يَؤُوْدُهٗ حِفْظُهُمَا، وَهُوَ الْعَلِيُّ الْعَظِيْمُ ✦",
+          latin:
+            "Wa ilaahukum ilaahuw waahidun, laa ilaaha illaa huwar-rahmanur-rahim.<br>Allahu laa ilaaha illaa huwal-hayyul-qayyuum, laa ta'khudzuhuu sinatuw wa laa naum, lahuu maa fis-samaawaati wa maa fil-ardh, man dzal-ladzii yasyfa'u 'indahuu illaa bi'idznih, ya'lamu maa baina aidiihim wa maa khalfahum, wa laa yuhiithuuna bisyai'im-min 'ilmihii illaa bimaa syaa', wasi'a kursiyyuhus-samaawaati wal-ardh, wa laa ya'uuduhuu hifzhuhumaa, wa huwal-'aliyyul-'azhiim.",
+          trans:
+            "Dan Tuhanmu adalah Tuhan Yang Maha Esa, tidak ada Tuhan melainkan Dia Yang Maha Pengasih lagi Maha Penyayang (QS. Al-Baqarah: 163).<br>Allah, tidak ada Tuhan melainkan Dia Yang Mahahidup lagi terus menerus mengurus (makhluk-Nya), tidak mengantuk dan tidak tidur. Kepunyaan-Nya apa yang di langit dan di bumi. Tiada yang dapat memberi syafa'at di sisi Allah tanpa izin-Nya. Allah mengetahui apa-apa yang di hadapan mereka dan di belakang mereka, dan mereka tidak mengetahui apa-apa dari ilmu Allah melainkan apa yang dikehendaki-Nya. Kursi Allah meliputi langit dan bumi. Dan Allah tidak merasa berat memelihara keduanya, dan Allah Maha Tinggi lagi Maha Agung (QS. Al-Baqarah: 255).",
+          fadhilah:
+            "Benteng pertahanan terkuat. Barangsiapa membacanya, maka Allah akan senantiasa menjaganya dan setan tidak akan mendekatinya.",
+        },
+        {
+          id: 9,
+          cat: "III. BENTENG DIRI & KEBERKAHAN",
+          target: 1,
+          title: "Āmanar Rasūl — Al-Baqarah 284–285",
+          subtitle: "Pengukuhan Iman & Permohonan Ampunan",
+          arabic:
+            "لِلّٰهِ مَا فِي السَّمَاوَاتِ وَمَا فِي الْأَرْضِ، وَإِنْ تُبْدُوْا مَا فِيْٓ أَنْفُسِكُمْ أَوْ تُخْفُوْهُ يُحَاسِبْكُمْ بِهِ اللّٰهُ، فَيَغْفِرُ لِمَنْ يَّشَآءُ، وَيُعَذِّبُ مَنْ يَّشَآءُ، وَاللّٰهُ عَلَى كُلِّ شَيْءٍ قَدِيْرٌ ✦<br>آمَنَ الرَّسُوْلُ بِمَآ أُنْزِلَ إِلَيْهِ مِنْ رَّبِّهِ وَالْمُؤْمِنُوْنَ، كُلٌّ آمَنَ بِاللّٰهِ، وَمَلَائِكَتِهِ، وَكُتُبِهِ، وَرُسُلِهِ، لَا نُفَرِّقُ بَيْنَ أَحَدٍ مِّنْ رُّسُلِهِ، وَقَالُوْا سَمِعْنَا وَأَطَعْنَا، غُفْرَانَكَ رَبَّنَا، وَإِلَيْكَ الْمَصِيْرُ ✦",
+          latin:
+            "Lillahi maa fis-samaawaati wa maa fil-ardh, wa in tubduu maa fii anfusikum au tukhfuuhu yuhaasibkum bihillah, fayaghfiru limay-yasyaa'u, wa yu'adzdzibu may-yasyaa', wallahu 'alaa kulli syai'in qadiir.<br>Aamanar-rasuulu bimaa unzila ilaihi mir-rabbihii wal-mu'minuun, kullun aamana billahi, wa malaaikatihii, wa kutubihii, wa rusulih, laa nufarriqu baina ahadim-mir-rusulih, wa qaaluu sami'naa wa atha'naa, ghufraanaka rabbanaa, wa ilaikal-mashiir.",
+          trans:
+            "Milik Allah-lah apa yang ada di langit dan di bumi. Jika kamu tampakkan apa yang ada di dalam hatimu atau kamu sembunyikan, niscaya Allah akan membuat perhitungan dengan kamu tentang perbuatanmu itu. Maka Allah mengampuni siapa yang dikehendaki-Nya, dan menyiksa siapa yang dikehendaki-Nya, dan Allah Maha Kuasa atas segala sesuatu.<br>Rasul (Muhammad) beriman kepada Al-Qur'an yang diturunkan kepadanya dari Tuhannya, demikian pula orang-orang yang beriman. Semuanya beriman kepada Allah, malaikat-malaikat-Nya, kitab-kitab-Nya dan rasul-rasul-Nya. (Mereka mengatakan): Kami tidak membeda-bedakan antara seorang pun dari rasul-rasul-Nya, dan mereka mengatakan: Kami dengar dan kami taat. (Ampunilah) kami ya Tuhan kami, dan kepada Engkaulah tempat kembali.",
+          fadhilah:
+            "Dua ayat penutup Al-Baqarah ini adalah pengukuhan iman yang sempurna setelah membentengi diri dengan Ayat Kursi.",
+        },
+        {
+          id: 10,
+          cat: "III. BENTENG DIRI & KEBERKAHAN",
+          target: 1,
+          title: "Āmanar Rasūl — Al-Baqarah 286",
+          subtitle: "Doa Penutup Surah Al-Baqarah",
+          arabic:
+            "لَا يُكَلِّفُ اللّٰهُ نَفْسًا إِلَّا وُسْعَهَا، لَهَا مَا كَسَبَتْ، وَعَلَيْهَا مَا اكْتَسَبَتْ، رَبَّنَا لَا تُؤَاخِذْنَآ إِنْ نَّسِيْنَآ أَوْ أَخْطَأْنَا، رَبَّنَا وَلَا تَحْمِلْ عَلَيْنَآ إِصْرًا كَمَا حَمَلْتَهٗ عَلَى الَّذِيْنَ مِنْ قَبْلِنَا، رَبَّنَا وَلَا تُحَمِّلْنَا مَا لَا طَاقَةَ لَنَا بِهِ، وَاعْفُ عَنَّا، وَاغْفِرْ لَنَا، وَارْحَمْنَا، أَنْتَ مَوْلَانَا، فَانْصُرْنَا عَلَى الْقَوْمِ الْكَافِرِيْنَ ✦",
+          latin:
+            "Laa yukallifullahu nafsan illaa wus'ahaa, lahaa maa kasabat, wa 'alaihaa mak-tasabat.<br>Rabbanaa laa tu'aakhidznaa in nasiinaa au akhtha'naa, rabbanaa wa laa tahmil 'alainaa ishran kamaa hamaltahu 'alal-ladziina min qablinaa, rabbanaa wa laa tuhammilnaa maa laa thaaqata lanaa bih, wa'fu 'annaa, waghfir lanaa, warhamnaa, anta maulaanaa, fanshurnaa 'alal-qaumil-kaafiriin.",
+          trans:
+            "Allah tidak membebani seseorang melainkan sesuai dengan kesanggupannya. Ia mendapat pahala (dari kebaikan) yang diusahakannya dan ia mendapat siksa (dari kejahatan) yang dikerjakannya.<br>(Mereka berdoa): Ya Tuhan kami, janganlah Engkau hukum kami jika kami lupa atau kami tersalah. Ya Tuhan kami, janganlah Engkau bebankan kepada kami beban yang berat sebagaimana Engkau bebankan kepada orang-orang sebelum kami. Ya Tuhan kami, janganlah Engkau pikulkan kepada kami apa yang tak sanggup kami memikulnya. Maafkanlah kami, ampunilah kami, dan rahmatilah kami. Engkaulah Pelindung kami, maka tolonglah kami menghadapi kaum yang kafir.",
+          fadhilah:
+            "Doa penutup Al-Baqarah yang Nabi ﷺ bersabda: 'Barangsiapa membacanya di malam hari, maka itu mencukupinya.'",
+        },
+        {
+          id: 11,
+          cat: "III. BENTENG DIRI & KEBERKAHAN",
+          target: 1,
+          title: "Dzikir & Doa Penutup Pagar",
+          subtitle: "Penutup Benteng Spiritual Sebelum Shalawat",
+          arabic:
+            "يَا أَرْحَمَ الرَّاحِمِيْنَ، ارْحَمْنَا (٣×)، بِرَحْمَتِكَ يَا أَرْحَمَ الرَّاحِمِيْنَ ✦<br>سُبْحَانَ اللّٰهِ وَبِحَمْدِهِ، سُبْحَانَ اللّٰهِ الْعَظِيْمِ (٣×) ✦<br>حَسْبُنَا اللّٰهُ وَنِعْمَ الْوَكِيْلُ، نِعْمَ الْمَوْلَى، وَنِعْمَ النَّصِيْرُ (٣×) ✦<br>وَلَا حَوْلَ وَلَا قُوَّةَ إِلَّا بِاللّٰهِ الْعَلِيِّ الْعَظِيْمِ ✦<br>أَسْتَغْفِرُ اللّٰهَ رَبَّ الْبَرَايَا، أَسْتَغْفِرُ اللّٰهَ مِنَ الْخَطَايَا ✦",
+          latin:
+            "Yaa arhamar-raahimiin, irhamnaa (3x), birahmatika yaa arhamar-raahimiin.<br>Subhanallahi wa bihamdihii, subhanallahil-'azhiim (3x).<br>Hasbunallahu wa ni'mal-wakiilu, ni'mal-maulaa, wa ni'man-nashiir (3x).<br>Wa laa haula wa laa quwwata illaa billahil-'aliyyil-'azhiim.<br>Astaghfirullah rabbal-baraayaa, astaghfirullah minal-khathaayaa.",
+          trans:
+            "Wahai Yang Paling Pengasih di antara para pengasih, kasihilah kami (3x), dengan rahmat-Mu wahai Yang Maha Pengasih.<br>Maha Suci Allah dan segala puji bagi-Nya, Maha Suci Allah Yang Maha Agung (3x).<br>Cukuplah Allah bagi kami, sebaik-baik pelindung, dan sebaik-baik penolong (3x).<br>Tiada daya dan kekuatan kecuali dengan pertolongan Allah Yang Maha Tinggi lagi Maha Agung.<br>Aku memohon ampun kepada Allah Tuhan semesta alam, aku memohon ampun dari segala kesalahan dan dosa.",
+          fadhilah:
+            "Dzikir penutup yang menyempurnakan pagar spiritual sebelum menyambungkan hati kepada Nabi ﷺ dengan shalawat.",
+        },
+        {
+          id: 12,
+          cat: "III. BENTENG DIRI & KEBERKAHAN",
+          target: 1,
+          title: "Dalil & Shalawat Nariyah",
+          subtitle: "Menyambung Hati kepada Nabi ﷺ — Dibaca 3×/7×/11×",
+          arabic:
+            "إِنَّ اللّٰهَ وَمَلَائِكَتَهُ يُصَلُّوْنَ عَلَى النَّبِيِّ، يَآ أَيُّهَا الَّذِيْنَ آمَنُوْا صَلُّوْا عَلَيْهِ، وَسَلِّمُوْا تَسْلِيْمًا ✦<br>اَللّٰهُمَّ صَلِّ صَلَاةً كَامِلَةً، وَسَلِّمْ سَلَامًا تَامًّا، عَلَى سَيِّدِنَا مُحَمَّدٍ الَّذِيْ تَنْحَلُّ بِهِ الْعُقَدُ، وَتَنْفَرِجُ بِهِ الْكُرَبُ، وَتُقْضَى بِهِ الْحَوَائِجُ، وَتُنَالُ بِهِ الرَّغَائِبُ، وَحُسْنُ الْخَوَاتِمِ، وَيُسْتَسْقَى الْغَمَامُ بِوَجْهِهِ الْكَرِيْمِ، وَعَلَى آلِهِ، وَصَحْبِهِ، فِيْ كُلِّ لَمْحَةٍ وَنَفَسٍۢ، بِعَدَدِ كُلِّ مَعْلُوْمٍ لَّكَ ✦",
+          latin:
+            "Innallaha wa malaaikatahu yushalluuna 'alan-nabiy, yaa ayyuhal-ladziina aamanuu shalluu 'alaihi, wa sallimuu tasliimaa.<br>Allahumma shalli shalaatan kaamilatan, wa sallim salaaman taamman, 'alaa sayyidinaa muhammadil-ladzii tanhallu bihil-'uqadu, wa tanfariju bihil-kurabu, wa tuqdhaa bihil-hawaiju, wa tunaalu bihir-raghaa'ibu, wa husnul-khawaatimi, wa yustasqal-ghamaamu biwajhihil-kariimi, wa 'alaa aalihii, wa shahbihii, fii kulli lamhatiw wa nafasim-bi'adadi kulli ma'luumil-lak.",
+          trans:
+            "Sesungguhnya Allah dan para malaikat-Nya bershalawat atas Nabi. Wahai orang-orang beriman, bershalawatlah kamu dan ucapkanlah salam penghormatan kepadanya (QS. Al-Ahzab: 56).<br>Ya Allah limpahkanlah shalawat yang sempurna, dan salam yang lengkap, atas junjungan kami Nabi Muhammad, yang dengannya terurai segala kesulitan, lenyap segala kesedihan, terpenuhi segala hajat, tercapai segala keinginan, baik pada akhir hayat, dan tercurah air hujan karena kemuliaan wajahnya, beserta keluarga, dan sahabatnya, di setiap kedipan mata dan tarikan nafas sebanyak ilmu yang ada pada-Mu.",
+          fadhilah:
+            "Shalawat Nariyah adalah shalawat yang masyhur untuk hajat. Bacalah 3×/7×/11× dengan penuh keyakinan dan cinta kepada Nabi ﷺ.",
+        },
+        {
+          id: 13,
+          cat: "III. BENTENG DIRI & KEBERKAHAN",
+          target: 1,
+          title: "Shalawat Ibrahimiyah",
+          subtitle: "Shalawat yang Diajarkan Langsung oleh Nabi ﷺ",
+          arabic:
+            "اَللّٰهُمَّ صَلِّ عَلَى سَيِّدِنَا مُحَمَّدٍ، وَعَلَى آلِ سَيِّدِنَا مُحَمَّدٍ، كَمَا صَلَّيْتَ عَلَى سَيِّدِنَا إِبْرَاهِيْمَ، وَعَلَى آلِ سَيِّدِنَا إِبْرَاهِيْمَ، وَبَارِكْ عَلَى سَيِّدِنَا مُحَمَّدٍ، وَعَلَى آلِ سَيِّدِنَا مُحَمَّدٍ، كَمَا بَارَكْتَ عَلَى سَيِّدِنَا إِبْرَاهِيْمَ، وَعَلَى آلِ سَيِّدِنَا إِبْرَاهِيْمَ، فِي الْعَالَمِيْنَ، إِنَّكَ حَمِيْدٌ مَجِيْدٌ ✦",
+          latin:
+            "Allahumma shalli 'alaa sayyidinaa muhammadin, wa 'alaa aali sayyidinaa muhammadin, kamaa shallaita 'alaa sayyidinaa ibraahiima, wa 'alaa aali sayyidinaa ibraahiim. Wa baarik 'alaa sayyidinaa muhammadin, wa 'alaa aali sayyidinaa muhammadin, kamaa baarakta 'alaa sayyidinaa ibraahiima, wa 'alaa aali sayyidinaa ibraahiima, fil-'aalamiina, innaka hamiidum-majiid.",
+          trans:
+            "Ya Allah, limpahkanlah rahmat atas junjungan kami Muhammad, dan keluarganya, sebagaimana Engkau limpahkan rahmat atas Ibrahim, dan keluarganya. Dan berkahilah junjungan kami Muhammad, dan keluarganya, sebagaimana Engkau berkahi Ibrahim, dan keluarganya, di seluruh alam semesta. Sungguh Engkau Maha Terpuji lagi Maha Mulia.",
+          fadhilah:
+            "Shalawat Ibrahimiyah dibaca dalam setiap shalat (tasyahud). Membacanya di sini menyempurnakan ikatan cinta kepada Nabi ﷺ sebelum memasuki Tawasul.",
+        },
+        {
+          id: 14,
+          cat: "IV. TAWASUL (1/11)",
+          target: 1,
+          title: "Tawasul 1 — Rasulullah SAW & Ahli Bait",
+          subtitle: "Kirimkan Al-Fatihah 1x",
+          arabic:
+            "إِلَى حَضْرَةِ النَّبِيِّ الْمُصْطَفَى سَيِّدِنَا مُحَمَّدٍ صَلَّى اللّٰهُ عَلَيْهِ وَسَلَّمَ، وَعَلَى آلِهِ، وَأَزْوَاجِهِ، وَذُرِّيَّاتِهِ، وَأَهْلِ بَيْتِهِ أَجْمَعِيْنَ، شَيْءٌ لِلّٰهِ لَهُمُ الْفَاتِحَةُ ✦",
+          latin:
+            "Ilaa hadhratin-nabiyyil-mushthafaa Sayyidinaa Muhammadin SAW, wa 'alaa aalihii, wa azwaajihii, wa dzurriyyaatihii, wa ahli baitihii ajma'iin, syai'ul-lillahi lahumul-Faatihah.",
+          trans:
+            "Kepada haribaan Nabi pilihan, junjungan kita Muhammad SAW, keluarga, istri-istri, keturunan, dan ahli bait beliau seluruhnya, sesuatu karena Allah, bagi mereka Al-Fatihah.",
+          fadhilah:
+            "Kirimkan Al-Fatihah penuh rasa cinta dan hormat kepada baginda Nabi SAW beserta keluarga beliau.",
+        },
+        {
+          id: 15,
+          cat: "IV. TAWASUL (2/11)",
+          target: 1,
+          title: "Tawasul 2 — Sahabat Khulafaur Rasyidin",
+          subtitle: "Kirimkan Al-Fatihah 1x",
+          arabic:
+            "ثُمَّ إِلَى حَضْرَةِ جَمِيْعِ أَصْحَابِ رَسُوْلِ اللّٰهِ صَلَّى اللّٰهُ عَلَيْهِ وَسَلَّمَ، خُصُوْصًا إِلَى حَضْرَةِ سَيِّدِنَا أَبِي بَكْرٍ، وَعُمَرَ، وَعُثْمَانَ، وَعَلِيٍّ رَضِيَ اللّٰهُ عَنْهُمْ، شَيْءٌ لِلّٰهِ لَهُمُ الْفَاتِحَةُ ✦",
+          latin:
+            "Tsumma ilaa hadhrati jami'i ash-haabi Rasulillah SAW, khushushan ilaa hadhrati Sayyidinaa Abii Bakrin, wa 'Umara, wa 'Uthsmaana, wa 'Aliyyin radhiyallahu 'anhum, syai'ul-lillahi lahumul-Faatihah.",
+          trans:
+            "Kepada seluruh sahabat Rasulullah SAW, khususnya Abu Bakar, Umar, Utsman, dan Ali RA, Al-Fatihah.",
+          fadhilah:
+            "Para sahabat Nabi adalah generasi terbaik umat Islam. Memuliakan mereka bagian dari keimanan.",
+        },
+        {
+          id: 16,
+          cat: "IV. TAWASUL (3/11)",
+          target: 1,
+          title: "Tawasul 3 — Tabi'in & Imam Madzhab",
+          subtitle: "Kirimkan Al-Fatihah 1x",
+          arabic:
+            "ثُمَّ إِلَى حَضْرَةِ التَّابِعِيْنَ، وَتَابِعِي التَّابِعِيْنَ، وَمَنْ تَبِعَهُمْ بِإِحْسَانٍ إِلَى يَوْمِ الدِّيْنِ، وَإِلَى أَرْوَاحِ الْأَئِمَّةِ الْمُجْتَهِدِيْنَ رَحِمَهُمُ اللّٰهُ تَعَالَى، شَيْءٌ لِلّٰهِ لَهُمُ الْفَاتِحَةُ ✦",
+          latin:
+            "Tsumma ilaa hadhratit-taabi'iina, wa taabi'it-taabi'iina, wa man tabi'ahum bi-ihsaanin ilaa yaumid-diin, wa ilaa arwaahil-a'immatil-mujtahidiina rahimahumullahut-ta'aalaa, syai'ul-lillahi lahumul-Faatihah.",
+          trans:
+            "Kepada para Tabi'in, Tabi'ut Tabi'in, dan orang-orang yang mengikuti mereka dengan baik, serta roh para Imam Mujtahid rahimahumullahu ta'ala, Al-Fatihah.",
+          fadhilah:
+            "Para Imam Madzhab: Imam Hanafi, Maliki, Syafi'i, dan Hanbali beserta murid-murid beliau.",
+        },
+        {
+          id: 17,
+          cat: "IV. TAWASUL (4/11)",
+          target: 1,
+          title: "Tawasul 4 — Para Malaikat Muqarrabin",
+          subtitle: "Kirimkan Al-Fatihah 1x",
+          arabic:
+            "ثُمَّ إِلَى حَضْرَةِ جَمِيْعِ الْمَلَائِكَةِ الْمُقَرَّبِيْنَ وَالْكَرُوْبِيِّيْنَ، خُصُوْصًا الْمَلَائِكَةِ جِبْرِيْلَ، وَمِيْكَائِيْلَ، وَإِسْرَافِيْلَ، وَعِزْرَائِيْلَ، شَيْءٌ لِلّٰهِ لَهُمُ الْفَاتِحَةُ ✦",
+          latin:
+            "Tsumma ilaa hadhrati jami'il-malaaikatil-muqarrabiina wal-karuubiyyiin, khushushanil-malaaikati Jibriila, wa Miikaa'iila, wa Israafiila, wa 'Izraa'iil, syai'ul-lillahi lahumul-Faatihah.",
+          trans:
+            "Kepada seluruh malaikat Muqarrabin dan Karubiyyin, khususnya Jibril, Mikail, Israfil, dan Izrail, Al-Fatihah.",
+          fadhilah:
+            "Para malaikat adalah makhluk Allah yang senantiasa bertasbih dan memohonkan ampunan bagi kaum beriman.",
+        },
+        {
+          id: 18,
+          cat: "IV. TAWASUL (5/11)",
+          target: 1,
+          title: "Tawasul 5 — Para Nabi & Rasul",
+          subtitle: "Kirimkan Al-Fatihah 1x",
+          arabic:
+            "ثُمَّ إِلَى حَضْرَةِ آبَائِهِ وَإِخْوَانِهِ مِنَ الْأَنْبِيَاءِ وَالْمُرْسَلِيْنَ، خُصُوْصًا نَبِيَّ اللّٰهِ خَضِرًا، وَنَبِيَّ اللّٰهِ إِلْيَاسَ، وَنَبِيَّ اللّٰهِ إِدْرِيْسَ، وَنَبِيَّ اللّٰهِ سُلَيْمَانَ، وَنَبِيَّ اللّٰهِ دَاوُدَ، وَنَبِيَّ اللّٰهِ إِبْرَاهِيْمَ، وَنَبِيَّ اللّٰهِ مُوْسَى، وَنَبِيَّ اللّٰهِ عِيْسَى عَلَيْهِمُ الصَّلَاةُ وَالسَّلَامُ، شَيْءٌ لِلّٰهِ لَهُمُ الْفَاتِحَةُ ✦",
+          latin:
+            "Tsumma ilaa hadhrati aabaa'ihii wa ikhwaanihii minal-ambiyaa'i wal-mursaliin, khushushan Nabiyyallah Khadhiran, wa Nabiyyallah Ilyasa, wa Nabiyyallah Idriisa, wa Nabiyyallah Sulaimaana, wa Nabiyyallah Daawuda, wa Nabiyyallah Ibraahiima, wa Nabiyyallah Muusaa, wa Nabiyyallah 'Iisaa 'alaihimush-shalaatu was-salaam, syai'ul-lillahi lahumul-Faatihah.",
+          trans:
+            "Kepada para Nabi dan Rasul, khususnya Nabi Khidir, Ilyas, Idris, Sulaiman, Daud, Ibrahim, Musa, dan Isa alaihimush-shalatu was-salam, Al-Fatihah.",
+          fadhilah:
+            "Para Nabi dan Rasul adalah teladan terbaik dalam mendekatkan diri kepada Allah SWT.",
+        },
+        {
+          id: 19,
+          cat: "IV. TAWASUL (6/11)",
+          target: 1,
+          title: "Tawasul 6 — Sultanul Auliya Syaikh Abdul Qadir",
+          subtitle: "Kirimkan Al-Fatihah 1x",
+          arabic:
+            "ثُمَّ إِلَى حَضْرَةِ خُصُوْصًا قُطْبِ الْغَوْثِ، وَمُحْيِي السُّنَّةِ وَالدِّيْنِ، إِمَامِنَا وَقُدْوَتِنَا وَسَيِّدِنَا سُلْطَانِ الْأَوْلِيَاءِ الشَّيْخِ عَبْدِ الْقَادِرِ الْجِيْلَانِيِّ فِي دَارِ بَغْدَادَ، قَدَّسَ اللّٰهُ سِرَّهُ الْعَزِيْزِ، وَنَوَّرَ ضَرِيْحَهُ، وَأُصُوْلِهِ وَفُرُوْعِهِ، وَأَهْلِ سِلْسِلَتِهِ، وَمُرِيْدِيْهِ، وَصَاحِبِ الْإِجَازَةِ كَرَامَةً لَهُمْ، شَيْءٌ لِلّٰهِ لَهُمُ الْفَاتِحَةُ ✦",
+          latin:
+            "Tsumma ilaa hadhrati khushushan Quthbil-Ghautsi, wa Muhyis-Sunnati wad-Diini, Imaaminaa wa Qudwatinaa wa Sayyidinaa Sulthaanil-Auliyaa'is-Syekh 'Abdul Qadir al-Jilaaniy fii Daari Baghdaad, qaddasallahu sirrahul-'Aziiza, wa nawwara dhariihahu, wa ushuulihii wa furuu'ihii, wa ahli silsilatihii, wa muriidiihii, wa shaahibil-ijaazati karaamatan lahum, syai'ul-lillahi lahumul-Faatihah.",
+          trans:
+            "Khususnya kepada Wali Qutub Ghauts, Pemimpin Para Wali, Syekh Abdul Qadir al-Jilani yang bersemayam di kota Baghdad, qaddasallahu sirrahul-'Aziz, semoga Allah menerangi makam beliau, beserta para leluhur, keturunan, jajaran silsilah, para murid beliau, dan pemberi ijazah sebagai karamah bagi mereka, Al-Fatihah.",
+          fadhilah:
+            "Syekh Abdul Qadir Al-Jilani (470-561 H) adalah wali qutub yang karamahnya diakui seluruh dunia Islam.",
+        },
+        {
+          id: 20,
+          cat: "IV. TAWASUL (7/11)",
+          target: 1,
+          title: "Tawasul 7 — Penyusun Kitab Hikmah",
+          subtitle: "Kirimkan Al-Fatihah 1x",
+          arabic:
+            "ثُمَّ إِلَى حَضْرَةِ أَرْوَاحِ الشَّيْخِ الْإِمَامِ أَحْمَدَ بْنِ عَلِيٍّ الْبُوْنِيِّ، وَالشَّيْخِ الْإِمَامِ أَحْمَدَ دَيْرَبِي الْكَبِيْرِ خُصُوْصًا، شَيْءٌ لِلّٰهِ لَهُمُ الْفَاتِحَةُ ✦",
+          latin:
+            "Tsumma ilaa hadhrati arwaahisy-Syaikhil-Imam Ahmad bin 'Ali al-Buniy, wasy-Syaikhil-Imam Ahmad Dairabi al-Kabir khushushan, syai'ul-lillahi lahumul-Faatihah.",
+          trans:
+            "Kepada penyusun kitab hikmah Syaikh Ahmad bin Ali Al-Buni dan Syaikh Ahmad Dairabi Al-Kabir, Al-Fatihah.",
+          fadhilah:
+            "Imam Al-Buni (w. 622 H) adalah ulama besar penyusun Kitab Syamsul Ma'arif yang sangat masyhur.",
+        },
+        {
+          id: 21,
+          cat: "IV. TAWASUL (8/11)",
+          target: 1,
+          title: "Tawasul 8 — Wali Songo Nusantara",
+          subtitle: "Kirimkan Al-Fatihah 1x",
+          arabic:
+            "ثُمَّ إِلَى حَضْرَةِ أَرْوَاحِ الْأَوْلِيَاءِ التِّسْعَةِ (وَالِي سَوْنغُوْ) فِي إِندُونِيْسِيَا، قَدَّسَ اللّٰهُ أَسْرَارَهُمْ، شَيْءٌ لِلّٰهِ لَهُمُ الْفَاتِحَةُ ✦",
+          latin:
+            "Tsumma ilaa hadhrati arwaahil-auliyaa'it-tis'ati (Wali Songo) fii Induuniisiyaa, qaddasallahu asraarahum, syai'ul-lillahi lahumul-Faatihah.",
+          trans:
+            "Kepada hadirat roh Sembilan Wali (Wali Songo) penyebar Islam di Indonesia, qaddasallahu asraarahum, Al-Fatihah.",
+          fadhilah:
+            "Wali Songo adalah 9 wali agung penyebar Islam di Nusantara yang menjadi pilar peradaban Islam Indonesia.",
+        },
+        {
+          id: 22,
+          cat: "IV. TAWASUL (9/11)",
+          target: 1,
+          title: "Tawasul 9 — Muassis Nahdlatul Ulama",
+          subtitle: "Kirimkan Al-Fatihah 1x",
+          arabic:
+            "ثُمَّ إِلَى أَرْوَاحِ مُؤَسِّسِي جَمْعِيَّةِ نَهْضَةِ الْعُلَمَاءِ، خُصُوْصًا إِلَى حَضْرَةِ الشَّيْخِ كِيَاهِي حَاجِي هَاشِمْ أَشْعَرِي، وَمَشَايِخِهِمْ، شَيْءٌ لِلّٰهِ لَهُمُ الْفَاتِحَةُ ✦",
+          latin:
+            "Tsumma ilaa arwaahi mu'assisii Jam'iyyati Nahdlatil-Ulama, khushushan ilaa hadhratis-Syekh KH Hasyim Asy'ari, wa masyayikhihim, syai'ul-lillahi lahumul-Faatihah.",
+          trans:
+            "Kepada pendiri Nahdlatul Ulama, khususnya Hadhratus Syaikh KH Hasyim Asy'ari, dan syekh-syekh mereka, Al-Fatihah.",
+          fadhilah:
+            "KH Hasyim Asy'ari (1871-1947) adalah pendiri NU, ulama besar yang juga pahlawan nasional Indonesia.",
+        },
+        {
+          id: 23,
+          cat: "IV. TAWASUL (10/11)",
+          target: 1,
+          title: "Tawasul 10 — Orang Tua & Para Guru",
+          subtitle: "Kirimkan Al-Fatihah 1x",
+          arabic:
+            "ثُمَّ إِلَى أَرْوَاحِ آبَائِنَا، وَأُمَّهَاتِنَا، وَأَجْدَادِنَا، وَجَدَّاتِنَا، وَجَمِيْعِ أَسَاتِذَتِنَا، وَمَشَايِخِنَا خُصُوْصًا، شَيْءٌ لِلّٰهِ لَهُمُ الْفَاتِحَةُ ✦",
+          latin:
+            "Tsumma ilaa arwaahi aabaa'inaa, wa ummahaatinaa, wa ajdaadinaa, wa jaddaatinaa, wa jami'i asaatidzatinaa, wa masyayikhinaa khushushan, syai'ul-lillahi lahumul-Faatihah.",
+          trans:
+            "Kepada ayah, ibu, kakek, nenek, guru-guru, dan syekh-syekh kami, Al-Fatihah.",
+          fadhilah:
+            "Mendoakan orang tua & guru adalah bentuk birrul walidain & tanda muridiyah yang sempurna.",
+        },
+        {
+          id: 24,
+          cat: "IV. TAWASUL (11/11)",
+          target: 1,
+          title: "Tawasul 11 — Pemberi Ijazah Amalan",
+          subtitle: "Kirimkan Al-Fatihah 1x",
+          arabic:
+            "ثُمَّ إِلَى حَضْرَةِ مَنْ أَجَازَنِي وَصَاحِبِ هٰذِهِ الْكَلِمَةِ، الشَّيْخِ رَئِيْسِ فَجْرِ صِدِّيْقْ، وَآعَنْغْ حَاجِي لِيْلِي سِيْبِيْتِيْكْ، شَيْءٌ لِلّٰهِ لَهُمُ الْفَاتِحَةُ ✦",
+          latin:
+            "Tsumma ilaa hadhrati man ajaazanii wa shaahibi haadzihil-kalimah, Syekh Ra'is Fajar Shiddiq, wa Aang Haji Lili Cibitik, syai'ul-lillahi lahumul-Faatihah.",
+          trans:
+            "Kepada yang mengijazahkan amalan ini — Ustadz Rais Fajar Shiddiq & Aang Haji Lili Cibitik, Al-Fatihah.",
+          fadhilah:
+            "Tawasul kepada pemberi ijazah memperkuat sanad amalan dan menjamin tersambungnya barakah.",
+        },
+        {
+          id: 25,
+          cat: "V. INTI AMALAN (1/5)",
+          target: 11,
+          title: "Sholawat Adrikni",
+          subtitle: "11× — Untuk Hajat Mendesak & Percepatan Rezeki",
+          arabic:
+            "اَلصَّلَاةُ وَالسَّلَامُ بِعَدَدِ مَا فِيْ عِلْمِ اللّٰهِ عَلَيْكَ وَعَلَى آلِكَ، يَا سَيِّدِيْ يَا رَسُوْلَ اللّٰهِ، خُذْ بِيَدِيْ، قَلَّتْ حِيْلَتِيْ، أَدْرِكْنِيْ سَرِيْعًۢا بِعِزَّةِ اللّٰهِ ✦",
+          latin:
+            "Ash-shalaatu was-salaamu bi'adadi maa fii 'ilmillahi 'alaika wa 'alaa aalika, Yaa Sayyidii Yaa Rasulallah, khudz biyadii, qallat hiilatii, adrikinii sari'am-bi'izzatillah.",
+          trans:
+            "Rahmat & salam sebanyak ilmu Allah atasmu ya Rasulullah, peganglah tanganku — habis daya upayaku — tolonglah aku segera dengan kemuliaan Allah.",
+          fadhilah:
+            "Dibaca 11× untuk kemudahan hajat mendesak & rezeki dari arah yang tidak disangka-sangka.",
+        },
+        {
+          id: 26,
+          cat: "V. INTI AMALAN (2/5)",
+          target: 7,
+          title: "Sholawat Ismul A'dhom",
+          subtitle: "7× — Keteguhan Iman & Kemudahan Hafalan",
+          arabic:
+            "اَللّٰهُمَّ إِنِّيْ أَسْأَلُكَ بِاسْمِكَ الْأَعْظَمِ، الْمَكْتُوْبِ مِنْ نُوْرِ وَجْهِكَ الْأَعْلَى، الْمُؤَبَّدِ الدَّائِمِ الْبَاقِي الْمُخَلَّدِ، فِيْ قَلْبِ نَبِيِّكَ وَرَسُوْلِكَ مُحَمَّدٍ صَلَّى اللّٰهُ عَلَيْهِ وَسَلَّمَ، وَبِحَقِّ بِسْمِ اللّٰهِ الرَّحْمٰنِ الرَّحِيْمِ ✦",
+          latin:
+            "Allahumma inni as'aluka bismikal-a'zham, al-maktubi min nuuri wajhikal-a'laa, al-mu'abbad ad-da'imil-baaqil-mukhallad, fii qalbi nabiyyika wa rasulika Muhammad SAW, wa bihaqqi bismillahir-rahmanir-rahim.",
+          trans:
+            "Ya Allah aku memohon dengan Nama Agung-Mu, yang tertulis dari cahaya Wajah-Mu yang Maha Tinggi, yang abadi lagi kekal, dalam hati Nabi dan Rasul-Mu Muhammad SAW, dan dengan kebenaran Bismillah.",
+          fadhilah:
+            "Dibaca 7× untuk keteguhan Iman, pertolongan rahasia, dan kemudahan menghafal Al-Qur'an.",
+        },
+        {
+          id: 27,
+          cat: "V. INTI AMALAN (3/5)",
+          target: 313,
+          title: "Zikir Kelimpahan Rezeki",
+          subtitle: "313× — Membuka Pintu Kekayaan & Keberhasilan",
+          arabic: "يَا غَنِيُّ، يَا مُغْنِيْ ✦",
+          latin: "Yaa Ghaniyyu, Yaa Mughnii",
+          trans: "Wahai Yang Maha Kaya, Wahai Yang Maha Memberi Kekayaan.",
+          fadhilah:
+            "Dibaca 313× menderaskan aliran rezeki yang berlimpah, halal, berkah dari segala penjuru yang tidak disangka.",
+        },
+        {
+          id: 28,
+          cat: "V. INTI AMALAN (4/5)",
+          target: 113,
+          title: "Zikir Pembuka Jalan & Kebutuhan",
+          subtitle: "113× — Membuka Kesulitan & Mencukupi Urusan",
+          arabic: "يَا فَتَّاحُ، يَا رَزَّاقُ ✦",
+          latin: "Yaa Fattaahu, Yaa Razzaaq",
+          trans:
+            "Wahai Yang Maha Pembuka (segala kesulitan), Wahai Yang Maha Memberi Rezeki.",
+          fadhilah:
+            "Dibaca 113× membuka pintu rahmat & jalan keluar dari segala kesulitan hidup secara menakjubkan.",
+        },
+        {
+          id: 29,
+          cat: "V. INTI AMALAN (5/5)",
+          target: 1,
+          title: "Doa Gabungan Utama Rezeki",
+          subtitle: "1× — Dibaca dengan Penuh Khusyuk",
+          arabic:
+            "رَبِّ اشْرَحْ لِيْ صَدْرِيْ، وَيَسِّرْ لِيْٓ أَمْرِيْ، وَاحْلُلْ عُقْدَةً مِّنْ لِّسَانِيْ، يَفْقَهُوا قَوْلِيْ ✦<br>وَبَارِكْ لَنَا اللّٰهُمَّ فِيْ جَمْعِ كَسْبِنَا، وَحَلَّ عُقُوْدَ الْعُسْرِ يَا يُوْهُ أَرْمَهَتْ ✦<br>اَللّٰهُمَّ بَارِكْ لَنَا فِيْ ثَمَرِنَا، وَزَرْعِنَا، وَتِجَارَتِنَا، وَارْزُقْنَا رِزْقًا حَلَالًا طَيِّبًا وَاسِعًا ✦",
+          latin:
+            "Rabbi isyrah lii shadrii, wa yassir lii amrii, wahlul 'uqdatam-mil-lisaanii, yafqahuu qaulii.<br>Wa baarik lanaa Allahumma fii jam'i kasbiinaa, wa halla 'uquudal-'usri Yaa Yuuhu Armahat.<br>Allahumma baarik lanaa fii tsimaarinaa, wa zar'inaa, wa tijaaratinaa, warzuqnaa rizqan halaalan thayyiban waasi'aa.",
+          trans:
+            "Ya Tuhanku lapangkanlah dadaku, mudahkanlah urusanku, dan lepaskanlah kekakuan dari lidahku, supaya mereka mengerti perkataanku (QS. Thaha: 25-28).<br>Berkahilah bagi kami ya Allah dalam himpunan penghasilan kami, dan lepaskanlah ikatan-ikatan kesulitan wahai Yaa Yuuhu Armahat.<br>Ya Allah berkahilah bagi kami pada buah-buahan kami, tanaman kami, dan perdagangan kami, serta rezekikanlah kami rezeki yang halal, baik, dan lapang.",
+          fadhilah:
+            "Doa pamungkas yang menggabungkan permohonan lapang dada, kelancaran rezeki, dan keberkahan usaha.",
+        },
+        {
+          id: 30,
+          cat: "VI. MUNAJAT PENUTUP",
+          target: 1,
+          title: "Munajat Hajat Pribadi",
+          subtitle: "Berdoa dengan Bahasa & Hajat Anda Sendiri",
+          fadhilah:
+            "Ini momen ijabah doa terbaik. Sampaikan hajat secara spesifik: keluarga, pekerjaan, utang, cita-cita.",
+          type: "finish",
+        },
+      ];
+
+      /* ===== STATE ===== */
+      const TASBIH_IDS = new Set([25, 26, 27, 28]);
+      let idx = 0;
+      let counts = new Array(SLIDES.length).fill(0);
+      let viewMode = "all";
+      let aaOn = true;
+      let isDark = false;
+
+      /* ===== HAPTIC ===== */
+      function vibrate(p = [40]) {
+        if (navigator.vibrate) navigator.vibrate(p);
+      }
+
+      /* ===== RENDER ===== */
+      function render() {
+        const s = SLIDES[idx];
+        const card = document.getElementById("slideCard");
+
+        // Progress
+        const pct = (((idx + 1) / SLIDES.length) * 100).toFixed(1);
+        document.getElementById("progress-fill").style.width = pct + "%";
+        document.getElementById("slideIndicatorChip").textContent =
+          `${idx + 1} / ${SLIDES.length}`;
+
+        // Buttons
+        document.getElementById("prevBtn").disabled = idx === 0;
+        document.getElementById("nextBtn").disabled = idx === SLIDES.length - 1;
+
+        // Counter / tasbih nav
+        updateCounter();
+
+        // Slide card animation reset
+        card.style.animation = "none";
+        card.offsetHeight; // reflow
+        card.style.animation = "";
+
+        let html = "";
+
+        /* ---- Slide Header ---- */
+        const done = counts[idx] >= s.target;
+        html += `
+      <div class="slide-header">
+        <div>
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px">
+            <span class="cat-badge"><i class="fa-solid fa-circle-dot" style="font-size:.55rem"></i> ${s.cat}</span>
+            ${aaOn ? '<span class="aa-badge"><i class="fa-solid fa-bolt"></i> Auto-Advance</span>' : ""}
+          </div>
+          <h2 class="slide-title">${s.title}</h2>
+          <p class="slide-subtitle">${s.subtitle}</p>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0">
+          <span class="slide-num-badge">${idx + 1}/${SLIDES.length}</span>
+        </div>
+      </div>
+      <div class="divider"></div>
+    `;
+
+        /* ---- Type: Home (Slide 1) ---- */
+        if (s.type === "home") {
+          html += `
+        <div class="bismillah-hero" style="padding:20px 0 24px;margin-top:10px;margin-bottom:24px;border-bottom:1px solid var(--clr-border)">
+          <div class="ar ar-center" style="font-size:var(--arabic-size);color:var(--clr-primary-dk);margin-top:10px;margin-bottom:22px;line-height:2.2;padding:8px 0">بِسْمِ اللّٰهِ الرَّحْمٰنِ الرَّحِيْمِ</div>
+          <div style="background:color-mix(in srgb, var(--clr-primary) 6%, transparent);border:1px solid color-mix(in srgb, var(--clr-primary) 20%, transparent);border-radius:var(--radius-md);padding:14px 20px;max-width:540px;margin:0 auto;text-align:center">
+            <p class="lt-label" style="color:var(--clr-text);line-height:1.6;margin:0;font-weight:500">
+              Panduan digital terstruktur amalan rezeki &amp; munajat hajat berdasarkan sanad keilmuan para ulama hikmah.
+            </p>
+          </div>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:14px">
+          <div style="background:var(--clr-surface2);border:1px solid var(--clr-border);border-radius:var(--radius-lg);padding:16px 18px">
+            <div class="lt-section" style="font-weight:800;color:var(--clr-gold-dk);margin-bottom:8px;display:flex;align-items:center;gap:6px">
+              🎯 TUJUAN &amp; MANFAAT AMALAN INI
+            </div>
+            <ul class="lt-body" style="color:var(--clr-text);line-height:1.65;padding-left:18px;margin:0;text-align:justify;text-justify:inter-word">
+              <li>Membuka pintu <strong>rezeki yang halal, berkah, dan lapang</strong> dari berbagai penjuru.</li>
+              <li>Memperlancar <strong>hajat-hajat penting</strong> (pekerjaan, utang, kesehatan, cita-cita).</li>
+              <li>Memberikan <strong>perlindungan spiritual (pagar gaib)</strong> dari gangguan jin, sihir, dan dengki.</li>
+              <li>Menguatkan <strong>keterhubungan ruhani</strong> kepada Nabi ﷺ dan para Auliya Allah.</li>
+            </ul>
+          </div>
+
+          <div style="background:var(--clr-surface2);border:1px solid var(--clr-border);border-radius:var(--radius-lg);padding:16px 18px">
+            <div class="lt-section" style="font-weight:800;color:var(--clr-gold-dk);margin-bottom:8px">
+              ✨ BARAKAH &amp; KARAMAH YANG TERKANDUNG
+            </div>
+            <ul class="lt-body" style="color:var(--clr-text);line-height:1.65;padding-left:18px;margin:0;text-align:justify;text-justify:inter-word">
+              <li><strong>Ayat Kursi &amp; Surat Pagar</strong> — Membentuk benteng ruhani yang sangat kokoh.</li>
+              <li><strong>Āmanar Rasūl (Al-Baqarah 284-286)</strong> — Mencukupi pembacanya sepanjang malam.</li>
+              <li><strong>Shalawat Nariyah &amp; Ibrahimiyah</strong> — Pembuka pintu hajat dan pemurni mahabbah Nabi ﷺ.</li>
+              <li><strong>Tawasul Wali Songo &amp; Syaikh Abdul Qadir Al-Jilani</strong> — Mengalirkan barakah para wali Allah.</li>
+              <li><strong>Zikir Ya Ghaniyyu Ya Mughni (313×)</strong> — Menderaskan rezeki berlimpah.</li>
+            </ul>
+          </div>
+
+          <div style="background:var(--clr-surface2);border:1px solid var(--clr-border);border-radius:var(--radius-lg);padding:16px 18px">
+            <div class="lt-section" style="font-weight:800;color:var(--clr-gold-dk);margin-bottom:8px">
+              📋 PETA ALUR AMALAN (31 Slide)
+            </div>
+            <div class="lt-sm" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;color:var(--clr-text);line-height:1.6">
+              <div>🟢 1–2: Beranda &amp; Adab</div>
+              <div>🟢 3: Muqaddimah</div>
+              <div>🟡 4–8: Surat Pagar Gaib</div>
+              <div>🟡 9–11: Āmanar Rasūl &amp; Dzikir</div>
+              <div>🔵 12–13: Shalawat</div>
+              <div>🔵 14–24: Tawasul 1–11</div>
+              <div>🔴 25–29: Inti Amalan</div>
+              <div>🔴 30–31: Munajat</div>
+            </div>
+          </div>
+
+          <div class="lt-sm" style="background:color-mix(in srgb, var(--clr-gold) 12%, transparent);border:1px solid color-mix(in srgb, var(--clr-gold) 35%, transparent);border-radius:var(--radius-md);padding:12px 16px;color:var(--clr-text);line-height:1.6;text-align:justify;text-justify:inter-word">
+            💡 <strong>Panduan:</strong> Tekan <strong>"Lanjutkan"</strong> untuk pindah slide. Pada zikir tasbih, sentuh tombol (+) untuk berzikir. Slide berpindah otomatis saat target selesai.
+          </div>
+        </div>
+      `;
+        }
+
+        /* ---- Type: Adab (Slide 2) ---- */
+        else if (s.type === "adab") {
+
+          html += `
+        <div style="display:flex;flex-direction:column;gap:14px">
+
+          <!-- WAKTU TERBAIK -->
+          <div style="background:var(--clr-surface2);border:1px solid var(--clr-border);border-radius:var(--radius-lg);padding:16px 18px">
+            <div class="lt-section" style="font-weight:800;color:var(--clr-primary);margin-bottom:8px">
+              ⏰ WAKTU TERBAIK PELAKSANAAN
+            </div>
+            <div class="lt-body" style="color:var(--clr-text);line-height:1.65;text-align:justify;text-justify:inter-word">
+              <div style="margin-bottom:8px">
+                <strong style="color:var(--clr-gold-dk)">① Setelah Sholat Tahajud (Pukul 02:00 – 04:00 WIB)</strong> — <em>Sangat Afdol & Mustajab.</em> Sepertiga malam terakhir saat pintu langit terbuka.
+              </div>
+              <div style="margin-bottom:8px">
+                <strong style="color:var(--clr-primary)">② Setelah Sholat Dhuha (Pukul 07:00 – 11:00 WIB)</strong> — <em>Khusus Pembuka Rezeki.</em> Minimal 20 menit setelah terbit matahari.
+              </div>
+              <div>
+                <strong style="color:var(--clr-text-muted)">③ Setelah Sholat Fardhu</strong> — Khususnya seusai Subuh atau Maghrib.
+              </div>
+            </div>
+          </div>
+
+          <!-- PERSIAPAN -->
+          <div style="background:var(--clr-surface2);border:1px solid var(--clr-border);border-radius:var(--radius-lg);padding:16px 18px">
+            <div class="lt-section" style="font-weight:800;color:var(--clr-primary);margin-bottom:8px">
+              🛁 PERSIAPAN LAHIR & BATIN
+            </div>
+            <ul class="lt-body" style="color:var(--clr-text);line-height:1.65;padding-left:18px;margin:0;text-align:justify;text-justify:inter-word">
+              <li><strong>Bersuci sempurna</strong> — Wudhu dengan tertib dan disunnahkan bersiwak.</li>
+              <li><strong>Pakaian suci &amp; bersih</strong> — Diutamakan pakaian putih dan wewangian (non-alkohol).</li>
+              <li><strong>Menghadap Kiblat</strong> — Duduk khusyuk di tempat yang suci.</li>
+              <li><strong>Niat &amp; Iftiqar</strong> — Menghadirkan rasa sangat membutuhkan pertolongan Allah SWT.</li>
+            </ul>
+          </div>
+
+          <!-- SHOLAT TAUBAT -->
+          <div style="background:var(--clr-surface2);border:1px solid var(--clr-border);border-radius:var(--radius-lg);padding:16px 18px">
+            <div class="lt-section" style="font-weight:800;color:var(--clr-primary);margin-bottom:6px">
+              🙏 1. SHOLAT SUNAH TAUBAT (Pembersih Dosa)
+            </div>
+            <div class="lt-body" style="color:var(--clr-text);line-height:1.6;margin-bottom:10px;text-align:justify;text-justify:inter-word">
+              <strong>Pelaksanaan:</strong> 2 Rakaat, 1 Salam (Disunnahkan sebelum amalan).
+            </div>
+            <div style="background:color-mix(in srgb, var(--clr-primary) 8%, transparent);border:1px dashed color-mix(in srgb, var(--clr-primary) 30%, transparent);border-radius:var(--radius-md);padding:10px 14px;margin-bottom:12px">
+              <div style="font-weight:700;color:var(--clr-primary-dk);margin-bottom:4px">
+                Lafaz Niat Sholat Taubat (2 Rakaat):
+              </div>
+              <div class="ar" style="font-size:var(--arabic-size);line-height:2.1;color:var(--clr-primary-dk);margin-bottom:4px">
+                أُصَلِّيْ سُنَّةَ التَّوْبَةِ رَكْعَتَيْنِ مُسْتَقْبِلَ الْقِبْلَةِ لِلّٰهِ تَعَالَى ✦
+              </div>
+              <div class="lt-sm" style="color:var(--clr-text);line-height:1.5">
+                <strong>Latin:</strong> <em>Ushallii sunnatat-taubati rak'ataini mustaqbilal-qiblati lillahi ta'aalaa.</em><br>
+                <strong>Arti:</strong> Aku niat sholat sunnah Taubat dua rakaat menghadap kiblat karena Allah Ta'ala.
+              </div>
+            </div>
+            <div class="lt-body" style="color:var(--clr-text);line-height:1.6;margin-bottom:6px">
+              <strong>Doa Istighfar & Sayyidul Istighfar (Setelah Salam):</strong>
+            </div>
+            <div class="ar ar-center" style="font-size:var(--arabic-size);line-height:2.1;color:var(--clr-primary-dk);background:color-mix(in srgb, var(--clr-primary) 10%, transparent);border:1px solid color-mix(in srgb, var(--clr-primary) 25%, transparent);padding:14px 16px;border-radius:var(--radius-md);margin:10px 0;text-align:justify;text-justify:inter-word">
+              أَسْتَغْفِرُ اللّٰهَ الْعَظِيْمَ، اَلَّذِيْ لَآ إِلٰهَ إِلَّا هُوَ، الْحَيُّ الْقَيُّوْمُ، وَأَتُوْبُ إِلَيْهِ ✦<br>اَللّٰهُمَّ أَنْتَ رَبِّيْ، لَآ إِلٰهَ إِلَّآ أَنْتَ، خَلَقْتَنِيْ، وَأَنَا عَبْدُكَ، وَأَنَا عَلٰى عَهْدِكَ، وَوَعْدِكَ مَا اسْتَطَعْتُ، أَعُوْذُ بِكَ مِنْ شَرِّ مَا صَنَعْتُ، أَبُوْءُ لَكَ بِنِعْمَتِكَ عَلَيَّ، وَأَبُوْءُ بِذَنْبِيْ، فَاغْفِرْ لِيْ، فَإِنَّهٗ لَا يَغْفِرُ الذُّنُوْبَ إِلَّا أَنْتَ ✦
+            </div>
+            <div class="lt-sm" style="color:var(--clr-text);line-height:1.55;margin-top:8px;text-align:justify;text-justify:inter-word">
+              <strong>Latin:</strong> Astaghfirullahal-'azhiim, alladzii laa ilaaha illaa huwal-hayyul-qayyuum, wa atuubu ilaih.<br>
+              Allahumma anta rabbii, laa ilaaha illaa anta, khalaqtanii, wa anaa 'abduka, wa anaa 'alaa 'ahdika, wa wa'dika mas-tatha'tu, a'udzu bika min syarri maa shana'tu, abu'u laka bini'matika 'alayya, wa abu'u bidzambii, faghfir lii, fa-innahuu laa yaghfirudz-dzunuuba illaa anta.<br><br>
+              <strong>Arti:</strong> Aku memohon ampun kepada Allah Yang Maha Agung, tiada Tuhan selain Dia Yang Mahahidup lagi Maha Berdiri Sendiri, dan aku bertaubat kepada-Nya.<br>
+              Ya Allah, Engkaulah Tuhanku, tiada Tuhan selain Engkau. Engkaulah yang menciptakanku dan aku adalah hamba-Mu. Aku akan setia pada perjanjianku dengan-Mu dan janji-Mu semampuku. Aku berlindung kepada-Mu dari kejahatan apa yang telah kuperbuat. Aku mengakui nikmat-Mu kepadaku dan aku mengakui dosaku kepada-Mu. Maka ampunilah aku, karena sesungguhnya tidak ada yang mengampuni dosa-dosa melainkan Engkau.
+            </div>
+          </div>
+
+          <!-- SHOLAT TAHAJUD -->
+          <div style="background:var(--clr-surface2);border:1px solid var(--clr-border);border-radius:var(--radius-lg);padding:16px 18px">
+            <div class="lt-section" style="font-weight:800;color:var(--clr-primary);margin-bottom:6px">
+              🌙 2. SHOLAT SUNAH TAHAJUD & WITIR (Malam)
+            </div>
+            <div class="lt-body" style="color:var(--clr-text);line-height:1.6;margin-bottom:10px;text-align:justify;text-justify:inter-word">
+              <strong>Pelaksanaan:</strong> Pukul 02:00 – 04:00 WIB. Disunnahkan <strong>8 Rakaat (4 Salam)</strong> + <strong>3 Rakaat Witir (2 Salam: 2+1)</strong>.
+            </div>
+            <div style="background:color-mix(in srgb, var(--clr-primary) 8%, transparent);border:1px dashed color-mix(in srgb, var(--clr-primary) 30%, transparent);border-radius:var(--radius-md);padding:10px 14px;margin-bottom:12px">
+              <div style="font-weight:700;color:var(--clr-primary-dk);margin-bottom:4px">
+                Lafaz Niat Sholat Tahajud (2 Rakaat):
+              </div>
+              <div class="ar" style="font-size:var(--arabic-size);line-height:2.1;color:var(--clr-primary-dk);margin-bottom:4px">
+                أُصَلِّيْ سُنَّةَ التَّهَجُّدِ رَكْعَتَيْنِ مُسْتَقْبِلَ الْقِبْلَةِ لِلّٰهِ تَعَالَى ✦
+              </div>
+              <div class="lt-sm" style="color:var(--clr-text);line-height:1.5;margin-bottom:10px">
+                <strong>Latin:</strong> <em>Ushallii sunnatat-tahajjudi rak'ataini mustaqbilal-qiblati lillahi ta'aalaa.</em><br>
+                <strong>Arti:</strong> Aku niat sholat sunnah Tahajud dua rakaat menghadap kiblat karena Allah Ta'ala.
+              </div>
+              <div style="font-weight:700;color:var(--clr-primary-dk);margin-bottom:4px;border-top:1px solid color-mix(in srgb, var(--clr-border) 60%, transparent);padding-top:8px">
+                Lafaz Niat Sholat Witir (1 Rakaat Penutup):
+              </div>
+              <div class="ar" style="font-size:var(--arabic-size);line-height:2.1;color:var(--clr-primary-dk);margin-bottom:4px">
+                أُصَلِّيْ سُنَّةَ الْوِتْرِ رَكْعَةً مُسْتَقْبِلَ الْقِبْلَةِ لِلّٰهِ تَعَالَى ✦
+              </div>
+              <div class="lt-sm" style="color:var(--clr-text);line-height:1.5">
+                <strong>Latin:</strong> <em>Ushallii sunnatal-witri rak'atan mustaqbilal-qiblati lillahi ta'aalaa.</em><br>
+                <strong>Arti:</strong> Aku niat sholat sunnah Witir satu rakaat menghadap kiblat karena Allah Ta'ala.
+              </div>
+            </div>
+            <div class="lt-body" style="color:var(--clr-text);line-height:1.6;margin-bottom:6px">
+              <strong>Doa Setelah Tahajud (Shahih Bukhari & Muslim):</strong>
+            </div>
+            <div class="ar ar-center" style="font-size:var(--arabic-size);line-height:2.1;color:var(--clr-primary-dk);background:color-mix(in srgb, var(--clr-primary) 10%, transparent);border:1px solid color-mix(in srgb, var(--clr-primary) 25%, transparent);padding:14px 16px;border-radius:var(--radius-md);margin:10px 0;text-align:justify;text-justify:inter-word">
+              اَللّٰهُمَّ رَبَّنَا لَكَ الْحَمْدُ، أَنْتَ قَيِّمُ السَّمٰوٰتِ وَالْاَرْضِ وَمَنْ فِيْهِنَّ، وَلَكَ الْحَمْدُ، أَنْتَ مَلِكُ السَّمٰوٰتِ وَالْاَرْضِ وَمَنْ فِيْهِنَّ، وَلَكَ الْحَمْدُ، أَنْتَ نُوْرُ السَّمٰوٰتِ وَالْاَرْضِ وَمَنْ فِيْهِنَّ، وَلَكَ الْحَمْدُ، أَنْتَ الْحَقُّ، وَوَعْدُكَ الْحَقُّ، وَلِقَاۤءُكَ حَقٌّ، وَقَوْلُكَ حَقٌّ، وَالْجَنَّةُ حَقٌّ، وَالنَّارُ حَقٌّ، وَالنَّبِيُّوْنَ حَقٌّ، وَمُحَمَّدٌ صَلَّى اللّٰهُ عَلَيْهِ وَسَلَّمَ حَقٌّ، وَالسَّاعَةُ حَقٌّ ✦<br>اَللّٰهُمَّ لَكَ أَسْلَمْتُ، وَبِكَ اٰمَنْتُ، وَعَلَيْكَ تَوَكَّلْتُ، وَإِلَيْكَ أَنَبْتُ، وَبِكَ خَاصَمْتُ، وَإِلَيْكَ حَاكَمْتُ، فَاغْفِرْ لِيْ مَا قَدَّمْتُ، وَمَا أَخَّرْتُ، وَمَا أَسْرَرْتُ، وَمَا أَعْلَنْتُ، وَمَا أَنْتَ أَعْلَمُ بِهِ مِنِّيْ، أَنْتَ الْمُقَدِّمُ، وَأَنْتَ الْمُؤَخِّرُ، لَآ إِلٰهَ إِلَّا أَنْتَ، وَلَا حَوْلَ وَلَا قُوَّةَ إِلَّا بِاللّٰهِ ✦
+            </div>
+            <div class="lt-sm" style="color:var(--clr-text);line-height:1.55;margin-top:8px;text-align:justify;text-justify:inter-word">
+              <strong>Latin:</strong> Allahumma rabbanaa lakal-hamdu, anta qayyimus-samaawaati wal-ardhi wa man fiihinna, wa lakal-hamdu, anta malikus-samaawaati wal-ardhi wa man fiihinna, wa lakal-hamdu, anta nuurus-samaawaati wal-ardhi wa man fiihinna, wa lakal-hamdu, antal-haqqu, wa wa'dukal-haqqu, wa liqaa'uka haqqun, wa qauluka haqqun, wal-jannatu haqqun, wan-naaru haqqun, wan-nabiyyuuna haqqun, wa muhammadun shallallahu 'alaihi wa sallama haqqun, was-saa'atu haqqun.<br>Allahumma laka aslamtu, wa bika aamantu, wa 'alaika tawakkaltu, wa ilaika anabtu, wa bika khaashamtu, wa ilaika haakamtu, faghfir lii maa qaddamtu, wa maa akhkhartu, wa maa asrartu, wa maa a'lantu, wa maa anta a'lamu bihii minnii, antal-muqaddimu, wa antal-mu'akhkhiru, laa ilaaha illaa anta, wa laa haula wa laa quwwata illaa billah.<br><br>
+              <strong>Arti:</strong> Ya Allah ya Tuhan kami, bagi-Mu segala puji, Engkaulah Penegak langit dan bumi serta seluruh seisinya. Bagi-Mu segala puji, Engkaulah Penguasa langit dan bumi serta seluruh seisinya. Bagi-Mu segala puji, Engkaulah Cahaya langit dan bumi serta seluruh seisinya. Bagi-Mu segala puji, Engkau Maha Benar, janji-Mu benar, pertemuan dengan-Mu benar, firman-Mu benar, surga itu benar, neraka itu benar, para nabi itu benar, Nabi Muhammad SAW itu benar, dan hari kiamat itu benar. Ya Allah, hanya kepada-Mu aku berserah diri, kepada-Mu aku beriman, kepada-Mu aku bertawakal, kepada-Mu aku kembali, demi Engkau aku membela, dan kepada-Mu aku berhukum. Maka ampunilah dosa-dosaku yang telah lalu dan yang akan datang, yang kubunyikan dan yang kunyatakan, serta apa yang Engkau lebih ketahui daripadaku. Engkaulah Yang Mendahulukan dan Engkaulah Yang Mengakhirkan, tiada Tuhan selain Engkau, dan tiada daya serta kekuatan kecuali dengan pertolongan Allah.
+            </div>
+          </div>
+
+          <!-- SHOLAT DHUHA -->
+          <div style="background:var(--clr-surface2);border:1px solid var(--clr-border);border-radius:var(--radius-lg);padding:16px 18px">
+            <div style="font-weight:800;font-size:0.92rem;color:var(--clr-primary);margin-bottom:6px">
+              ☀️ 3. SHOLAT SUNAH DHUHA (Siang)
+            </div>
+            <div style="font-size:0.85rem;color:var(--clr-text);line-height:1.6;margin-bottom:10px;text-align:justify;text-justify:inter-word">
+              <strong>Pelaksanaan:</strong> Pukul 07:00 – 11:00 WIB. Minimal 2 Rakaat, Afdol <strong>8 Rakaat (4 Salam)</strong>.
+            </div>
+            <div style="background:color-mix(in srgb, var(--clr-primary) 8%, transparent);border:1px dashed color-mix(in srgb, var(--clr-primary) 30%, transparent);border-radius:var(--radius-md);padding:10px 14px;margin-bottom:12px">
+              <div style="font-weight:700;font-size:0.85rem;color:var(--clr-primary-dk);margin-bottom:4px">
+                Lafaz Niat Sholat Dhuha (2 Rakaat):
+              </div>
+              <div class="ar" style="font-size:var(--arabic-size);line-height:2.1;color:var(--clr-primary-dk);margin-bottom:4px">
+                أُصَلِّيْ سُنَّةَ الضُّحَى رَكْعَتَيْنِ مُسْتَقْبِلَ الْقِبْلَةِ لِلّٰهِ تَعَالَى ✦
+              </div>
+              <div style="font-size:0.8rem;color:var(--clr-text);line-height:1.5">
+                <strong>Latin:</strong> <em>Ushallii sunnatadh-dhuhaa rak'ataini mustaqbilal-qiblati lillahi ta'aalaa.</em><br>
+                <strong>Arti:</strong> Aku niat sholat sunnah Dhuha dua rakaat menghadap kiblat karena Allah Ta'ala.
+              </div>
+            </div>
+            <div style="font-size:0.85rem;color:var(--clr-text);line-height:1.6;margin-bottom:6px">
+              <strong>Doa Setelah Sholat Dhuha:</strong>
+            </div>
+            <div class="ar ar-center" style="font-size:var(--arabic-size);line-height:2.1;color:var(--clr-primary-dk);background:color-mix(in srgb, var(--clr-primary) 10%, transparent);border:1px solid color-mix(in srgb, var(--clr-primary) 25%, transparent);padding:14px 16px;border-radius:var(--radius-md);margin:10px 0;text-align:justify;text-justify:inter-word">
+              اَللّٰهُمَّ إِنَّ الضُّحَاۤءَ ضُحَاۤؤُكَ، وَالْبَهَاۤءَ بَهَاۤؤُكَ، وَالْجَمَالَ جَمَالُكَ، وَالْقُوَّةَ قُوَّتُكَ، وَالْقُدْرَةَ قُدْرَتُكَ، وَالْعِصْمَةَ عِصْمَتُكَ ✦<br>اَللّٰهُمَّ إِنْ كَانَ رِزْقِيْ فِي السَّمَاۤءِ فَأَنْزِلْهُ، وَإِنْ كَانَ فِي الْأَرْضِ فَأَخْرِجْهُ، وَإِنْ كَانَ مُعْسِرًا فَيَسِّرْهُ، وَإِنْ كَانَ حَرَامًا فَطَهِّرْهُ، وَإِنْ كَانَ بَعِيْدًا فَقَرِّبْهُ، بِحَقِّ ضُحَاۤئِكَ وَبَهَاۤئِكَ وَجَمَالِكَ وَقُوَّتِكَ وَقُدْرَتِكَ اٰتِنِيْ مَآ اٰتَيْتَ عِبَادَكَ الصَّالِحِيْنَ ✦
+            </div>
+            <div style="font-size:0.82rem;color:var(--clr-text);line-height:1.55;margin-top:8px;text-align:justify;text-justify:inter-word">
+              <strong>Latin:</strong> Allahumma innadh-dhuhaa'a dhuhaa'uka, wal-bahaa'a bahaa'uka, wal-jamaala jamaaluka, wal-quwwata quwwatuka, wal-qudrata qudratuka, wal-'ishmata 'ishmatuka.<br>
+              Allahumma in kaana rizqii fis-samaa'i fa-anzilhu, wa in kaana fil-ardhi fa-akhrijhu, wa in kaana mu'assiran fa-yassirhu, wa in kaana haraaman fa-thahhirhu, wa in kaana ba'iidan fa-qarribhu, bihaqqi dhuhaa'ika, wa bahaa'ika, wa jamaalika, wa quwwatika, wa qudratika, aatinii maa aataita 'ibaadakas-shaalihiin.<br><br>
+              <strong>Arti:</strong> Ya Allah, sesungguhnya waktu Dhuha itu Dhuha-Mu, keindahan itu keindahan-Mu, kecantikan itu kecantikan-Mu, kekuatan itu kekuatan-Mu, kekuasaan itu kekuasaan-Mu, dan perlindungan itu perlindungan-Mu.<br>
+              Ya Allah, jika rezekiku ada di langit maka turunkanlah, jika ada di bumi maka keluarkanlah, jika menyulitkan maka mudahkanlah, jika haram maka sucikanlah, jika jauh maka dekatkanlah. Dengan hakikat Dhuha-Mu, keindahan-Mu, kecantikan-Mu, kekuatan-Mu, dan kekuasaan-Mu, limpahkanlah kepadaku apa yang telah Engkau limpahkan kepada hamba-hamba-Mu yang shaleh.
+            </div>
+          </div>
+        </div>
+      `;
+        }
+
+        /* ---- Type: Finish ---- */
+        else if (s.type === "finish") {
+          html += `
+        <div class="finish-card">
+          <div class="finish-icon"><i class="fa-solid fa-hands-praying"></i></div>
+          <div class="ar ar-center" style="font-size:var(--arabic-size);color:var(--clr-primary-dk);margin-bottom:14px;line-height:1.8">
+            الْحَمْدُ لِلّٰهِ رَبِّ الْعَالَمِيْنَ ✦
+          </div>
+          <p class="lt-label" style="color:var(--clr-text);line-height:1.65;max-width:420px;margin:0 auto 18px;text-align:center">
+            Sampaikan hajat Anda secara spesifik kepada Allah SWT — keluarga, pekerjaan, kesehatan, utang, cita-cita.
+            Berdoa di penghujung amalan sangat mustajab.
+          </p>
+          <div style="display:inline-flex;align-items:center;gap:10px;padding:12px 20px;border-radius:99px;
+            background:linear-gradient(135deg,var(--clr-primary),var(--clr-gold));color:#fff;
+            font-size:.85rem;font-weight:700">
+            <i class="fa-solid fa-circle-check"></i>
+            Amalan Selesai — Semoga Mustajab &amp; Diijabah
+          </div>
+        </div>
+      `;
+        }
+
+        /* ---- Type: Standard Arabic ---- */
+        else {
+          const pc = document.documentElement;
+          const fam =
+            pc.style.getPropertyValue("--arabic-font") || "var(--arabic-font)";
+
+          if (viewMode === "all" || viewMode === "arabic") {
+            html += `<div class="arabic-block"><p class="ar">${s.arabic}</p></div>`;
+          }
+          if ((viewMode === "all" || viewMode === "latin") && s.latin) {
+            html += `
+          <div class="latin-block">
+            <div class="latin-label"><i class="fa-solid fa-book-open" style="margin-right:4px"></i>Transliterasi Latin</div>
+            <div class="latin-text">${s.latin}</div>
+          </div>
+        `;
+          }
+          if (viewMode === "all" && s.trans) {
+            html += `
+          <div class="trans-block">
+            <div class="trans-label"><i class="fa-solid fa-language" style="margin-right:4px"></i>Terjemahan</div>
+            <div>${s.trans}</div>
+          </div>
+        `;
+          }
+        }
+
+        /* ---- Fadhilah ---- */
+        if (s.fadhilah && s.type !== "home" && s.type !== "adab") {
+          html += `
+        <div class="fadhilah-box">
+          <div class="fadhilah-icon"><i class="fa-solid fa-lightbulb"></i></div>
+          <div class="fadhilah-text">${s.fadhilah}</div>
+        </div>
+      `;
+        }
+
+        card.innerHTML = html;
+      }
+      function updateCounter() {
+        const s = SLIDES[idx];
+        const cnt = counts[idx];
+        const hasTas = TASBIH_IDS.has(s.id);
+        const isDone = cnt >= s.target;
+
+        // Show / hide correct center button and reset button wrapper
+        const tasbihWrap = document.getElementById("tasbihWrap");
+        if (tasbihWrap) tasbihWrap.style.display = hasTas ? "flex" : "none";
+        document.getElementById("lanjutBtn").style.display = hasTas
+          ? "none"
+          : "flex";
+
+        if (hasTas) {
+          document.getElementById("tasbihCount").textContent = cnt;
+          document.getElementById("tasbihTarget").textContent =
+            `Target: ${s.target}×`;
+          document.getElementById("tasbihBtn").classList.toggle("done", isDone);
+        } else {
+          // Update Lanjutkan label based on position
+          const isLast = idx === SLIDES.length - 1;
+          const lbl = isLast ? "Selesai" : "Lanjutkan";
+          document.getElementById("lanjutLabel").textContent = lbl;
+        }
+      }
+
+      function tapCounter(e) {
+        // Ripple
+        const btn = document.getElementById("tasbihBtn");
+        const rect = btn.getBoundingClientRect();
+        const x =
+          (e.clientX || e.touches?.[0]?.clientX || rect.left + rect.width / 2) -
+          rect.left;
+        const y =
+          (e.clientY || e.touches?.[0]?.clientY || rect.top + rect.height / 2) -
+          rect.top;
+        const r = document.createElement("span");
+        r.className = "ripple";
+        r.style.cssText = `width:80px;height:80px;left:${x - 40}px;top:${y - 40}px`;
+        document.getElementById("rippleCont").appendChild(r);
+        r.addEventListener("animationend", () => r.remove());
+
+        // Bounce count
+        const cd = document.getElementById("tasbihCount");
+        cd.style.transform = "scale(1.3)";
+        setTimeout(() => (cd.style.transform = ""), 160);
+
+        const s = SLIDES[idx];
+        if (counts[idx] >= s.target) return; // already full
+
+        counts[idx]++;
+        updateCounter();
+        vibrate([30]);
+
+        if (counts[idx] >= s.target) {
+          vibrate([80, 40, 80]);
+          showToast(`✅ ${s.target}× selesai!`);
+          if (aaOn && idx < SLIDES.length - 1) {
+            setTimeout(nextSlide, 800);
+          }
+        }
+      }
+
+      function resetSlide() {
+        counts[idx] = 0;
+        updateCounter();
+        showToast("🔄 Counter direset");
+      }
+
+      /* ===== NAVIGATION ===== */
+      function nextSlide() {
+        if (idx < SLIDES.length - 1) {
+          idx++;
+          render();
+        }
+      }
+      function prevSlide() {
+        if (idx > 0) {
+          idx--;
+          render();
+        }
+      }
+      function goToSlide(i) {
+        if (i >= 0 && i < SLIDES.length) {
+          idx = i;
+          render();
+          closeSlideModal();
+        }
+      }
+
+      /* ===== SWIPE ===== */
+      let tx0 = 0,
+        ty0 = 0;
+      document.getElementById("main").addEventListener(
+        "touchstart",
+        (e) => {
+          tx0 = e.changedTouches[0].screenX;
+          ty0 = e.changedTouches[0].screenY;
+        },
+        { passive: true },
+      );
+      document.getElementById("main").addEventListener(
+        "touchend",
+        (e) => {
+          const dx = e.changedTouches[0].screenX - tx0;
+          const dy = e.changedTouches[0].screenY - ty0;
+          if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 60) {
+            dx < 0 ? nextSlide() : prevSlide();
+          }
+        },
+        { passive: true },
+      );
+
+      /* ===== KEYBOARD ===== */
+      document.addEventListener("keydown", (e) => {
+        if (e.code === "ArrowRight") nextSlide();
+        else if (e.code === "ArrowLeft") prevSlide();
+        else if (e.code === "Space" || e.code === "Enter") {
+          e.preventDefault();
+          tapCounter({ clientX: 0, clientY: 0 });
+        }
+      });
+
+      /* ===== SLIDE MODAL ===== */
+      function openSlideModal() {
+        const list = document.getElementById("slideList");
+        list.innerHTML = SLIDES.map((s, i) => {
+          const isCur = i === idx;
+          const isDone = counts[i] >= s.target;
+          return `
+        <div class="slide-item ${isCur ? "active" : ""}" onclick="goToSlide(${i})">
+          <div class="slide-item-num">${i + 1}</div>
+          <div class="slide-item-info">
+            <div class="slide-item-cat">${s.cat}</div>
+            <div class="slide-item-name">${s.title}</div>
+          </div>
+          <div class="slide-item-prog">
+            <span>${counts[i]}/${s.target}</span>
+            ${isDone ? '<i class="fa-solid fa-circle-check" style="color:var(--clr-success)"></i>' : ""}
+          </div>
+        </div>
+      `;
+        }).join("");
+        document.getElementById("slideModal").classList.add("open");
+      }
+      function closeSlideModal(e) {
+        if (!e || e.target === document.getElementById("slideModal"))
+          document.getElementById("slideModal").classList.remove("open");
+      }
+
+      /* ===== SETTINGS MODAL ===== */
+      function toggleSettings() {
+        document.getElementById("settingsModal").classList.toggle("open");
+      }
+      function closeSettings(e) {
+        if (!e || e.target === document.getElementById("settingsModal"))
+          document.getElementById("settingsModal").classList.remove("open");
+      }
+
+      /* ===== FONT SIZING SYSTEM ===== */
+      const ARABIC_SCALES = [75, 85, 95, 100, 115, 130, 145, 160];
+      const LATIN_SCALES = [75, 85, 95, 100, 115, 130, 145, 160];
+
+      let arabicScaleIdx = parseInt(localStorage.getItem("pad_arabic_scale_idx"));
+      if (isNaN(arabicScaleIdx)) arabicScaleIdx = 3; // Default 100%
+
+      let latinScaleIdx = parseInt(localStorage.getItem("pad_latin_scale_idx"));
+      if (isNaN(latinScaleIdx)) latinScaleIdx = 3; // Default 100%
+
+      function applyFontScales() {
+        const arPercent = ARABIC_SCALES[arabicScaleIdx];
+        const ltPercent = LATIN_SCALES[latinScaleIdx];
+
+        const baseAr = 2.4;
+        const baseLt = 0.88;
+        const baseTrans = 0.85;
+        const baseFadh = 0.82;
+
+        document.documentElement.style.setProperty("--arabic-size", (baseAr * arPercent / 100).toFixed(2) + "rem");
+        document.documentElement.style.setProperty("--latin-size", (baseLt * ltPercent / 100).toFixed(2) + "rem");
+        document.documentElement.style.setProperty("--trans-size", (baseTrans * ltPercent / 100).toFixed(2) + "rem");
+        document.documentElement.style.setProperty("--fadhilah-size", (baseFadh * ltPercent / 100).toFixed(2) + "rem");
+
+        const arLbl = document.getElementById("arabicSizeLabel");
+        const ltLbl = document.getElementById("latinSizeLabel");
+        if (arLbl) arLbl.textContent = arPercent + "%";
+        if (ltLbl) ltLbl.textContent = ltPercent + "%";
+
+        localStorage.setItem("pad_arabic_scale_idx", arabicScaleIdx);
+        localStorage.setItem("pad_latin_scale_idx", latinScaleIdx);
+
+        // Re-render the active slide so inline-style elements also update
+        const card = document.getElementById("slideCard");
+        if (card && typeof render === "function") render();
+      }
+
+      function adjustFontSize(type, delta) {
+        if (type === "arabic") {
+          arabicScaleIdx = Math.max(0, Math.min(ARABIC_SCALES.length - 1, arabicScaleIdx + delta));
+        } else if (type === "latin") {
+          latinScaleIdx = Math.max(0, Math.min(LATIN_SCALES.length - 1, latinScaleIdx + delta));
+        }
+        applyFontScales();
+        showToast((type === "arabic" ? "Ukuran Arab: " : "Ukuran Latin: ") + (type === "arabic" ? ARABIC_SCALES[arabicScaleIdx] : LATIN_SCALES[latinScaleIdx]) + "%");
+      }
+
+      function resetFontSize(type) {
+        if (type === "arabic") arabicScaleIdx = 3;
+        if (type === "latin") latinScaleIdx = 3;
+        applyFontScales();
+        showToast("Ukuran reset ke 100%");
+      }
+
+      // Initialize font scales immediately
+      applyFontScales();
+
+      /* ===== VIEW MODE ===== */
+      function setView(m) {
+        viewMode = m;
+        ["All", "Arabic", "Latin"].forEach((x) => {
+          document
+            .getElementById("pill" + x)
+            .classList.toggle(
+              "active",
+              m === x.toLowerCase() || (m === "all" && x === "All"),
+            );
+        });
+        render();
+      }
+
+      /* ===== THEME ===== */
+      function toggleTheme() {
+        isDark = !isDark;
+        document.documentElement.setAttribute(
+          "data-theme",
+          isDark ? "dark" : "light",
+        );
+        const btn = document.getElementById("themeBtn");
+        btn.innerHTML = isDark
+          ? '<i class="fa-solid fa-sun"></i>'
+          : '<i class="fa-solid fa-moon"></i>';
+        btn.classList.toggle("active", isDark);
+      }
+
+      /* ===== SOUND ===== */
+      function toggleSound() {
+        soundOn = !soundOn;
+        const btn = document.getElementById("soundBtn");
+        btn.innerHTML = soundOn
+          ? '<i class="fa-solid fa-volume-high"></i>'
+          : '<i class="fa-solid fa-volume-xmark"></i>';
+        btn.classList.toggle("active", !soundOn);
+        document.getElementById("soundToggle").classList.toggle("on", soundOn);
+      }
+      function toggleSoundSetting() {
+        toggleSound();
+      }
+
+      /* ===== AUTO-ADVANCE ===== */
+      function toggleAA() {
+        aaOn = !aaOn;
+        document.getElementById("aaToggle").classList.toggle("on", aaOn);
+        render();
+        showToast(aaOn ? "⚡ Auto-Advance ON" : "⏸ Auto-Advance OFF");
+      }
+
+      /* ===== TOAST ===== */
+      let toastTimer;
+      function showToast(msg) {
+        const t = document.getElementById("toast");
+        t.textContent = msg;
+        t.classList.add("show");
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => t.classList.remove("show"), 2400);
+      }
+
+      /* ===== CHART ===== */
+      function drawChart() {
+        const el = document.getElementById("homeChart");
+        if (!el) return;
+        if (window._homeChart) {
+          window._homeChart.destroy();
+        }
+        const isDarkNow =
+          document.documentElement.getAttribute("data-theme") === "dark";
+        window._homeChart = new Chart(el.getContext("2d"), {
+          type: "doughnut",
+          data: {
+            labels: [
+              "Rezeki & Usaha",
+              "Keteguhan Iman",
+              "Solusi Mendesak",
+              "Keberkahan",
+              "Kesehatan",
+            ],
+            datasets: [
+              {
+                data: [95, 88, 75, 90, 80],
+                backgroundColor: [
+                  "#0B5940",
+                  "#C27C15",
+                  "#1A6096",
+                  "#10B981",
+                  "#6B7280",
+                ],
+                borderColor: isDarkNow ? "#132218" : "#FFFDF8",
+                borderWidth: 3,
+                hoverOffset: 10,
+              },
+            ],
+          },
+          options: {
+            cutout: "58%",
+            maintainAspectRatio: false,
+            responsive: true,
+            plugins: {
+              legend: {
+                position: "bottom",
+                labels: {
+                  boxWidth: 10,
+                  boxHeight: 10,
+                  font: { size: 11, family: "Inter" },
+                  padding: 12,
+                  color: isDarkNow ? "#8BB89E" : "#6B7A6E",
+                },
+              },
+            },
+          },
+        });
+      }
+
+      /* ===== INIT ===== */
+      // render() is now called by openModule() only, not on page load.
+      // The splash screen controller (in <head> script) handles the page init.
+    </script>
+  </body>
+</html>
