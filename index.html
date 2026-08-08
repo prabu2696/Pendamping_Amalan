@@ -34,11 +34,11 @@
       http-equiv="Content-Security-Policy"
       content="
         default-src 'self';
-        script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net;
+        script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://www.gstatic.com;
         style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com;
         font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com data:;
         img-src 'self' data: blob:;
-        connect-src 'self' https://raw.githubusercontent.com https://github.com https://api.github.com;
+        connect-src 'self' https://raw.githubusercontent.com https://github.com https://api.github.com https://*.firebaseio.com https://*.googleapis.com https://firestore.googleapis.com;
         media-src 'none';
         object-src 'none';
         frame-src 'none';
@@ -73,6 +73,33 @@
 
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Firebase SDK (Compat) -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    <script>
+      // Firebase Config
+      const firebaseConfig = {
+        apiKey: "AIzaSyDhXqgaEWkfW7iM-tWyWCzbaM0jArbmr2g",
+        authDomain: "pendamping-amalan.firebaseapp.com",
+        projectId: "pendamping-amalan",
+        storageBucket: "pendamping-amalan.firebasestorage.app",
+        messagingSenderId: "371479758099",
+        appId: "1:371479758099:web:0166780edbba1893d706e6",
+        measurementId: "G-CNN9Q2LXDV"
+      };
+
+      if (typeof firebase !== "undefined" && !firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+      }
+      const db = (typeof firebase !== "undefined" && firebase.firestore) ? firebase.firestore() : null;
+
+      if (db) {
+        db.enablePersistence({ synchronizeTabs: true }).catch(function(err) {
+          console.warn("Firestore offline persistence fallback:", err.code);
+        });
+      }
+    </script>
     <!-- Splash Screen & Multi-Module Controller -->
     <script>
       let currentScreen = "menu"; // 'menu' or 'reader'      
@@ -3489,62 +3516,46 @@
         toastTimer = setTimeout(() => t.classList.remove("show"), 2400);
       }
 
-      /* ===== ONLINE UPDATE CHECKER (OTA REALTIME) ===== */
+      /* ===== ONLINE UPDATE CHECKER (CLOUD FIRESTORE) ===== */
       async function checkOnlineUpdates() {
         const btnIcon = document.querySelector("#updateBtn i");
         if (btnIcon) btnIcon.classList.add("fa-spin");
 
-        showToast("🔄 Memeriksa pembaruan sistem OTA...");
+        showToast("🔥 Terhubung ke Cloud Firestore...");
 
         try {
-          let text = "";
-          // 1. Coba ambil via GitHub REST API (Instant 0s delay, bypass CDN cache)
-          try {
-            const apiRes = await fetch("https://api.github.com/repos/prabu2696/Pendamping_Amalan/contents/index.html?t=" + Date.now() + "&r=" + Math.random().toString(36).substring(2), {
-              cache: "no-store",
-              headers: { 
-                "Accept": "application/vnd.github.v3+json",
-                "Cache-Control": "no-cache, no-store, must-revalidate"
-              }
-            });
-            if (apiRes.ok) {
-              const apiJson = await apiRes.json();
-              if (apiJson && apiJson.content) {
-                const b64 = apiJson.content.replace(/\s/g, '');
-                text = decodeURIComponent(escape(atob(b64)));
-              }
-            }
-          } catch (_) {}
+          if (!db) throw new Error("Firestore SDK tidak tersedia");
 
-          // 2. Fallback ke Raw CDN dengan Random Cache Buster
-          if (!text) {
-            const rawRes = await fetch("https://raw.githubusercontent.com/prabu2696/Pendamping_Amalan/main/index.html?t=" + Date.now() + "&cb=" + Math.random().toString(36).substring(2), {
-              cache: "no-store",
-              headers: { "Cache-Control": "no-cache, no-store, must-revalidate" }
-            });
-            if (!rawRes.ok) throw new Error("Gagal mengambil file OTA");
-            text = await rawRes.text();
-          }
-          
-          // Ekstrak versi dari file HTML jarak jauh
-          const match = text.match(/window\.__APP_VERSION\s*=\s*(\d+);/);
-          
-          if (match && match[1]) {
-            const remoteVersion = parseInt(match[1], 10);
-            if (remoteVersion > window.__APP_VERSION) {
-              localStorage.setItem("ota_cached_html", text);
+          // Panggil koleksi Firestore 'app_updates' -> dokumen 'latest'
+          const docRef = db.collection("app_updates").doc("latest");
+          const docSnap = await docRef.get();
+
+          if (docSnap.exists) {
+            const data = docSnap.data();
+            const remoteVersion = data.version || 0;
+            if (remoteVersion > window.__APP_VERSION && data.html) {
+              localStorage.setItem("ota_cached_html", data.html);
               localStorage.setItem("ota_cached_version", remoteVersion);
-              showToast("✨ Pembaruan diunduh! Memuat ulang sistem...");
+              showToast("✨ Pembaruan Firestore diunduh! Memuat ulang...");
               setTimeout(() => location.reload(), 1500);
               return;
+            } else if (data.message) {
+              showToast("🔥 Firestore: " + data.message);
             } else {
-              showToast(`✓ Sistem sudah berada di versi terbaru (v${window.__APP_VERSION}).`);
+              showToast("🔥 Cloud Firestore Aktif & Versi Terbaru!");
             }
           } else {
-            showToast("⚠ Format versi OTA tidak valid atau tidak ditemukan.");
+            // Inisialisasi awal jika dokumen belum ada di Firestore
+            await docRef.set({
+              version: window.__APP_VERSION,
+              updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+              message: "Cloud Firestore Terhubung!"
+            }, { merge: true });
+            showToast("🔥 Firestore Inisialisasi Berhasil!");
           }
         } catch (err) {
-          showToast("✓ Anda sedang offline. Sistem berjalan sempurna.");
+          console.warn("Firestore sync check error:", err);
+          showToast("⚡ Firestore Siap (Mode Cache Offline)");
         } finally {
           if (btnIcon) {
             setTimeout(() => {
