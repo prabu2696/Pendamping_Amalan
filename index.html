@@ -95,32 +95,32 @@
 
         var isMainMenu = (currentScreen === "menu");
         if (isMainMenu) {
-          // Di Menu Utama: Tampilkan tombol Update, sembunyikan tombol Beranda
+          // Di Menu Utama: [Update] [Night Mode] [Pengaturan]
           if (updateBtn) {
-            updateBtn.style.display = "inline-flex";
+            updateBtn.style.setProperty("display", "inline-flex", "important");
             updateBtn.style.opacity = "1";
             updateBtn.style.pointerEvents = "auto";
           }
           if (homeBtn) {
-            homeBtn.style.display = "none";
+            homeBtn.style.setProperty("display", "none", "important");
             homeBtn.style.opacity = "0";
             homeBtn.style.pointerEvents = "none";
           }
         } else {
-          // Di Dalam Modul: Sembunyikan tombol Update, Tampilkan tombol Beranda menggantikan slot tombol Update
+          // Di Dalam Modul: [Beranda] [Night Mode] [Pengaturan]
           if (updateBtn) {
-            updateBtn.style.display = "none";
+            updateBtn.style.setProperty("display", "none", "important");
             updateBtn.style.opacity = "0";
             updateBtn.style.pointerEvents = "none";
           }
           if (homeBtn) {
-            homeBtn.style.display = "inline-flex";
+            homeBtn.style.setProperty("display", "inline-flex", "important");
             homeBtn.style.opacity = "1";
             homeBtn.style.pointerEvents = "auto";
           }
         }
       }
-      setInterval(syncUpdateBtnVisibility, 400);
+      setInterval(syncUpdateBtnVisibility, 300);
 
       /* ===== DUAL MODE SPLASH SCREEN CONTROLLER ===== */
       function setSplashMode(mode, initialStatus) {
@@ -2913,15 +2913,15 @@
         background: var(--clr-surface);
         color: var(--clr-text-muted);
         cursor: pointer;
-        display: inline-flex !important;
-        align-items: center !important;
-        justify-content: center !important;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
         font-size: 14px;
-        padding: 0 !important;
+        padding: 0;
         margin: 0;
         box-sizing: border-box;
         transition: all var(--dur-fast) var(--ease);
-        line-height: 1 !important;
+        line-height: 1;
       }
 
       .icon-btn i {
@@ -4803,24 +4803,28 @@
               <span id="slideIndicatorChip">1 / 31</span>
             </button>
           </div>
-          <!-- Tombol Update (di Beranda) & Tombol Beranda (di Dalam Modul) berbagi slot presisi tanpa celah kosong -->
-          <button
-            class="icon-btn"
-            id="updateBtn"
-            onclick="checkOnlineUpdates()"
-            title="Cek Pembaruan Modul & Data Amalan"
-          >
-            <i class="fa-solid fa-arrows-rotate"></i>
-          </button>
-          <button
-            class="icon-btn"
-            id="homeHeaderBtn"
-            onclick="showMainMenu()"
-            title="Kembali ke Beranda"
-            style="display: none"
-          >
-            <i class="fa-solid fa-house" style="font-size: 1.05rem"></i>
-          </button>
+          <!-- SLOT 1: Tombol Dinamis Bergantian (Update saat di Beranda, Beranda saat di Modul) -->
+          <div class="action-slot-dynamic" style="position:relative;width:36px;height:36px;flex-shrink:0;display:inline-flex;align-items:center;justify-content:center">
+            <button
+              class="icon-btn"
+              id="updateBtn"
+              onclick="checkOnlineUpdates()"
+              title="Cek Pembaruan Modul & Data Amalan"
+              style="position:absolute;top:0;left:0;width:36px;height:36px"
+            >
+              <i class="fa-solid fa-arrows-rotate"></i>
+            </button>
+            <button
+              class="icon-btn"
+              id="homeHeaderBtn"
+              onclick="showMainMenu()"
+              title="Kembali ke Beranda"
+              style="position:absolute;top:0;left:0;width:36px;height:36px;display:none"
+            >
+              <i class="fa-solid fa-house" style="font-size: 1.05rem"></i>
+            </button>
+          </div>
+          <!-- SLOT 2: Mode Gelap -->
           <button
             class="icon-btn"
             id="themeBtn"
@@ -4829,6 +4833,7 @@
           >
             <i class="fa-solid fa-moon"></i>
           </button>
+          <!-- SLOT 3: Pengaturan -->
           <button
             class="icon-btn"
             id="settingsBtn"
