@@ -126,19 +126,8 @@
       function setSplashMode(mode, initialStatus) {
         currentSplashMode = mode || "loading";
         var splash = document.getElementById("splashScreen");
-        var badge = document.getElementById("splashModeBadge");
         if (splash) splash.classList.remove("hidden");
-
-        if (badge) {
-          if (currentSplashMode === "downloading") {
-            badge.className = "splash-mode-badge mode-downloading";
-            badge.innerHTML = '<i class="fa-solid fa-cloud-arrow-down fa-bounce"></i> MENGUNDUH PEMBARUAN';
-          } else {
-            badge.className = "splash-mode-badge mode-loading";
-            badge.innerHTML = '<i class="fa-solid fa-arrows-spin fa-spin"></i> MEMUAT DATA APLIKASI';
-          }
-        }
-        updateSplashProgress(0, initialStatus || (currentSplashMode === "downloading" ? "Menghubungkan..." : "Memuat..."));
+        updateSplashProgress(0, initialStatus || (currentSplashMode === "downloading" ? "Menghubungkan server..." : "Menyiapkan sistem..."));
       }
 
       function updateSplashProgress(percent, statusText) {
@@ -151,8 +140,14 @@
         if (percentEl) percentEl.textContent = Math.round(clampedPct) + "%";
 
         if (status && statusText) {
-          var prefix = (currentSplashMode === "downloading") ? "Sedang Mendownload: " : "Memuat: ";
-          status.textContent = prefix + statusText;
+          var cleanText = String(statusText).trim();
+          var prefix = (currentSplashMode === "downloading") ? "Mendownload: " : "Memuat: ";
+          // Cegah duplikasi prefix jika teks sudah mengandung kata Memuat / Mendownload
+          if (cleanText.toLowerCase().startsWith("memuat:") || cleanText.toLowerCase().startsWith("mendownload:")) {
+            status.textContent = cleanText;
+          } else {
+            status.textContent = prefix + cleanText;
+          }
         }
       }
 
@@ -4801,11 +4796,6 @@
       <!-- Judul & Sub-judul Minimalis -->
       <h1 class="splash-title">PENDAMPING AMALAN</h1>
       <p class="splash-subtitle">Teman Setia Menuju Ridha-Nya</p>
-
-      <!-- Mode Badge (Loading / Downloading) — diisi oleh setSplashMode() -->
-      <div id="splashModeBadge" class="splash-mode-badge mode-loading">
-        <i class="fa-solid fa-arrows-spin fa-spin"></i> MEMUAT DATA APLIKASI
-      </div>
 
       <!-- Progress Bar (0-100%) -->
       <div class="splash-loader-box">
