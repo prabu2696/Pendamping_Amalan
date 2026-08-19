@@ -2610,7 +2610,7 @@
       }
 
       /* ============================================================
-       ARABIC TEXT
+       ARABIC TEXT (RATA KANAN-KIRI DENGAN DIRECTION RTL)
     ============================================================ */
       .ar {
         font-family: var(--arabic-font);
@@ -2621,16 +2621,18 @@
           "calt" 1;
         text-rendering: optimizeLegibility;
         -webkit-font-smoothing: antialiased;
-        direction: rtl;
-        text-align: justify;
-        text-justify: inter-word;
-        text-align-last: right;
+        direction: rtl !important;
+        text-align: justify !important;
+        text-justify: inter-word !important;
+        text-align-last: right !important;
         font-size: var(--arabic-size);
         line-height: var(--arabic-lh);
         word-spacing: 1px;
         padding: 4px 0;
         letter-spacing: 0;
         color: var(--clr-primary-dk);
+        width: 100%;
+        box-sizing: border-box;
       }
 
       /* View Mode filtering for Slide 3+ (scoped to #slideCard) */
@@ -2647,9 +2649,14 @@
         color: var(--clr-primary);
       }
 
-      .ar-center {
+      /* Khusus Slide 1 & 31: Teks Arab Tetap di Tengah */
+      .ar-center,
+      .ar.ar-center,
+      .bismillah-hero .ar,
+      .finish-card .ar {
         text-align: center !important;
         text-align-last: center !important;
+        direction: rtl !important;
       }
 
       /* ============================================================
@@ -3100,7 +3107,7 @@
         margin: 14px 0;
       }
 
-      /* Arabic block */
+      /* Arabic block (Rata Kanan-Kiri) */
       .arabic-block {
         background: linear-gradient(
           135deg,
@@ -3114,6 +3121,20 @@
         position: relative;
         overflow-x: hidden;
         overflow-y: visible;
+        direction: rtl !important;
+        text-align: justify !important;
+        text-justify: inter-word !important;
+      }
+
+      .arabic-block .ar,
+      .arabic-block p.ar,
+      .arabic-block p {
+        direction: rtl !important;
+        text-align: justify !important;
+        text-justify: inter-word !important;
+        text-align-last: right !important;
+        margin: 0 !important;
+        width: 100% !important;
       }
 
       /* Latin block */
@@ -5614,7 +5635,7 @@
               <div style="font-weight:700;color:var(--clr-primary-dk);margin-bottom:4px">
                 Lafaz Niat Sholat Taubat (2 Rakaat):
               </div>
-              <div class="ar" style="font-size:var(--arabic-size);line-height:2.1;color:var(--clr-primary-dk);margin-bottom:4px">
+              <div class="ar" style="font-size:var(--arabic-size);line-height:2.1;color:var(--clr-primary-dk);margin-bottom:4px;text-align:justify;text-justify:inter-word;text-align-last:right;direction:rtl">
                 أُصَلِّيْ سُنَّةَ التَّوْبَةِ رَكْعَتَيْنِ مُسْتَقْبِلَ الْقِبْلَةِ لِلّٰهِ تَعَالَى ✦
               </div>
               <div class="lt-sm" style="color:var(--clr-text);line-height:1.5">
@@ -5625,7 +5646,7 @@
             <div class="lt-body" style="color:var(--clr-text);line-height:1.6;margin-bottom:6px">
               <strong>Doa Istighfar & Sayyidul Istighfar (Setelah Salam):</strong>
             </div>
-            <div class="ar ar-center" style="font-size:var(--arabic-size);line-height:2.1;color:var(--clr-primary-dk);background:color-mix(in srgb, var(--clr-primary) 10%, transparent);border:1px solid color-mix(in srgb, var(--clr-primary) 25%, transparent);padding:14px 16px;border-radius:var(--radius-md);margin:10px 0;text-align:justify;text-justify:inter-word">
+            <div class="ar" style="font-size:var(--arabic-size);line-height:2.1;color:var(--clr-primary-dk);background:color-mix(in srgb, var(--clr-primary) 10%, transparent);border:1px solid color-mix(in srgb, var(--clr-primary) 25%, transparent);padding:14px 16px;border-radius:var(--radius-md);margin:10px 0;text-align:justify;text-justify:inter-word;text-align-last:right;direction:rtl">
               أَسْتَغْفِرُ اللّٰهَ الْعَظِيْمَ، اَلَّذِيْ لَآ إِلٰهَ إِلَّا هُوَ، الْحَيُّ الْقَيُّوْمُ، وَأَتُوْبُ إِلَيْهِ ✦<br>اَللّٰهُمَّ أَنْتَ رَبِّيْ، لَآ إِلٰهَ إِلَّآ أَنْتَ، خَلَقْتَنِيْ، وَأَنَا عَبْدُكَ، وَأَنَا عَلٰى عَهْدِكَ، وَوَعْدِكَ مَا اسْتَطَعْتُ، أَعُوْذُ بِكَ مِنْ شَرِّ مَا صَنَعْتُ، أَبُوْءُ لَكَ بِنِعْمَتِكَ عَلَيَّ، وَأَبُوْءُ بِذَنْبِيْ، فَاغْفِرْ لِيْ، فَإِنَّهٗ لَا يَغْفِرُ الذُّنُوْبَ إِلَّا أَنْتَ ✦
             </div>
             <div class="lt-sm" style="color:var(--clr-text);line-height:1.55;margin-top:8px;text-align:justify;text-justify:inter-word">
@@ -5648,7 +5669,7 @@
               <div style="font-weight:700;color:var(--clr-primary-dk);margin-bottom:4px">
                 Lafaz Niat Sholat Tahajud (2 Rakaat):
               </div>
-              <div class="ar" style="font-size:var(--arabic-size);line-height:2.1;color:var(--clr-primary-dk);margin-bottom:4px">
+              <div class="ar" style="font-size:var(--arabic-size);line-height:2.1;color:var(--clr-primary-dk);margin-bottom:4px;text-align:justify;text-justify:inter-word;text-align-last:right;direction:rtl">
                 أُصَلِّيْ سُنَّةَ التَّهَجُّدِ رَكْعَتَيْنِ مُسْتَقْبِلَ الْقِبْلَةِ لِلّٰهِ تَعَالَى ✦
               </div>
               <div class="lt-sm" style="color:var(--clr-text);line-height:1.5;margin-bottom:10px">
@@ -5658,7 +5679,7 @@
               <div style="font-weight:700;color:var(--clr-primary-dk);margin-bottom:4px;border-top:1px solid color-mix(in srgb, var(--clr-border) 60%, transparent);padding-top:8px">
                 Lafaz Niat Sholat Witir (1 Rakaat Penutup):
               </div>
-              <div class="ar" style="font-size:var(--arabic-size);line-height:2.1;color:var(--clr-primary-dk);margin-bottom:4px">
+              <div class="ar" style="font-size:var(--arabic-size);line-height:2.1;color:var(--clr-primary-dk);margin-bottom:4px;text-align:justify;text-justify:inter-word;text-align-last:right;direction:rtl">
                 أُصَلِّيْ سُنَّةَ الْوِتْرِ رَكْعَةً مُسْتَقْبِلَ الْقِبْلَةِ لِلّٰهِ تَعَالَى ✦
               </div>
               <div class="lt-sm" style="color:var(--clr-text);line-height:1.5">
@@ -5669,7 +5690,7 @@
             <div class="lt-body" style="color:var(--clr-text);line-height:1.6;margin-bottom:6px">
               <strong>Doa Setelah Tahajud (Shahih Bukhari & Muslim):</strong>
             </div>
-            <div class="ar ar-center" style="font-size:var(--arabic-size);line-height:2.1;color:var(--clr-primary-dk);background:color-mix(in srgb, var(--clr-primary) 10%, transparent);border:1px solid color-mix(in srgb, var(--clr-primary) 25%, transparent);padding:14px 16px;border-radius:var(--radius-md);margin:10px 0;text-align:justify;text-justify:inter-word">
+            <div class="ar" style="font-size:var(--arabic-size);line-height:2.1;color:var(--clr-primary-dk);background:color-mix(in srgb, var(--clr-primary) 10%, transparent);border:1px solid color-mix(in srgb, var(--clr-primary) 25%, transparent);padding:14px 16px;border-radius:var(--radius-md);margin:10px 0;text-align:justify;text-justify:inter-word;text-align-last:right;direction:rtl">
               اَللّٰهُمَّ رَبَّنَا لَكَ الْحَمْدُ، أَنْتَ قَيِّمُ السَّمٰوٰتِ وَالْاَرْضِ وَمَنْ فِيْهِنَّ، وَلَكَ الْحَمْدُ، أَنْتَ مَلِكُ السَّمٰوٰتِ وَالْاَرْضِ وَمَنْ فِيْهِنَّ، وَلَكَ الْحَمْدُ، أَنْتَ نُوْرُ السَّمٰوٰتِ وَالْاَرْضِ وَمَنْ فِيْهِنَّ، وَلَكَ الْحَمْدُ، أَنْتَ الْحَقُّ، وَوَعْدُكَ الْحَقُّ، وَلِقَاۤءُكَ حَقٌّ، وَقَوْلُكَ حَقٌّ، وَالْجَنَّةُ حَقٌّ، وَالنَّارُ حَقٌّ، وَالنَّبِيُّوْنَ حَقٌّ، وَمُحَمَّدٌ صَلَّى اللّٰهُ عَلَيْهِ وَسَلَّمَ حَقٌّ، وَالسَّاعَةُ حَقٌّ ✦<br>اَللّٰهُمَّ لَكَ أَسْلَمْتُ، وَبِكَ اٰمَنْتُ، وَعَلَيْكَ تَوَكَّلْتُ، وَإِلَيْكَ أَنَبْتُ، وَبِكَ خَاصَمْتُ، وَإِلَيْكَ حَاكَمْتُ، فَاغْفِرْ لِيْ مَا قَدَّمْتُ، وَمَا أَخَّرْتُ، وَمَا أَسْرَرْتُ، وَمَا أَعْلَنْتُ، وَمَا أَنْتَ أَعْلَمُ بِهِ مِنِّيْ، أَنْتَ الْمُقَدِّمُ، وَأَنْتَ الْمُؤَخِّرُ، لَآ إِلٰهَ إِلَّا أَنْتَ، وَلَا حَوْلَ وَلَا قُوَّةَ إِلَّا بِاللّٰهِ ✦
             </div>
             <div class="lt-sm" style="color:var(--clr-text);line-height:1.55;margin-top:8px;text-align:justify;text-justify:inter-word">
@@ -5690,7 +5711,7 @@
               <div style="font-weight:700;font-size:0.85rem;color:var(--clr-primary-dk);margin-bottom:4px">
                 Lafaz Niat Sholat Dhuha (2 Rakaat):
               </div>
-              <div class="ar" style="font-size:var(--arabic-size);line-height:2.1;color:var(--clr-primary-dk);margin-bottom:4px">
+              <div class="ar" style="font-size:var(--arabic-size);line-height:2.1;color:var(--clr-primary-dk);margin-bottom:4px;text-align:justify;text-justify:inter-word;text-align-last:right;direction:rtl">
                 أُصَلِّيْ سُنَّةَ الضُّحَى رَكْعَتَيْنِ مُسْتَقْبِلَ الْقِبْلَةِ لِلّٰهِ تَعَالَى ✦
               </div>
               <div style="font-size:0.8rem;color:var(--clr-text);line-height:1.5">
@@ -5701,7 +5722,7 @@
             <div style="font-size:0.85rem;color:var(--clr-text);line-height:1.6;margin-bottom:6px">
               <strong>Doa Setelah Sholat Dhuha:</strong>
             </div>
-            <div class="ar ar-center" style="font-size:var(--arabic-size);line-height:2.1;color:var(--clr-primary-dk);background:color-mix(in srgb, var(--clr-primary) 10%, transparent);border:1px solid color-mix(in srgb, var(--clr-primary) 25%, transparent);padding:14px 16px;border-radius:var(--radius-md);margin:10px 0;text-align:justify;text-justify:inter-word">
+            <div class="ar" style="font-size:var(--arabic-size);line-height:2.1;color:var(--clr-primary-dk);background:color-mix(in srgb, var(--clr-primary) 10%, transparent);border:1px solid color-mix(in srgb, var(--clr-primary) 25%, transparent);padding:14px 16px;border-radius:var(--radius-md);margin:10px 0;text-align:justify;text-justify:inter-word;text-align-last:right;direction:rtl">
               اَللّٰهُمَّ إِنَّ الضُّحَاۤءَ ضُحَاۤؤُكَ، وَالْبَهَاۤءَ بَهَاۤؤُكَ، وَالْجَمَالَ جَمَالُكَ، وَالْقُوَّةَ قُوَّتُكَ، وَالْقُدْرَةَ قُدْرَتُكَ، وَالْعِصْمَةَ عِصْمَتُكَ ✦<br>اَللّٰهُمَّ إِنْ كَانَ رِزْقِيْ فِي السَّمَاۤءِ فَأَنْزِلْهُ، وَإِنْ كَانَ فِي الْأَرْضِ فَأَخْرِجْهُ، وَإِنْ كَانَ مُعْسِرًا فَيَسِّرْهُ، وَإِنْ كَانَ حَرَامًا فَطَهِّرْهُ، وَإِنْ كَانَ بَعِيْدًا فَقَرِّبْهُ، بِحَقِّ ضُحَاۤئِكَ وَبَهَاۤئِكَ وَجَمَالِكَ وَقُوَّتِكَ وَقُدْرَتِكَ اٰتِنِيْ مَآ اٰتَيْتَ عِبَادَكَ الصَّالِحِيْنَ ✦
             </div>
             <div style="font-size:0.82rem;color:var(--clr-text);line-height:1.55;margin-top:8px;text-align:justify;text-justify:inter-word">
