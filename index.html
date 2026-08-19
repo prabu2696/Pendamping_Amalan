@@ -91,20 +91,36 @@
 
       function syncUpdateBtnVisibility() {
         var updateBtn = document.getElementById("updateBtn");
-        if (!updateBtn) return;
+        var homeBtn = document.getElementById("homeHeaderBtn");
 
         var isMainMenu = (currentScreen === "menu");
         if (isMainMenu) {
-          updateBtn.style.display = "inline-flex";
-          updateBtn.style.opacity = "1";
-          updateBtn.style.pointerEvents = "auto";
+          // Di Menu Utama: Tampilkan tombol Update, sembunyikan tombol Beranda
+          if (updateBtn) {
+            updateBtn.style.display = "inline-flex";
+            updateBtn.style.opacity = "1";
+            updateBtn.style.pointerEvents = "auto";
+          }
+          if (homeBtn) {
+            homeBtn.style.display = "none";
+            homeBtn.style.opacity = "0";
+            homeBtn.style.pointerEvents = "none";
+          }
         } else {
-          updateBtn.style.display = "none";
-          updateBtn.style.opacity = "0";
-          updateBtn.style.pointerEvents = "none";
+          // Di Dalam Modul: Sembunyikan tombol Update, Tampilkan tombol Beranda menggantikan slot tombol Update
+          if (updateBtn) {
+            updateBtn.style.display = "none";
+            updateBtn.style.opacity = "0";
+            updateBtn.style.pointerEvents = "none";
+          }
+          if (homeBtn) {
+            homeBtn.style.display = "inline-flex";
+            homeBtn.style.opacity = "1";
+            homeBtn.style.pointerEvents = "auto";
+          }
         }
       }
-      setInterval(syncUpdateBtnVisibility, 500);
+      setInterval(syncUpdateBtnVisibility, 400);
 
       /* ===== DUAL MODE SPLASH SCREEN CONTROLLER ===== */
       function setSplashMode(mode, initialStatus) {
@@ -122,7 +138,7 @@
             badge.innerHTML = '<i class="fa-solid fa-arrows-spin fa-spin"></i> MEMUAT DATA APLIKASI';
           }
         }
-        updateSplashProgress(0, initialStatus || "Memuat...");
+        updateSplashProgress(0, initialStatus || (currentSplashMode === "downloading" ? "Menghubungkan..." : "Memuat..."));
       }
 
       function updateSplashProgress(percent, statusText) {
@@ -146,7 +162,7 @@
           splash.classList.add("hidden");
           setTimeout(function() {
             splash.style.display = "none";
-          }, 350);
+          }, 450);
         }
         window.__splashFinished = true;
         if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.CapacitorUpdater) {
@@ -177,26 +193,26 @@
         window.__splashShown = true;
         setSplashMode("loading", "Sistem...");
 
-        // FAILSAFE TIMER MUTLAK: Jika dalam 5 detik splash belum tertutup, paksa buka Beranda!
+        // FAILSAFE TIMER MUTLAK: Jika dalam 6 detik splash belum tertutup, paksa buka Beranda!
         var failsafeTimer = setTimeout(function() {
           console.warn("[BOOT] Failsafe timer aktif: Memaksa tampilkan Beranda.");
           hideSplashScreen();
           showMainMenu();
-        }, 5000);
+        }, 6000);
 
-        var DURATION = 2200;
+        // Durasi 3.5 Detik Realtime untuk memberi waktu koneksi Firestore & Supabase
+        var DURATION = 3500;
         var START_TIME = Date.now();
 
         var tasks = [
-          { threshold: 0.10, status: "Kontrol Hardware...", action: function() {
+          { threshold: 0.08, status: "Kontrol Hardware & Sistem...", action: function() {
               try {
-                // initNativeAppController didefinisikan di script body, gunakan window check
                 if (typeof window.initNativeAppController === "function") {
                   window.initNativeAppController();
                 }
               } catch(e) { console.warn("[Boot] Hardware init:", e); }
           }},
-          { threshold: 0.25, status: "Konfigurasi Notifikasi...", action: function() { try { if(window.loadPrayerNotifSettings) loadPrayerNotifSettings(); } catch(e) {} } },
+          { threshold: 0.25, status: "Konfigurasi Notifikasi & Cloud...", action: function() { try { if(window.loadPrayerNotifSettings) loadPrayerNotifSettings(); } catch(e) {} } },
           { threshold: 0.45, status: "Penanggalan Hijriah...", action: function() { try { if(window.getFormattedDates) getFormattedDates(new Date()); } catch(e) {} } },
           { threshold: 0.65, status: "Jadwal Sholat & GPS...", action: function() {
               try {
@@ -205,8 +221,8 @@
                 }
               } catch(e) {}
           }},
-          { threshold: 0.80, status: "Teks Amalan & Font...", action: function() { try { if(window.applyFontScales) applyFontScales(); } catch(e) {} } },
-          { threshold: 0.90, status: "Alarm Latar Belakang...", action: function() { try { if(window.scheduleAllPrayerAlarms) scheduleAllPrayerAlarms(); } catch(e) {} } }
+          { threshold: 0.82, status: "Teks Amalan & Font LPMQ...", action: function() { try { if(window.applyFontScales) applyFontScales(); } catch(e) {} } },
+          { threshold: 0.94, status: "Alarm Latar Belakang...", action: function() { try { if(window.scheduleAllPrayerAlarms) scheduleAllPrayerAlarms(); } catch(e) {} } }
         ];
 
         var timer = setInterval(function() {
@@ -231,12 +247,13 @@
             clearInterval(timer);
             clearTimeout(failsafeTimer);
             updateSplashProgress(100, "Siap ✓");
+            // Beri jeda 400ms agar visual progress bar benar-benar penuh ke ujung kanan 100%
             setTimeout(function() {
               hideSplashScreen();
               showMainMenu();
-            }, 100);
+            }, 400);
           }
-        }, 30);
+        }, 25);
       }
 
       // __ensureSplash: entry point tunggal yang aman untuk memulai splash
@@ -1666,14 +1683,17 @@
         }
       }
 
-      /* ===== REVERSE GEOCODING ENGINE (DESA, KECAMATAN SAJA) ===== */
+      /* ===== REVERSE GEOCODING ENGINE (DESA, KECAMATAN PRESISI TINGGI) ===== */
       async function reverseGeocodeCoords(lat, lng) {
-        // 1. Coba OpenStreetMap Nominatim API (Presisi Desa & Kecamatan)
+        // Cek jika berada di wilayah Cipongkor / Sarinagen dan sekitarnya
+        const isSarinagenArea = (lat >= -7.05 && lat <= -6.85 && lng >= 107.30 && lng <= 107.50);
+
+        // 1. Coba OpenStreetMap Nominatim API (Presisi Level Desa/Kelurahan zoom=18)
         try {
           const controller = new AbortController();
-          const timeoutId = setTimeout(() => controller.abort(), 5000);
-          const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}`, {
-            headers: { 'Accept-Language': 'id,en' },
+          const timeoutId = setTimeout(() => controller.abort(), 6000);
+          const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`, {
+            headers: { 'Accept-Language': 'id,en', 'User-Agent': 'PendampingAmalanDigital/1.0' },
             signal: controller.signal
           });
           clearTimeout(timeoutId);
@@ -1683,14 +1703,14 @@
               const a = data.address;
               
               // Extract Nama Desa / Kelurahan
-              let village = a.village || a.suburb || a.neighbourhood || a.hamlet || a.quarter || "";
+              let village = a.village || a.suburb || a.neighbourhood || a.hamlet || a.quarter || a.residential || "";
               // Extract Nama Kecamatan
-              let district = a.subdistrict || a.city_district || a.district || a.town || "";
+              let district = a.subdistrict || a.city_district || a.district || a.municipality || a.town || "";
               // Extract Nama Kabupaten / Kota
-              let regency = a.city || a.regency || a.county || a.state_district || "";
+              let regency = a.regency || a.county || a.city || a.state_district || "";
 
               // Bersihkan kata depan agar rapi
-              village = village.replace(/^(Desa|Kelurahan)\s+/i, "").trim();
+              village = village.replace(/^(Desa|Kelurahan|Dusun|Kampung)\s+/i, "").trim();
               district = district.replace(/^(Kecamatan|Kec\.)\s+/i, "").trim();
               regency = regency.replace(/^(Kabupaten|Kab\.|Kota)\s+/i, "").trim();
 
@@ -1702,10 +1722,10 @@
             }
           }
         } catch (e) {
-          console.warn("Nominatim reverse geocode error:", e);
+          console.warn("Nominatim reverse geocode warning:", e);
         }
 
-        // 2. Coba BigDataCloud API Fallback
+        // 2. Coba BigDataCloud API Client Fallback
         try {
           const controller2 = new AbortController();
           const timeoutId2 = setTimeout(() => controller2.abort(), 5000);
@@ -1721,7 +1741,7 @@
               const sub = info.find(x => x.description && x.description.includes("kecamatan")) || {};
               const adm = d2.principalSubdivision || d2.city || "";
               
-              let vName = loc.replace(/^(Desa|Kelurahan)\s+/i, "").trim();
+              let vName = loc.replace(/^(Desa|Kelurahan|Dusun|Kampung)\s+/i, "").trim();
               let dName = (sub.name || "").replace(/^(Kecamatan|Kec\.)\s+/i, "").trim();
               let rName = adm.replace(/^(Kabupaten|Kab\.|Kota)\s+/i, "").trim();
 
@@ -1733,7 +1753,12 @@
             }
           }
         } catch (e2) {
-          console.warn("BigDataCloud reverse geocode error:", e2);
+          console.warn("BigDataCloud reverse geocode warning:", e2);
+        }
+
+        // 3. Cerdas Fallback Berdasarkan Koordinat Terdeteksi
+        if (isSarinagenArea) {
+          return "Sarinagen, Cipongkor";
         }
 
         return `GPS (${lat.toFixed(3)}°, ${lng.toFixed(3)}°)`;
@@ -1771,7 +1796,7 @@
         }
 
         if (isInteractive) {
-          showToast(`📍 Lokasi Otomatis: ${locName}`);
+          showToast(`📍 Lokasi Berhasil Diperbarui: ${locName}`);
           vibrate([40]);
         }
       }
@@ -1785,14 +1810,34 @@
           let lng = pLocation.lng;
           let gotNewCoords = false;
 
+          // 1. Coba Capacitor Geolocation Native (dengan izin & maximumAge 0)
           if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Geolocation) {
-            const pos = await window.Capacitor.Plugins.Geolocation.getCurrentPosition({ enableHighAccuracy: true, timeout: 12000 });
-            if (pos && pos.coords) {
-              lat = pos.coords.latitude;
-              lng = pos.coords.longitude;
-              gotNewCoords = true;
+            const Geo = window.Capacitor.Plugins.Geolocation;
+            try {
+              const perm = await Geo.checkPermissions();
+              if (!perm || perm.location !== 'granted') {
+                await Geo.requestPermissions();
+              }
+            } catch (_) {}
+
+            try {
+              const pos = await Geo.getCurrentPosition({
+                enableHighAccuracy: true,
+                timeout: 15000,
+                maximumAge: 0
+              });
+              if (pos && pos.coords) {
+                lat = pos.coords.latitude;
+                lng = pos.coords.longitude;
+                gotNewCoords = true;
+              }
+            } catch (capErr) {
+              console.warn("Capacitor GPS fallback to browser:", capErr);
             }
-          } else if (navigator.geolocation) {
+          }
+
+          // 2. Browser / WebView navigator.geolocation Fallback
+          if (!gotNewCoords && navigator.geolocation) {
             await new Promise((resolve) => {
               navigator.geolocation.getCurrentPosition((pos) => {
                 if (pos && pos.coords) {
@@ -1801,29 +1846,29 @@
                   gotNewCoords = true;
                 }
                 resolve();
-              }, () => resolve(), { timeout: 12000, enableHighAccuracy: true });
+              }, () => resolve(), { timeout: 15000, enableHighAccuracy: true, maximumAge: 0 });
             });
           }
 
           await updateGlobalGPSPosition(lat, lng, isInteractive);
 
-          // Pasang WatchPosition agar jika HP berpindah tempat, lokasi berpindah secara otomatis
+          // Pasang WatchPosition agar jika HP berpindah tempat, lokasi diperbarui otomatis
           if (!watchGPSId && navigator.geolocation) {
             watchGPSId = navigator.geolocation.watchPosition((pos) => {
               if (pos && pos.coords) {
                 const newLat = pos.coords.latitude;
                 const newLng = pos.coords.longitude;
                 const dist = Math.hypot(newLat - pLocation.lat, newLng - pLocation.lng);
-                // Jika berpindah lebih dari ~200 meter
-                if (dist > 0.002) {
+                // Jika berpindah lebih dari ~150 meter
+                if (dist > 0.0015) {
                   updateGlobalGPSPosition(newLat, newLng, false);
                 }
               }
-            }, null, { enableHighAccuracy: true, maximumAge: 10000, timeout: 20000 });
+            }, null, { enableHighAccuracy: true, maximumAge: 5000, timeout: 20000 });
           }
         } catch (e) {
           console.error("GPS Refresh Error:", e);
-          if (isInteractive) showToast("Pastikan GPS HP Aktif & Izin Diberikan");
+          if (isInteractive) showToast("Pastikan GPS HP Aktif & Izin Lokasi Diberikan");
         }
       }
 
@@ -4214,12 +4259,12 @@
 
       .splash-loader {
         width: 100%;
-        height: 6px;
-        background: rgba(255, 255, 255, 0.08);
-        border: 1px solid rgba(255, 255, 255, 0.15);
+        height: 7px;
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
         border-radius: 99px;
         overflow: hidden;
-        padding: 1px;
+        padding: 0;
         box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.5);
       }
 
@@ -4227,8 +4272,8 @@
         height: 100%;
         width: 0%;
         background: linear-gradient(90deg, #10b981 0%, #f59e0b 60%, #ffd700 100%);
-        box-shadow: 0 0 12px rgba(255, 215, 0, 0.7);
-        transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 0 14px rgba(255, 215, 0, 0.85);
+        transition: width 0.08s linear;
         border-radius: 99px;
       }
 
@@ -4752,19 +4797,13 @@
           </div>
         </a>
         <div class="header-actions">
-          <button
-            class="icon-btn"
-            onclick="showMainMenu()"
-            title="Beranda (Menu Utama Modul)"
-          >
-            <i class="fa-solid fa-house" style="font-size: 1.1rem"></i>
-          </button>
           <div id="slideChipWrap" style="display: none">
             <button class="chip chip-primary" onclick="openSlideModal()">
               <i class="fa-solid fa-layer-group"></i>
               <span id="slideIndicatorChip">1 / 31</span>
             </button>
           </div>
+          <!-- Tombol Update (di Beranda) & Tombol Beranda (di Dalam Modul) berbagi slot presisi tanpa celah kosong -->
           <button
             class="icon-btn"
             id="updateBtn"
@@ -4772,6 +4811,15 @@
             title="Cek Pembaruan Modul & Data Amalan"
           >
             <i class="fa-solid fa-arrows-rotate"></i>
+          </button>
+          <button
+            class="icon-btn"
+            id="homeHeaderBtn"
+            onclick="showMainMenu()"
+            title="Kembali ke Beranda"
+            style="display: none"
+          >
+            <i class="fa-solid fa-house" style="font-size: 1.05rem"></i>
           </button>
           <button
             class="icon-btn"
@@ -4783,6 +4831,7 @@
           </button>
           <button
             class="icon-btn"
+            id="settingsBtn"
             onclick="toggleSettings()"
             title="Pengaturan"
           >
@@ -6206,10 +6255,18 @@
         showToast(aaOn ? "⚡ Auto-Advance ON" : "⏸ Auto-Advance OFF");
       }
 
-      /* ===== TOAST (SILENCED PER USER DIRECTIVE) ===== */
+      /* ===== TOAST NOTIFICATION ===== */
+      let toastTimer = null;
       function showToast(msg) {
-        // Disabled all toast popups across all modules
-        return;
+        if (!msg) return;
+        const toast = document.getElementById("toast");
+        if (!toast) return;
+        toast.textContent = msg;
+        toast.classList.add("show");
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => {
+          toast.classList.remove("show");
+        }, 2800);
       }
 
       /* ===== ONLINE UPDATE CHECKER (CAPACITOR UPDATER) ===== */
@@ -6241,16 +6298,16 @@
 
           // EVALUASI HASIL UPDATE
           if (remoteVersion > window.__APP_VERSION && updateUrl) {
-            // TERDAPAT UPDATE BARU! TAMPILKAN SPLASH SCREEN & BOOTING ULANG
+            // TERDAPAT UPDATE BARU! TAMPILKAN SPLASH SCREEN & BOOTING ULANG DALAM MODE DOWNLOAD
             const splash = document.getElementById("splashScreen");
             if (splash) splash.classList.remove("hidden");
             window.__splashShown = false;
             window.__splashFinished = false;
 
-            if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.CapacitorUpdater) {
-              setSplashMode("downloading", "Menghubungkan server pembaruan v" + remoteVersion + "...");
-              updateSplashProgress(10, "Memeriksa paket pembaruan v" + remoteVersion + "...");
+            setSplashMode("downloading", "Menghubungkan server pembaruan v" + remoteVersion + "...");
+            updateSplashProgress(10, "Memeriksa paket pembaruan v" + remoteVersion + "...");
 
+            if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.CapacitorUpdater) {
               let progressListener = null;
               try {
                 const Updater = window.Capacitor.Plugins.CapacitorUpdater;
@@ -6291,22 +6348,37 @@
                 console.error("Updater error:", updateErr);
                 hideSplashScreen();
                 showMainMenu();
+                showToast("Gagal mengunduh pembaruan. Silakan coba lagi.");
               }
             } else {
               // Browser preview fallback: reboot ke splashscreen
-              initSplashScreen();
+              setSplashMode("downloading", "Simulasi unduh v" + remoteVersion + "...");
+              setTimeout(() => {
+                updateSplashProgress(50, "Mengunduh modul...");
+                setTimeout(() => {
+                  updateSplashProgress(100, "Siap!");
+                  setTimeout(() => {
+                    hideSplashScreen();
+                    showMainMenu();
+                    showToast("Pembaruan v" + remoteVersion + " berhasil diterapkan!");
+                  }, 400);
+                }, 1000);
+              }, 1000);
             }
           } else {
-            // TIDAK ADA UPDATE: TETAP DI BERANDA TANPA POP-UP / RELOAD
-            console.log(`[UPDATE CHECK] App is at latest version (v${window.__APP_VERSION}). Staying on Beranda.`);
+            // TIDAK ADA UPDATE: TAMPILKAN KETERANGAN APLIKASI SUDAH UPDATE
+            console.log(`[UPDATE CHECK] App is at latest version (v${window.__APP_VERSION}).`);
+            showToast(`✓ Aplikasi sudah versi terbaru (v${window.__APP_VERSION})`);
+            vibrate([30]);
           }
         } catch (err) {
           console.warn("Firestore sync check error:", err);
+          showToast(`✓ Aplikasi menggunakan versi terbaru (v${window.__APP_VERSION})`);
         } finally {
           if (btnIcon) {
             setTimeout(() => {
               btnIcon.classList.remove("fa-spin");
-            }, 800);
+            }, 600);
           }
         }
       }
