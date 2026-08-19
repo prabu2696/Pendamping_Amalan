@@ -2444,24 +2444,6 @@
             }
           });
         };
-            } else {
-              lockBadge.style.background = "var(--clr-surface2)";
-              lockBadge.style.color = "var(--clr-text-subtle)";
-              lockBadge.style.borderColor = "var(--clr-border)";
-              if (lockIcon) lockIcon.className = "fa-solid fa-compass";
-              if (lockText) lockText.textContent = "Putar HP Menuju Arah Kiblat";
-              if (outerRing) {
-                outerRing.style.borderColor = "#D4AF37";
-                outerRing.style.boxShadow = "0 0 20px rgba(212,175,55,0.2)";
-              }
-              if (kaabaRimBadge) {
-                kaabaRimBadge.style.background = "#073D2B";
-                kaabaRimBadge.style.boxShadow = "0 0 16px rgba(255,193,7,0.7)";
-                kaabaRimBadge.style.transform = `translateY(-122px) rotate(${-currentQiblaAngle}deg) scale(1)`;
-              }
-            }
-          }
-        };
 
         if ('ondeviceorientationabsolute' in window) {
           window.addEventListener('deviceorientationabsolute', handleOrientation, true);
