@@ -1,92 +1,29 @@
 # ================================================================
-# CIMEGA SMART OFFICE v1.0 — .gitignore
-# Electron.js + Firebase + Supabase + Gemini AI + Optimizer
-# Target OS: Windows 10/11 (64-bit)
+# PENDAMPING AMALAN DIGITAL — .gitignore
+# Capacitor Android + Supabase + Firebase OTA
 # ================================================================
 
 # ───────────────────────────────────────────────────────────────
-# !! KEAMANAN — WAJIB TIDAK DI-UPLOAD KE GITHUB !!
+# 🔒 KEAMANAN & KREDENSIAL RAHASIA (WAJIB TIDAK DI-PUSH KE GIT)
 # ───────────────────────────────────────────────────────────────
-
-# Environment variables (kredensial Firebase, Supabase, Gemini)
 .env
-.env.local
-.env.production
-.env.development
-.env.staging
-
-# Firebase Service Account Keys (digunakan oleh firebase-admin)
+.env.*
+!.env.example
 serviceAccountKey.json
 firebase-adminsdk*.json
 *-firebase-adminsdk-*.json
-google-services.json
-
-# GitHub Recovery Codes
-github_recovery_codes.txt
-
-# Firebase config dengan hardcoded credentials
-src/services/api/serviceAccountKey.json
+update_*.zip
+*.zip
 
 # ───────────────────────────────────────────────────────────────
-# DEPENDENSI NODE.JS
+# DEPENDENSI & BUILD OUTPUT
 # ───────────────────────────────────────────────────────────────
-
 node_modules/
 .npm/
 .pnpm-store/
 
-# ───────────────────────────────────────────────────────────────
-# BUILD OUTPUT ELECTRON (Windows only)
-# ───────────────────────────────────────────────────────────────
-
-dist/
-build/
-out/
-release/
-dist_electron/
-*.jsc
-
-# File installer Windows
-*.exe
-*.msi
-*.nsis
-
-# ───────────────────────────────────────────────────────────────
-# ASET MEDIA & FONT (terlalu besar/lisensi untuk GitHub)
-# ───────────────────────────────────────────────────────────────
-
-# File audio BGM lokal — cukup simpan di mesin admin
-src/assets/assets_music/*.mp3
-src/assets/assets_music/*.wav
-src/assets/assets_music/*.ogg
-src/assets/assets_music/*.aac
-src/assets/assets_music/*.flac
-src/assets/assets_music/*.m4a
-
-# Font Proprietary/Standar Windows (Lisensi)
-# Jangan unggah font Arial dan Times New Roman ke repositori publik
-src/assets/fonts/Arial*.ttf
-src/assets/fonts/TimesNewRoman*.ttf
-src/assets/fonts/arial*.ttf
-src/assets/fonts/times*.ttf
-
-# ───────────────────────────────────────────────────────────────
-# CACHE & DATA SEMENTARA
-# ───────────────────────────────────────────────────────────────
-
-# Cache aplikasi
-data_cache/
-.cache/
-*.cache
-.gemini/
-
-# Scratch / file kerja sementara
-scratch/
-
-# ───────────────────────────────────────────────────────────────
-# LOG FILES
-# ───────────────────────────────────────────────────────────────
-
+.DS_Store
+Thumbs.db
 logs/
 *.log
 log.txt

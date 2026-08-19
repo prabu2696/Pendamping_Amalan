@@ -60,8 +60,21 @@
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
     />
 
-    <!-- Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Chart.js — dimuat secara async agar tidak memblokir splash screen -->
+    <script>
+      // Muat Chart.js secara non-blocking; jika gagal (offline/WebView) buat stub
+      (function() {
+        var s = document.createElement('script');
+        s.src = 'https://cdn.jsdelivr.net/npm/chart.js';
+        s.async = true;
+        s.onerror = function() {
+          console.warn('[Chart.js] CDN gagal dimuat (mode offline). Chart disabled.');
+          // Stub Chart agar tidak terjadi ReferenceError saat drawChart() dipanggil
+          window.Chart = function() { this.destroy = function(){}; };
+        };
+        document.head.appendChild(s);
+      })();
+    </script>
 
     <!-- Splash Screen & Multi-Module Controller -->
     <script>
@@ -154,25 +167,35 @@
 
         var splash = document.getElementById("splashScreen");
         if (!splash) {
-          showMainMenu();
+          // DOM belum siap, coba lagi sebentar
+          setTimeout(function() {
+            if (!window.__splashShown) initSplashScreen();
+          }, 50);
           return;
         }
 
         window.__splashShown = true;
         setSplashMode("loading", "Sistem...");
 
-        // FAILSAFE TIMER MUTLAK: Jika dalam 3.2 detik splash belum tertutup, paksa buka Beranda!
+        // FAILSAFE TIMER MUTLAK: Jika dalam 5 detik splash belum tertutup, paksa buka Beranda!
         var failsafeTimer = setTimeout(function() {
           console.warn("[BOOT] Failsafe timer aktif: Memaksa tampilkan Beranda.");
           hideSplashScreen();
           showMainMenu();
-        }, 3200);
+        }, 5000);
 
         var DURATION = 2200;
         var START_TIME = Date.now();
 
         var tasks = [
-          { threshold: 0.10, status: "Kontrol Hardware...", action: function() { try { initNativeAppController(); } catch(e) {} } },
+          { threshold: 0.10, status: "Kontrol Hardware...", action: function() {
+              try {
+                // initNativeAppController didefinisikan di script body, gunakan window check
+                if (typeof window.initNativeAppController === "function") {
+                  window.initNativeAppController();
+                }
+              } catch(e) { console.warn("[Boot] Hardware init:", e); }
+          }},
           { threshold: 0.25, status: "Konfigurasi Notifikasi...", action: function() { try { if(window.loadPrayerNotifSettings) loadPrayerNotifSettings(); } catch(e) {} } },
           { threshold: 0.45, status: "Penanggalan Hijriah...", action: function() { try { if(window.getFormattedDates) getFormattedDates(new Date()); } catch(e) {} } },
           { threshold: 0.65, status: "Jadwal Sholat & GPS...", action: function() {
@@ -216,18 +239,28 @@
         }, 30);
       }
 
+      // __ensureSplash: entry point tunggal yang aman untuk memulai splash
       function __ensureSplash() {
         if (window.__splashInitialized) return;
         if (!document.getElementById('splashScreen')) {
-          setTimeout(__ensureSplash, 100);
+          setTimeout(__ensureSplash, 50);
           return;
         }
         window.__splashInitialized = true;
         initSplashScreen();
       }
-      setTimeout(__ensureSplash, 30);
-      window.addEventListener("DOMContentLoaded", __ensureSplash);
-      window.addEventListener("load", __ensureSplash);
+
+      // Panggil sesegera mungkin dengan 3 strategi peluncuran
+      if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", __ensureSplash);
+      } else {
+        // DOM sudah siap (script dieksekusi setelah DOMContentLoaded)
+        setTimeout(__ensureSplash, 10);
+      }
+      window.addEventListener("load", function() {
+        // Fallback jika DOMContentLoaded tidak terpicu (kasus jarang di WebView)
+        if (!window.__splashInitialized) __ensureSplash();
+      });
 
       function showMainMenu() {
         currentScreen = "menu";
@@ -1458,6 +1491,47 @@
         }
       }
 
+      /* ===== NATIVE APP CONTROLLER (Capacitor Boot Sequence) ===== */
+      /**
+       * initNativeAppController — dipanggil oleh splash screen saat boot.
+       * Tugasnya: inisialisasi semua plugin Capacitor yang dibutuhkan saat startup.
+       * PENTING: Semua operasi harus try/catch agar tidak memblokir splash screen.
+       */
+      window.initNativeAppController = function() {
+        // Pastikan Capacitor sudah tersedia sebelum mengakses plugin
+        if (!window.Capacitor || !window.Capacitor.Plugins) {
+          console.log("[NativeCtrl] Capacitor belum siap (mode browser/web). Melewati init native.");
+          return;
+        }
+
+        // 1. Setup Notification Channels (Android 8+)
+        if (window.Capacitor.Plugins.LocalNotifications) {
+          try {
+            setupNotificationChannels();
+          } catch(e) {
+            console.warn("[NativeCtrl] Notification channels:", e);
+          }
+        }
+
+        // 2. Set App Badge (jika tersedia)
+        if (window.Capacitor.Plugins.App) {
+          try {
+            window.Capacitor.Plugins.App.addListener('appStateChange', function(state) {
+              if (state.isActive) {
+                // App kembali aktif — perbarui UI jika perlu
+                if (typeof startGlobalLivePrayerCountdown === 'function') {
+                  startGlobalLivePrayerCountdown();
+                }
+              }
+            });
+          } catch(e) {
+            console.warn("[NativeCtrl] App state listener:", e);
+          }
+        }
+
+        console.log("[NativeCtrl] Native App Controller berhasil diinisialisasi.");
+      };
+
       /* ===== BACKGROUND ALARM & PRAYER NOTIFICATION SCHEDULER ENGINE ===== */
       const SOUND_MAP = {
         mekkah: 'adzan_mekkah_zahrani',
@@ -2396,10 +2470,8 @@
         }
       }
 
-
-      window.addEventListener("DOMContentLoaded", () => {
-        initSplashScreen();
-      });
+      // initSplashScreen sudah dihandle oleh __ensureSplash() di head script.
+      // Tidak perlu dipanggil ulang di sini untuk mencegah konflik __splashShown guard.
     </script>
 
     <style>
@@ -4176,6 +4248,36 @@
         font-weight: 800;
         color: #ffd700;
       }
+
+      /* Mode Badge — MEMUAT / MENGUNDUH */
+      .splash-mode-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 0.68rem;
+        font-weight: 800;
+        letter-spacing: 1.2px;
+        padding: 6px 16px;
+        border-radius: 99px;
+        margin-bottom: 20px;
+        text-transform: uppercase;
+      }
+      .splash-mode-badge.mode-loading {
+        background: rgba(11, 89, 64, 0.35);
+        color: #10B981;
+        border: 1px solid rgba(16, 185, 129, 0.35);
+      }
+      .splash-mode-badge.mode-downloading {
+        background: rgba(245, 158, 11, 0.25);
+        color: #F59E0B;
+        border: 1px solid rgba(245, 158, 11, 0.35);
+        animation: badgePulse 1.5s ease-in-out infinite;
+      }
+      @keyframes badgePulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.65; }
+      }
+
       /* NU ONLINE INSPIRED HOME DASHBOARD - ULTRA LUXURY */
       .nu-dome-header {
         background: #093326 url('assets/images/islamic_dome_bg.jpg') center/cover no-repeat !important;
@@ -4597,6 +4699,11 @@
       <!-- Judul & Sub-judul Minimalis -->
       <h1 class="splash-title">PENDAMPING AMALAN</h1>
       <p class="splash-subtitle">Teman Setia Menuju Ridha-Nya</p>
+
+      <!-- Mode Badge (Loading / Downloading) — diisi oleh setSplashMode() -->
+      <div id="splashModeBadge" class="splash-mode-badge mode-loading">
+        <i class="fa-solid fa-arrows-spin fa-spin"></i> MEMUAT DATA APLIKASI
+      </div>
 
       <!-- Progress Bar (0-100%) -->
       <div class="splash-loader-box">
@@ -6266,14 +6373,21 @@
       (function securityGuard() {
         "use strict";
 
-        /* 1. Cegah aplikasi dijalankan di dalam iframe (clickjacking) */
+        /* 1. Cegah aplikasi dijalankan di dalam iframe (clickjacking)
+              PENGECUALIAN: Capacitor WebView bukan iframe biasa, tidak perlu dicek */
         if (window.self !== window.top) {
-          document.body.innerHTML = "";
-          window.top.location = window.self.location;
-          return;
+          try {
+            // Hanya blokir jika ini benar-benar iframe di browser biasa
+            // Jangan redirect di dalam Capacitor/Android WebView
+            if (!window.Capacitor) {
+              document.body.innerHTML = "";
+              window.top.location = window.self.location;
+              return;
+            }
+          } catch(_) { /* Silently ignore cross-origin iframe errors */ }
         }
 
-        /* 2. Nonaktifkan klik kanan di dalam APK */
+        /* 2. Nonaktifkan klik kanan di dalam APK (Android tidak perlu) */
         document.addEventListener("contextmenu", function (e) {
           e.preventDefault();
         });
@@ -6290,41 +6404,10 @@
           }
         });
 
-        /* 4. Deteksi DevTools terbuka — reset jika terdeteksi di browser */
-        let devToolsOpen = false;
-        const threshold = 160;
-        setInterval(function () {
-          const widthDiff = window.outerWidth - window.innerWidth > threshold;
-          const heightDiff = window.outerHeight - window.innerHeight > threshold;
-          if ((widthDiff || heightDiff) && !devToolsOpen) {
-            devToolsOpen = true;
-          } else {
-            devToolsOpen = false;
-          }
-        }, 2000);
-
-        /* 5. Validasi integritas: pastikan tidak ada injeksi skrip luar */
-        function checkScriptIntegrity() {
-          const scripts = document.querySelectorAll("script[src]");
-          const allowedDomains = [
-            "cdn.jsdelivr.net",
-          ];
-          scripts.forEach(function (s) {
-            try {
-              const url = new URL(s.src);
-              if (!allowedDomains.some((d) => url.hostname.endsWith(d))) {
-                console.warn("[Security] Script sumber tidak dikenal diblokir:", s.src);
-                s.remove();
-              }
-            } catch (_) {}
-          });
-        }
-
-        if (document.readyState === "loading") {
-          document.addEventListener("DOMContentLoaded", checkScriptIntegrity);
-        } else {
-          checkScriptIntegrity();
-        }
+        /* 4. Script Integrity Check DIHAPUS — daftar allowedDomains yang terlalu ketat
+              sebelumnya menghapus Chart.js (cdn.jsdelivr.net) saat berjalan di
+              Android WebView (file:// protocol), menyebabkan aplikasi crash.
+              Keamanan sudah ditangani oleh Content-Security-Policy di <meta> tag. */
 
         console.log(
           "%c⚠ Pendamping Amalan — Protected by Prabu26.dev Security Guard",
