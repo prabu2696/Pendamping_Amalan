@@ -346,7 +346,7 @@
               <!-- Module 1: Wirid & Doa (Opens Sub-Catalog) -->
               <div class="nu-mod-card active" onclick="openWiridCatalog()">
                 <div class="nu-mod-icon-wrap" style="background:linear-gradient(135deg, #10B981, #047857)">
-                  <i class="fa-solid fa-hands-praying"></i>
+                  <i class="fa-solid fa-book-quran"></i>
                 </div>
                 <div class="nu-mod-info">
                   <div class="nu-mod-title">Wirid &amp; Doa</div>
@@ -357,8 +357,8 @@
 
               <!-- Module 2: Jadwal Shalat -->
               <div class="nu-mod-card active" onclick="showPrayerTimesPage()">
-                <div class="nu-mod-icon-wrap" style="background:linear-gradient(135deg, #3B82F6, #1D4ED8)">
-                  <i class="fa-solid fa-clock"></i>
+                <div class="nu-mod-icon-wrap" style="background:linear-gradient(135deg, #0284C7, #0369A1)">
+                  <i class="fa-solid fa-mosque"></i>
                 </div>
                 <div class="nu-mod-info">
                   <div class="nu-mod-title">Jadwal Shalat</div>
@@ -370,19 +370,39 @@
               <!-- Module 3: Kompas Kiblat -->
               <div class="nu-mod-card active" onclick="showQiblaCompassPage()">
                 <div class="nu-mod-icon-wrap" style="background:linear-gradient(135deg, #F59E0B, #D97706)">
-                  <i class="fa-solid fa-compass"></i>
+                  <i class="fa-solid fa-kaaba"></i>
                 </div>
                 <div class="nu-mod-info">
                   <div class="nu-mod-title">Kompas Kiblat</div>
-                  <div class="nu-mod-sub">Arah Kiblat Digital Presisi 3D</div>
+                  <div class="nu-mod-sub">Arah Kiblat Digital Presisi 3D Ka'bah</div>
                 </div>
                 <div class="nu-mod-arrow"><i class="fa-solid fa-chevron-right"></i></div>
               </div>
 
-              <!-- Module 4: Tasbih Digital -->
+              <!-- Module 4: Tasbih Digital (Authentic Islamic Misbaha Beads SVG) -->
               <div class="nu-mod-card active" onclick="showTasbihDigitalPage()">
                 <div class="nu-mod-icon-wrap" style="background:linear-gradient(135deg, #8B5CF6, #6D28D9)">
-                  <i class="fa-solid fa-dharmachakra"></i>
+                  <svg width="26" height="26" viewBox="0 0 24 24" fill="none" style="display:block;color:#ffffff">
+                    <!-- String Line -->
+                    <circle cx="12" cy="8.2" r="5.6" stroke="currentColor" stroke-width="0.8" stroke-dasharray="0.6 1.4" opacity="0.45"/>
+                    <!-- Beads in a Loop -->
+                    <circle cx="12" cy="2.6" r="1.3" fill="currentColor"/>
+                    <circle cx="15.3" cy="3.5" r="1.3" fill="currentColor"/>
+                    <circle cx="17.4" cy="6.2" r="1.3" fill="currentColor"/>
+                    <circle cx="17.4" cy="9.8" r="1.3" fill="currentColor"/>
+                    <circle cx="15.3" cy="12.5" r="1.3" fill="currentColor"/>
+                    <circle cx="13.2" cy="13.7" r="1.2" fill="currentColor"/>
+                    <circle cx="10.8" cy="13.7" r="1.2" fill="currentColor"/>
+                    <circle cx="8.7" cy="12.5" r="1.3" fill="currentColor"/>
+                    <circle cx="6.6" cy="9.8" r="1.3" fill="currentColor"/>
+                    <circle cx="6.6" cy="6.2" r="1.3" fill="currentColor"/>
+                    <circle cx="8.7" cy="3.5" r="1.3" fill="currentColor"/>
+                    <!-- Imam Bead (Khadim / Kepala Tasbih) -->
+                    <path d="M10.8 14.6h2.4l-0.4 2.6h-1.6z" fill="currentColor"/>
+                    <circle cx="12" cy="17.8" r="0.8" fill="currentColor"/>
+                    <!-- Tassel (Rumbai Sutra Tasbih) -->
+                    <path d="M12 18.6v4.2 M10.2 22.5l1.6-3.7 M13.8 22.5l-1.6-3.7" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+                  </svg>
                 </div>
                 <div class="nu-mod-info">
                   <div class="nu-mod-title">Tasbih Digital</div>
@@ -443,7 +463,7 @@
                 <i class="fa-solid fa-arrow-left"></i>
               </button>
               <div>
-                <h2 style="font-size:1.2rem;font-weight:800;margin:0;color:var(--clr-primary-dk)">🤲 Katalog Wirid &amp; Doa</h2>
+                <h2 style="font-size:1.2rem;font-weight:800;margin:0;color:var(--clr-primary-dk)"><i class="fa-solid fa-book-quran" style="color:var(--clr-primary);margin-right:6px"></i> Katalog Wirid &amp; Doa</h2>
                 <p style="font-size:0.78rem;color:var(--clr-text-subtle);margin:2px 0 0">Pilih amalan atau munajat yang ingin Anda baca</p>
               </div>
             </div>
@@ -778,7 +798,7 @@
                 <button class="icon-btn" onclick="showMainMenu()" style="width:38px;height:38px;border-radius:10px">
                   <i class="fa-solid fa-arrow-left"></i>
                 </button>
-                <h2 style="font-size:1.2rem;font-weight:800;margin:0;color:var(--clr-primary-dk)">Jadwal Shalat</h2>
+                <h2 style="font-size:1.2rem;font-weight:800;margin:0;color:var(--clr-primary-dk)"><i class="fa-solid fa-mosque" style="color:var(--clr-primary);margin-right:6px"></i> Jadwal Shalat Presisi</h2>
               </div>
               <div style="display:flex;gap:8px">
                 <button class="icon-btn" onclick="openRingtoneSettingsModal()" title="Pengaturan Nada Dering Adzan" style="width:38px;height:38px;border-radius:10px;color:var(--clr-gold-dk)">
@@ -993,14 +1013,14 @@
             keywords: ['jadwal', 'shalat', 'solat', 'waktu', 'imsak', 'subuh', 'dzuhur', 'ashar', 'maghrib', 'isya'],
             title: 'Jadwal Shalat Presisi GPS',
             subtitle: 'Kalkulasi 5 waktu shalat, imsak & notifikasi adzan',
-            icon: 'fa-clock',
+            icon: 'fa-mosque',
             action: () => showPrayerTimesPage()
           },
           {
             keywords: ['kompas', 'kiblat', 'arah', 'kabah', 'kaabah', 'qibla', '3d'],
             title: 'Kompas Kiblat 3D Realistis',
-            subtitle: 'Penentu arah kiblat presisi dengan kompas 3D',
-            icon: 'fa-compass',
+            subtitle: 'Penentu arah kiblat presisi Ka\'bah dengan kompas 3D',
+            icon: 'fa-kaaba',
             action: () => showQiblaCompassPage()
           },
           {
@@ -1014,14 +1034,14 @@
             keywords: ['tasbih', 'digital', 'dzikir', 'zikir', ' hitung', 'counter', '33', '100', '11', '70'],
             title: 'Tasbih Digital Interaktif',
             subtitle: 'Hitungan dzikir interaktif, suara & getar',
-            icon: 'fa-hand-pointer',
+            icon: 'tasbih-svg',
             action: () => showTasbihDigitalPage()
           },
           {
             keywords: ['katalog', 'daftar', 'wirid', 'doa', 'hizb', 'munajat', 'amalan'],
             title: 'Katalog Lengkap Wirid & Doa',
             subtitle: 'Koleksi lengkap amalan rezeki, keselamatan & tawasul',
-            icon: 'fa-book-open',
+            icon: 'fa-book-quran',
             action: () => openWiridCatalog()
           },
           {
@@ -1113,7 +1133,25 @@
           html += `
             <div onclick="executeSearchResultItem(${idx})" style="display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:14px;background:var(--clr-bg);border:1.5px solid var(--clr-border);cursor:pointer;transition:all 0.2s ease" onmouseover="this.style.borderColor='var(--clr-primary)'" onmouseout="this.style.borderColor='var(--clr-border)'">
               <div style="width:38px;height:38px;border-radius:10px;background:color-mix(in srgb, var(--clr-primary) 15%, transparent);color:var(--clr-primary);display:grid;place-items:center;font-size:1rem;flex-shrink:0">
-                <i class="fa-solid ${res.icon}"></i>
+                ${res.icon === 'tasbih-svg' ? `
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" style="display:block;color:var(--clr-primary)">
+                    <circle cx="12" cy="8.2" r="5.6" stroke="currentColor" stroke-width="0.8" stroke-dasharray="0.6 1.4" opacity="0.45"/>
+                    <circle cx="12" cy="2.6" r="1.3" fill="currentColor"/>
+                    <circle cx="15.3" cy="3.5" r="1.3" fill="currentColor"/>
+                    <circle cx="17.4" cy="6.2" r="1.3" fill="currentColor"/>
+                    <circle cx="17.4" cy="9.8" r="1.3" fill="currentColor"/>
+                    <circle cx="15.3" cy="12.5" r="1.3" fill="currentColor"/>
+                    <circle cx="13.2" cy="13.7" r="1.2" fill="currentColor"/>
+                    <circle cx="10.8" cy="13.7" r="1.2" fill="currentColor"/>
+                    <circle cx="8.7" cy="12.5" r="1.3" fill="currentColor"/>
+                    <circle cx="6.6" cy="9.8" r="1.3" fill="currentColor"/>
+                    <circle cx="6.6" cy="6.2" r="1.3" fill="currentColor"/>
+                    <circle cx="8.7" cy="3.5" r="1.3" fill="currentColor"/>
+                    <path d="M10.8 14.6h2.4l-0.4 2.6h-1.6z" fill="currentColor"/>
+                    <circle cx="12" cy="17.8" r="0.8" fill="currentColor"/>
+                    <path d="M12 18.6v4.2 M10.2 22.5l1.6-3.7 M13.8 22.5l-1.6-3.7" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+                  </svg>
+                ` : `<i class="fa-solid ${res.icon}"></i>`}
               </div>
               <div style="flex:1;overflow:hidden">
                 <div style="font-size:0.72rem;font-weight:800;color:var(--clr-gold-dk);letter-spacing:0.5px;margin-bottom:2px">${res.categoryLabel}</div>
@@ -2014,7 +2052,7 @@
                 <button class="icon-btn" onclick="showMainMenu()" style="width:38px;height:38px;border-radius:10px" title="Kembali ke Beranda">
                   <i class="fa-solid fa-arrow-left"></i>
                 </button>
-                <h2 style="font-size:1.2rem;font-weight:800;margin:0;color:var(--clr-primary-dk)">Kompas Kiblat Realistis 3D</h2>
+                <h2 style="font-size:1.2rem;font-weight:800;margin:0;color:var(--clr-primary-dk)"><i class="fa-solid fa-kaaba" style="color:var(--clr-gold-dk);margin-right:6px"></i> Kompas Kiblat 3D Ka'bah</h2>
               </div>
             </div>
 
@@ -2215,7 +2253,26 @@
                 <button class="icon-btn" onclick="showMainMenu()" style="width:38px;height:38px;border-radius:10px" title="Kembali ke Beranda">
                   <i class="fa-solid fa-arrow-left"></i>
                 </button>
-                <h2 style="font-size:1.2rem;font-weight:800;margin:0;color:var(--clr-primary-dk)">📿 Tasbih Digital Interaktif</h2>
+                <div style="display:flex;align-items:center;gap:8px">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" style="display:inline-block;color:var(--clr-primary-dk);vertical-align:middle">
+                    <circle cx="12" cy="8.2" r="5.6" stroke="currentColor" stroke-width="0.8" stroke-dasharray="0.6 1.4" opacity="0.45"/>
+                    <circle cx="12" cy="2.6" r="1.3" fill="currentColor"/>
+                    <circle cx="15.3" cy="3.5" r="1.3" fill="currentColor"/>
+                    <circle cx="17.4" cy="6.2" r="1.3" fill="currentColor"/>
+                    <circle cx="17.4" cy="9.8" r="1.3" fill="currentColor"/>
+                    <circle cx="15.3" cy="12.5" r="1.3" fill="currentColor"/>
+                    <circle cx="13.2" cy="13.7" r="1.2" fill="currentColor"/>
+                    <circle cx="10.8" cy="13.7" r="1.2" fill="currentColor"/>
+                    <circle cx="8.7" cy="12.5" r="1.3" fill="currentColor"/>
+                    <circle cx="6.6" cy="9.8" r="1.3" fill="currentColor"/>
+                    <circle cx="6.6" cy="6.2" r="1.3" fill="currentColor"/>
+                    <circle cx="8.7" cy="3.5" r="1.3" fill="currentColor"/>
+                    <path d="M10.8 14.6h2.4l-0.4 2.6h-1.6z" fill="currentColor"/>
+                    <circle cx="12" cy="17.8" r="0.8" fill="currentColor"/>
+                    <path d="M12 18.6v4.2 M10.2 22.5l1.6-3.7 M13.8 22.5l-1.6-3.7" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+                  </svg>
+                  <h2 style="font-size:1.2rem;font-weight:800;margin:0;color:var(--clr-primary-dk)">Tasbih Digital Interaktif</h2>
+                </div>
               </div>
             </div>
 
