@@ -2277,10 +2277,7 @@
             </div>
 
             <!-- TARGET PRESET SELECTOR BAR -->
-            <div style="background:var(--clr-surface);border:1.5px solid var(--clr-border);border-radius:20px;padding:14px;margin-bottom:20px;box-shadow:0 6px 20px rgba(0,0,0,0.04)">
-              <div style="font-size:0.75rem;font-weight:800;color:var(--clr-gold-dk);letter-spacing:1px;margin-bottom:10px;text-transform:uppercase">
-                🎯 PILIH TARGET DZIKIR (OPSIONAL / MANUAL)
-              </div>
+            <div style="background:var(--clr-surface);border:1.5px solid var(--clr-border);border-radius:20px;padding:12px 14px;margin-bottom:20px;box-shadow:0 6px 20px rgba(0,0,0,0.04)">
               <div style="display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap">
                 ${[11, 33, 70, 100].map(t => `
                   <button onclick="setTasbihTarget(${t})" style="padding:8px 16px;border-radius:99px;font-weight:800;font-size:0.86rem;cursor:pointer;transition:all 0.2s ease;${tasbihState.target === t ? 'background:var(--clr-primary);color:#fff;border:none;box-shadow:0 4px 12px rgba(16,185,129,0.35)' : 'background:var(--clr-bg);color:var(--clr-text);border:1.5px solid var(--clr-border)'}">
