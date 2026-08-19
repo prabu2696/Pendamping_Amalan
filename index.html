@@ -107,7 +107,7 @@
             homeBtn.style.pointerEvents = "none";
           }
         } else {
-          // Di Dalam Modul: [Beranda] [Night Mode] [Pengaturan]
+          // Di Luar Menu Utama:
           if (updateBtn) {
             updateBtn.style.setProperty("display", "none", "important");
             updateBtn.style.opacity = "0";
@@ -117,6 +117,13 @@
             homeBtn.style.setProperty("display", "inline-flex", "important");
             homeBtn.style.opacity = "1";
             homeBtn.style.pointerEvents = "auto";
+            if (currentScreen === "reader") {
+              homeBtn.setAttribute("title", "Kembali ke Katalog Wirid & Doa");
+              homeBtn.onclick = function() { openWiridCatalog(); };
+            } else {
+              homeBtn.setAttribute("title", "Kembali ke Beranda");
+              homeBtn.onclick = function() { showMainMenu(); };
+            }
           }
         }
       }
@@ -419,6 +426,8 @@
         if (progressTrack) progressTrack.style.display = "none";
         const slideChipWrap = document.getElementById("slideChipWrap");
         if (slideChipWrap) slideChipWrap.style.display = "none";
+        const catalogChipWrap = document.getElementById("catalogChipWrap");
+        if (catalogChipWrap) catalogChipWrap.style.display = "none";
 
         startGlobalLivePrayerCountdown();
       }
@@ -438,6 +447,8 @@
           if (progressTrack) progressTrack.style.display = "block";
           const slideChipWrap = document.getElementById("slideChipWrap");
           if (slideChipWrap) slideChipWrap.style.display = "inline-flex";
+          const catalogChipWrap = document.getElementById("catalogChipWrap");
+          if (catalogChipWrap) catalogChipWrap.style.display = "inline-flex";
           if (typeof goToSlide === "function") goToSlide(0);
         }
       }
@@ -454,7 +465,7 @@
           <div id="wiridCatalogScreen" style="max-width:900px;margin:0 auto;width:100%;box-sizing:border-box;padding-bottom:24px">
             <!-- Back Header -->
             <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;padding-bottom:14px;border-bottom:1px solid var(--clr-border)">
-              <button class="icon-btn" onclick="showMainMenu()" style="width:38px;height:38px;border-radius:10px">
+              <button class="icon-btn" onclick="showMainMenu()" style="width:38px;height:38px;border-radius:10px" title="Kembali ke Beranda">
                 <i class="fa-solid fa-arrow-left"></i>
               </button>
               <div>
@@ -487,6 +498,8 @@
         if (progressTrack) progressTrack.style.display = "none";
         const slideChipWrap = document.getElementById("slideChipWrap");
         if (slideChipWrap) slideChipWrap.style.display = "none";
+        const catalogChipWrap = document.getElementById("catalogChipWrap");
+        if (catalogChipWrap) catalogChipWrap.style.display = "none";
       }
 
       /* ===== GLOBAL LIVE PRAYER & LOCATION ENGINE ===== */
@@ -895,6 +908,8 @@
         if (progressTrack) progressTrack.style.display = "none";
         const slideChipWrap = document.getElementById("slideChipWrap");
         if (slideChipWrap) slideChipWrap.style.display = "none";
+        const catalogChipWrap = document.getElementById("catalogChipWrap");
+        if (catalogChipWrap) catalogChipWrap.style.display = "none";
 
         startGlobalLivePrayerCountdown();
       }
@@ -2095,6 +2110,8 @@
         if (progressTrack) progressTrack.style.display = "none";
         const slideChipWrap = document.getElementById("slideChipWrap");
         if (slideChipWrap) slideChipWrap.style.display = "none";
+        const catalogChipWrap = document.getElementById("catalogChipWrap");
+        if (catalogChipWrap) catalogChipWrap.style.display = "none";
 
         // Pasang event listener orientasi sensor HP
         attachOrientationListener();
@@ -2184,6 +2201,8 @@
         if (progressTrack) progressTrack.style.display = "none";
         const slideChipWrap = document.getElementById("slideChipWrap");
         if (slideChipWrap) slideChipWrap.style.display = "none";
+        const catalogChipWrap = document.getElementById("catalogChipWrap");
+        if (catalogChipWrap) catalogChipWrap.style.display = "none";
       }
 
       function renderTasbihDigitalPage() {
@@ -4803,6 +4822,12 @@
           </div>
         </a>
         <div class="header-actions">
+          <div id="catalogChipWrap" style="display: none">
+            <button class="chip" onclick="openWiridCatalog()" style="background:color-mix(in srgb, var(--clr-gold) 15%, transparent);color:var(--clr-gold-dk);border:1px solid color-mix(in srgb, var(--clr-gold) 40%, transparent);cursor:pointer;font-weight:700" title="Kembali ke Katalog Wirid &amp; Doa">
+              <i class="fa-solid fa-arrow-left"></i>
+              <span>Katalog</span>
+            </button>
+          </div>
           <div id="slideChipWrap" style="display: none">
             <button class="chip chip-primary" onclick="openSlideModal()">
               <i class="fa-solid fa-layer-group"></i>
@@ -5588,7 +5613,13 @@
         /* ---- Type: Home (Slide 1) ---- */
         if (s.type === "home") {
           html += `
-        <div class="bismillah-hero" style="padding:20px 0 24px;margin-top:10px;margin-bottom:24px;border-bottom:1px solid var(--clr-border);text-align:center">
+        <div style="margin-bottom:12px;text-align:left">
+          <button onclick="openWiridCatalog()" style="padding:7px 16px;border-radius:99px;background:var(--clr-surface2);border:1.5px solid var(--clr-border);color:var(--clr-primary-dk);font-size:0.82rem;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:6px" title="Kembali ke Katalog Wirid &amp; Doa">
+            <i class="fa-solid fa-arrow-left"></i> <span>Kembali ke Katalog Wirid</span>
+          </button>
+        </div>
+
+        <div class="bismillah-hero" style="padding:20px 0 24px;margin-top:4px;margin-bottom:24px;border-bottom:1px solid var(--clr-border);text-align:center">
           <div class="ar ar-center" style="font-size:var(--arabic-size);color:var(--clr-primary-dk);margin-top:10px;margin-bottom:22px;line-height:2.2;padding:8px 0;text-align:center !important;text-align-last:center !important">بِسْمِ اللّٰهِ الرَّحْمٰنِ الرَّحِيْمِ</div>
           <div style="background:color-mix(in srgb, var(--clr-primary) 6%, transparent);border:1px solid color-mix(in srgb, var(--clr-primary) 20%, transparent);border-radius:var(--radius-md);padding:14px 20px;max-width:540px;margin:0 auto;text-align:center">
             <p class="lt-label" style="color:var(--clr-text);line-height:1.6;margin:0;font-weight:500;text-align:center">
