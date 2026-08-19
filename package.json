@@ -5,7 +5,10 @@
   "main": "index.html",
   "author": "Prabu26.dev",
   "scripts": {
-    "start": "npx serve ."
+    "start": "npx serve .",
+    "build": "node scripts/sync_android.js",
+    "sync": "node scripts/sync_android.js",
+    "push": "node --use-system-ca scripts/push_ota.js"
   },
   "keywords": [
     "amalan",
@@ -20,6 +23,20 @@
     "@capacitor/android": "^8.5.0",
     "@capacitor/cli": "^8.5.0",
     "@capacitor/core": "^8.5.0",
+    "firebase": "^12.17.1",
+    "firebase-admin": "^14.2.0",
     "jimp": "^1.6.1"
+  },
+  "dependencies": {
+    "@capacitor/app": "^8.1.1",
+    "@capacitor/device": "^8.0.3",
+    "@capacitor/filesystem": "^8.1.2",
+    "@capacitor/geolocation": "^8.2.1",
+    "@capacitor/haptics": "^8.0.2",
+    "@capacitor/local-notifications": "^8.2.1",
+    "@capgo/capacitor-updater": "^8.51.3",
+    "@supabase/supabase-js": "^2.112.2",
+    "adm-zip": "^0.6.0",
+    "dotenv": "^17.4.2"
   }
 }

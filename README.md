@@ -1,89 +1,100 @@
-# 📱 Pendamping Amalan Digital — Amalan Rezeki & Munajat Hajat 🤲
+# 📱 Pendamping Amalan Digital — Android & Web App 🤲
 
-**Pendamping Amalan Digital** adalah aplikasi web & tasbih digital interaktif yang dirancang khusus untuk mendampingi ibadah harian, pembacaan tawasul silsilah, perisai diri, dan zikir menderaskan rezeki secara khusyuk, rapi, dan teratur.
-
-Aplikasi ini dikembangkan oleh **Prabu26.dev** dengan standar penulisan **Rasm Utsmani Kemenag RI** menggunakan font resmi **LPMQ Isep Misbah**.
-
----
-
-## 🚀 Fitur Utama
-
-### 1. **Teks Utsmani Standar Kemenag RI (Font LPMQ Isep Misbah)**
-- Menggunakan berkas font resmi `LPMQ-IsepMisbah.ttf` dari Kementerian Agama Republik Indonesia.
-- Dilengkapi dengan tanda tajwid khas Mushaf Standar Indonesia seperti **Mim Iqlab (`ۢ`)**, **Badal Kasrah (`ـٖ`)**, dan penulisan harakat yang tajam dan nyaman dibaca.
-
-### 2. **Jeda Nafas Tanda Baca (*Waqaf / Breathed Pauses*)**
-- Seluruh bacaan (Istighfar, Syahadat, Shalawat, Ayat Kursi, Āmanar Rasūl, Shalawat Nariyah, Shalawat Ibrahimiyah, Tawasul 1-11, hingga Doa Rezeki) dilengkapi **koma Arab (`،`)** dan **koma Latin (`,`)** pada setiap klausa frasa.
-- Pembaca dapat mengambil nafas dengan tenang dan teratur tanpa merasa dipaksa membaca kalimat panjang sekaligus.
-- Tanda bintang (`✦`) digunakan secara khusus sebagai penutup ayat Al-Qur'an atau bait doa utama.
-
-### 3. **Tasbih Digital Presisi dengan Respon Haptik**
-- Penghitung tasbih otomatis dengan target bacaan dinamis (11×, 7×, 313×, 113×, dll.).
-- Dilengkapi efek getar (*vibration*) dan *ripple animation* per ketukan.
-- **Tata Letak Navigasi Terkunci**: Tombol `< Prev` dan `Next >` tetap stabil di pinggir kanan-kiri layar, sementara counter tasbih digital berada tepat di tengah secara simetris.
-
-### 4. **Struktur 31 Slide Amalan Lengkap**
-
-- **I. Adab & Persiapan**: Panduan Shalat Taubat, Shalat Tahajud & Witir, Shalat Dhuha, serta Sayyidul Istighfar.
-- **II. Muqaddimah**: Pembersihan Diri (Istighfar 3x, Syahadat 3x, Shalawat 3x, Tahlil 3x, Takbir 3x).
-- **III. Benteng Diri & Keberkahan**:
-  - Surah Al-Fatihah, Al-Ikhlas, Al-Falaq, An-Nas, Al-Qadr.
-  - Ayat Kursi (QS. Al-Baqarah: 163 & 255).
-  - Āmanar Rasūl (QS. Al-Baqarah: 284–286).
-  - Dzikir Penutup Pagar.
-  - Dalil Al-Ahzab 56 & Shalawat Nariyah (dengan transliterasi wasal `muhammadil-ladzii`).
-  - Shalawat Ibrahimiyah.
-- **IV. Tawasul Lengkap (11 Silsilah)**:
-  1. Rasulullah SAW, Keluarga, Istri, Keturunan, & Ahli Bait.
-  2. Sahabat Khulafaur Rasyidin (Abu Bakar, Umar, Utsman, Ali RA).
-  3. Tabi'in, Tabi'ut Tabi'in, & Imam Madzhab (Rahimahumullahu Ta'ala).
-  4. Para Malaikat Muqarrabin & Karubiyyin (Jibril, Mikail, Israfil, Izrail).
-  5. Para Nabi & Rasul (Nabi Khidir, Ilyas, Idris, Sulaiman, Daud, Ibrahim, Musa, Isa AS).
-  6. Sultanul Auliya Syekh Abdul Qadir Al-Jilani (dengan susunan ijazah silsilah lengkap).
-  7. Penyusun Kitab Hikmah (Imam Ahmad bin Ali Al-Buni & Ahmad Dairabi Al-Kabir).
-  8. Wali Songo Nusantara (`قَدَّسَ اللّٰهُ أَسْرَارَهُمْ`).
-  9. Muassis Nahdlatul Ulama (Hadhratus Syaikh KH Hasyim Asy'ari).
-  10. Orang Tua, Kakek-Nenek, & Para Guru.
-  11. Pemberi Ijazah Amalan (Ust. Rais Fajar Shiddiq & Aang Haji Lili Cibitik).
-- **V. Inti Amalan**:
-  - Sholawat Adrikni (11×)
-  - Sholawat Ismul A'dhom (7×)
-  - Zikir Kelimpahan Rezeki: *Yaa Ghaniyyu Yaa Mughnii* (313×)
-  - Zikir Pembuka Jalan: *Yaa Fattaahu Yaa Razzaaq* (113×)
-  - Doa Gabungan Utama Rezeki (1×)
-- **VI. Munajat Penutup**: Munajat Hajat Pribadi.
+Aplikasi Islami komprehensif berstandar **Rasm Utsmani Kemenag RI (Font LPMQ Isep Misbah)** yang mencakup:
+- **Modul Wirid, Tawasul & Doa Rezeki (31 Slide Interaktif)**
+- **Jadwal Shalat Akurat Kemenag RI & Alarm Latar Belakang**
+- **Kompas Arah Kiblat 3D Interaktif**
+- **Tasbih Digital Minimalis dengan Respon Haptik & Audio**
+- **Universal Search Amalan & Doa**
+- **Pembaruan Otomatis (OTA Server) via Capacitor Updater + Supabase + Firestore**
 
 ---
 
-## 📂 Berkas Proyek
+## 🏛️ Arsitektur Proyek: Single Source of Truth (Sistem Tunggal)
+
+Untuk menjaga konsistensi antara pengembangan dengan AI, Web, dan **Android Studio**, proyek ini menggunakan prinsip **Satu Sumber Kebenaran (*Single Source of Truth*)**:
+
+1. **`index.html` (Master Source File di Root)**:
+   - Seluruh penambahan fitur, perubahan UI/UX, logic JavaScript, style CSS, dan data amalan **wajib dikerjakan pada file `index.html` di folder root**.
+2. **Sinkronisasi Otomatis**:
+   - Menjalankan `npm run sync` (atau `npm run push`) akan menyinkronkan kode dari Master Root ke folder distribusi `www/` dan folder native Android `android/app/src/main/assets/public/` secara instan.
+3. **Android Studio**:
+   - Saat Anda melakukan **Run (▶)** atau **Build APK** di Android Studio, Android Studio akan otomatis membaca aset yang sudah 100% tersinkronisasi.
+
+---
+
+## 📂 Struktur Direktori Proyek
 
 ```
 Pendamping_Amalan_Digital/
-├── index.html                 # Aplikasi Web Standalone 31 Slide + Tasbih Digital
-├── Logo_Pesantren.png         # Logo resmi instansi
-├── public/
-│   └── fonts/
-│       └── LPMQ-IsepMisbah.ttf # Font Resmi Kemenag RI
-├── package.json               # Konfigurasi npm & metadata proyek
-├── .gitignore                 # Konfigurasi file terabaikan git
-└── README.md                  # Dokumentasi resmi proyek
+├── index.html                   # 🌟 MASTER SOURCE FILE (Pusat Segala Kode)
+├── .env                         # 🔒 Kredensial Rahasia & API Key (Terlindungi di .gitignore)
+├── .env.example                 # 📋 Template Variabel Lingkungan
+├── assets/                      # 🎨 Aset Media & Font Aplikasi
+│   ├── images/                  # Berkas Gambar & Logo
+│   │   ├── Logo_Pesantren.png   # Logo Brand Pesantren
+│   │   └── islamic_dome_bg.jpg  # Background Header Islami
+│   ├── audio/                   # Berkas Audio MP3 Adzan & Tarhim Resmi
+│   │   ├── adzan_bayati_fahmi.mp3
+│   │   ├── adzan_kurdi_mishary.mp3
+│   │   ├── adzan_madinah_qassas.mp3
+│   │   ├── adzan_mekkah_zahrani.mp3
+│   │   ├── adzan_subuh_bahanan.mp3
+│   │   ├── adzan_subuh_kurdi_mishary.mp3
+│   │   └── tarhim_hushariy.mp3
+│   └── fonts/                   # Font Resmi LPMQ Kemenag RI
+│       └── LPMQ-IsepMisbah.ttf
+├── scripts/                     # ⚡ Skrip Otomatisasi & Sinkronisasi
+│   ├── sync_android.js          # Skrip Sinkronisasi Master Root -> www & Android
+│   └── push_ota.js              # Skrip Upload OTA (Membaca Kredensial dari .env)
+├── www/                         # Folder Distribusi Web (Auto-Generated)
+├── android/                     # Project Native Android Studio (Capacitor)
+├── capacitor.config.json        # Konfigurasi Capacitor
+└── package.json                 # Dependency & NPM Scripts
 ```
 
 ---
 
-## 💻 Cara Menjalankan
+## 🔒 Keamanan & Environment Variables (.env)
 
-Aplikasi ini berbasis **Single Page Web Application (SPA)** murni tanpa dependensi compiler yang rumit:
+Seluruh kunci rahasia (*secret API keys*) untuk Supabase Storage dan Firebase Firestore **tersimpan aman di file `.env` di folder root** dan tidak pernah terekspos ke dalam file client `index.html`:
 
-1. Cukup buka berkas `index.html` langsung di browser laptop/HP Anda.
-2. Atau jalankan server lokal sederhana:
-   ```bash
-   npx serve .
-   ```
+```ini
+# Supabase Storage (OTA ZIP Bucket)
+SUPABASE_URL=https://...
+SUPABASE_SERVICE_ROLE_KEY=sb_secret_...
+SUPABASE_BUCKET_NAME=ota-updates
+
+# Firebase / Cloud Firestore (Metadata)
+FIREBASE_API_KEY=AIzaSy...
+FIREBASE_AUTH_DOMAIN=...
+FIREBASE_PROJECT_ID=...
+```
+
+* File `.env` dan file kunci privat sudah terdaftar di `.gitignore` sehingga tidak akan pernah bocor ke git publik.
+* File `index.html` bersih 100% dari hardcoded API key privat.
+
+---
+
+## 🛠️ Perintah Utama (NPM Scripts)
+
+| Perintah | Deskripsi |
+| :--- | :--- |
+| `npm run sync` | **Menyinkronkan** seluruh file master root ke folder `www/` dan folder `android` lalu menjalankan `cap sync`. |
+| `npm run push` | **Menaikkan versi build OTA**, memaketkan ZIP update, mengunggah ke Supabase & Firestore menggunakan kredensial `.env`, dan menyinkronkan aset Android. |
+| `npm start` | Menjalankan server lokal pratinjau browser pada port lokal. |
+
+---
+
+## 🔄 Pembaruan Tanpa Install Ulang (Server OTA)
+
+Aplikasi telah dilengkapi sistem **Over-The-Air (OTA) Update**:
+1. Lakukan pembaruan kode di `index.html`.
+2. Jalankan `npm run push`.
+3. Buka aplikasi di HP, ketuk tombol **🔄 Update** di Beranda.
+4. Aplikasi akan mengunduh paket update baru dan me-reload tanpa perlu install ulang file APK!
 
 ---
 
 ## 📜 Hak Cipta & Pengembang
-
-© 2026 **Pendamping Amalan Digital**  
-*Developed by Prabu26.dev*
+© 2026 **Pendamping Amalan Digital** — *Developed by Prabu26.dev*
