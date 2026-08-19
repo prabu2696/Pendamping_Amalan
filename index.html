@@ -290,110 +290,252 @@
         }
 
         const mainDateInfo = getFormattedDates(new Date());
+        const pNotifs = (typeof loadPrayerNotifSettings === 'function') ? loadPrayerNotifSettings() : { subuh:true, dzuhur:true, ashar:true, maghrib:true, isya:true };
+        const times = (window.calculateKemenagPrayerTimes && pLocation) ? calculateKemenagPrayerTimes(pLocation.lat, pLocation.lng, new Date()) : { subuh:"04:40", dzuhur:"12:00", ashar:"15:15", maghrib:"18:05", isya:"19:15" };
 
         main.innerHTML = `
-          <div id="mainMenuScreen" style="max-width:900px;margin:0 auto;width:100%;box-sizing:border-box;padding-bottom:24px">
+          <div id="mainMenuScreen">
             
-            <!-- DOME ARCH HEADER BANNER (NU Online Inspired) -->
-            <div class="nu-dome-header">
-              <div class="nu-header-top" style="justify-content:flex-start">
-                <div class="nu-date-badge">
-                  <span>${mainDateInfo.gregShort}</span> • <span style="color:#F59E0B;font-weight:700">${mainDateInfo.hijriStr}</span>
+            <!-- TOP DATE BAR -->
+            <div class="dashboard-date-bar">
+              <div class="date-capsule">
+                <i class="fa-regular fa-calendar" style="color:#22C7C2"></i>
+                <span>${mainDateInfo.gregShort}</span> • <span class="hijri-text">${mainDateInfo.hijriStr}</span>
+              </div>
+              <button onclick="refreshGPSLocation(true)" class="date-capsule" style="cursor:pointer;border-color:rgba(34,199,194,0.35);color:#22C7C2" title="Perbarui Lokasi GPS">
+                <i class="fa-solid fa-location-crosshairs"></i>
+                <span id="homeLocationBadgeText" style="color:#fff;font-size:0.75rem;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${pLocation.name}</span>
+              </button>
+            </div>
+
+            <!-- HERO PROMO BANNER (Start Tasbih Tracking / Amalan Rezeki) -->
+            <div class="hero-promo-card">
+              <div class="hero-content-wrap">
+                <div class="hero-text-side">
+                  <div class="hero-badge-tag"><i class="fa-solid fa-sparkles"></i> Amalan Harian</div>
+                  <h2 class="hero-title-main">Start Tasbih &amp; Wirid Tracking</h2>
+                  <p class="hero-sub-text">Remember Allah every day • Kunci Pembuka Pintu Rezeki &amp; Munajat Hajat</p>
+                  <button class="hero-cta-btn" onclick="openModule(0)">
+                    Mulai Sekarang <i class="fa-solid fa-arrow-right"></i>
+                  </button>
+                </div>
+                
+                <!-- Decorative Hanging Lanterns & Crescent Moon Graphic -->
+                <div class="hero-graphic-side">
+                  <svg width="95" height="95" viewBox="0 0 100 100" fill="none">
+                    <!-- Glowing Crescent Moon -->
+                    <path d="M55 15C32.909 15 15 32.909 15 55C15 77.091 32.909 95 55 95C66.248 95 76.404 90.364 83.648 82.904C63.4 81.248 47.4 64.368 47.4 43.6C47.4 30.976 53.64 19.824 63.24 13.168C60.568 11.768 57.848 11 55 11V15Z" fill="url(#heroCrescGrad)" stroke="#F3D38C" stroke-width="1.5" filter="drop-shadow(0 0 16px rgba(212,175,106,0.65))"/>
+                    <!-- Hanging Lantern 1 -->
+                    <line x1="72" y1="0" x2="72" y2="28" stroke="#D4AF6A" stroke-width="1"/>
+                    <rect x="66" y="28" width="12" height="18" rx="3" fill="#D4AF6A" stroke="#F3D38C" stroke-width="0.8"/>
+                    <circle cx="72" cy="37" r="3" fill="#FFF2B2" filter="drop-shadow(0 0 6px #FFE066)"/>
+                    <!-- Hanging Lantern 2 -->
+                    <line x1="88" y1="0" x2="88" y2="42" stroke="#D4AF6A" stroke-width="1"/>
+                    <rect x="82" y="42" width="12" height="18" rx="3" fill="#D4AF6A" stroke="#F3D38C" stroke-width="0.8"/>
+                    <circle cx="88" cy="51" r="3" fill="#FFF2B2" filter="drop-shadow(0 0 6px #FFE066)"/>
+                    <defs>
+                      <linearGradient id="heroCrescGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="#FFF3CC"/>
+                        <stop offset="45%" stop-color="#D4AF6A"/>
+                        <stop offset="100%" stop-color="#8C651E"/>
+                      </linearGradient>
+                    </defs>
+                  </svg>
                 </div>
               </div>
 
-              <!-- Dome Arch Card -->
-              <div class="nu-dome-card" style="position:relative">
-                <button onclick="refreshGPSLocation(true)" class="icon-btn" style="position:absolute;top:16px;right:18px;width:34px;height:34px;border-radius:50%;background:rgba(0,0,0,0.55);border:1.5px solid rgba(212,175,55,0.45);color:#F59E0B;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px;box-shadow:0 2px 8px rgba(0,0,0,0.35);transition:all 0.2s ease;" title="Perbarui Lokasi GPS">
-                  <i class="fa-solid fa-location-crosshairs"></i>
-                </button>
-                
-                <div class="nu-prayer-label">WAKTU SHOLAT BERIKUTNYA</div>
-                
-                <div class="nu-prayer-main">
-                  <span class="nu-prayer-name" id="homePrayerName">Subuh</span>
-                  <span class="nu-prayer-time" id="homePrayerTime">04:40</span>
-                  <span class="nu-prayer-tz">WIB</span>
-                </div>
-
-                <div style="font-size:0.76rem;color:#FFD54F;font-weight:600;margin:6px 0 8px;display:flex;align-items:center;justify-content:center;gap:5px">
-                  <i class="fa-solid fa-location-dot" style="font-size:0.7rem;color:#F59E0B"></i>
-                  <span id="homeLocationBadgeText">${pLocation.name}</span>
-                </div>
-
-                <div class="nu-prayer-countdown">
-                  <i class="fa-regular fa-clock" style="margin-right:4px"></i> Hitung Mundur: <strong id="prayerCountdown">- 00 : 00 : 00</strong>
-                </div>
+              <!-- Pagination Dots -->
+              <div class="hero-pagination-dots">
+                <div class="p-dot active"></div>
+                <div class="p-dot"></div>
+                <div class="p-dot"></div>
               </div>
             </div>
 
-            <!-- SEARCH BAR (FULL UNIVERSAL SEARCH ACCESS) -->
-            <div class="nu-search-box" style="position:relative">
+            <!-- UNIVERSAL SEARCH BAR -->
+            <div class="nu-search-box">
               <i class="fa-solid fa-magnifying-glass nu-search-icon"></i>
               <input type="text" id="homeSearchInput" oninput="handleUniversalSearch(this.value)" placeholder="Cari wirid, doa, tawasul, adzan, atau fitur..." class="nu-search-input" style="padding-right:38px" />
-              <button id="homeSearchClearBtn" onclick="clearUniversalSearch()" style="display:none;position:absolute;right:14px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--clr-text-subtle);cursor:pointer;font-size:0.9rem" title="Hapus Pencarian">
+              <button id="homeSearchClearBtn" onclick="clearUniversalSearch()" style="display:none;position:absolute;right:14px;top:50%;transform:translateY(-50%);background:none;border:none;color:#9AA6BD;cursor:pointer;font-size:0.9rem" title="Hapus Pencarian">
                 <i class="fa-solid fa-xmark"></i>
               </button>
             </div>
-            <div id="homeSearchResultsPanel" style="display:none;margin-top:12px;background:var(--clr-surface);border:1.5px solid var(--clr-border);border-radius:20px;padding:16px;box-shadow:0 10px 30px rgba(0,0,0,0.15);max-height:420px;overflow-y:auto"></div>
+            <div id="homeSearchResultsPanel" style="display:none;margin-bottom:20px;background:rgba(16,36,64,0.85);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,0.12);border-radius:20px;padding:16px;box-shadow:0 12px 36px rgba(0,0,0,0.4);max-height:420px;overflow-y:auto"></div>
 
-            <!-- 3 CORE TARGET MODULES GRID (Clean 3-Card Layout) -->
-            <div style="font-size:0.75rem;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--clr-gold-dk);margin:20px 0 12px;display:flex;align-items:center;gap:6px">
-              <i class="fa-solid fa-kaaba"></i> MODUL UTAMA APLIKASI
+            <!-- SECTION 1: FEATURES QUICK ACCESS GRID -->
+            <div class="section-header-modern">
+              <div class="section-title-modern">
+                <i class="fa-solid fa-grid-2" style="color:#22C7C2"></i> Features
+              </div>
+              <span class="section-link-more" onclick="openWiridCatalog()">See all</span>
             </div>
 
-            <div class="nu-modules-grid">
-              <!-- Module 1: Wirid & Doa (Opens Sub-Catalog) -->
-              <div class="nu-mod-card active" onclick="openWiridCatalog()">
-                <div class="nu-mod-icon-wrap" style="background:linear-gradient(135deg, #10B981, #047857)">
-                  <i class="fa-solid fa-hands-praying"></i>
+            <div class="features-quick-grid">
+              <!-- Feature 1: Ruqiyah / Wirid & Doa -->
+              <div class="feature-squircle-btn" onclick="openWiridCatalog()">
+                <div class="feature-icon-squircle" style="background:linear-gradient(135deg, #10B981 0%, #047857 100%)">
+                  <i class="fa-solid fa-book-quran"></i>
                 </div>
-                <div class="nu-mod-info">
-                  <div class="nu-mod-title">Wirid &amp; Doa</div>
-                  <div class="nu-mod-sub">Katalog Amalan Rezeki, Hizb &amp; Munajat</div>
+                <div>
+                  <div class="feature-label-title">Ruqiyah &amp; Doa</div>
+                  <div class="feature-label-sub">31 Slide Amalan Rezeki &amp; Hizb</div>
                 </div>
-                <div class="nu-mod-arrow"><i class="fa-solid fa-chevron-right"></i></div>
               </div>
 
-              <!-- Module 2: Jadwal Shalat -->
-              <div class="nu-mod-card active" onclick="showPrayerTimesPage()">
-                <div class="nu-mod-icon-wrap" style="background:linear-gradient(135deg, #3B82F6, #1D4ED8)">
-                  <i class="fa-solid fa-clock"></i>
+              <!-- Feature 2: Jadwal Shalat -->
+              <div class="feature-squircle-btn" onclick="showPrayerTimesPage()">
+                <div class="feature-icon-squircle" style="background:linear-gradient(135deg, #0284C7 0%, #0369A1 100%)">
+                  <i class="fa-solid fa-person-praying"></i>
                 </div>
-                <div class="nu-mod-info">
-                  <div class="nu-mod-title">Jadwal Shalat</div>
-                  <div class="nu-mod-sub">Waktu Shalat Presisi Kemenag RI &amp; GPS</div>
+                <div>
+                  <div class="feature-label-title">Jadwal Shalat</div>
+                  <div class="feature-label-sub">Hisab Kemenag &amp; Notifikasi Adzan</div>
                 </div>
-                <div class="nu-mod-arrow"><i class="fa-solid fa-chevron-right"></i></div>
               </div>
 
-              <!-- Module 3: Kompas Kiblat -->
-              <div class="nu-mod-card active" onclick="showQiblaCompassPage()">
-                <div class="nu-mod-icon-wrap" style="background:linear-gradient(135deg, #F59E0B, #D97706)">
+              <!-- Feature 3: Kompas Kiblat -->
+              <div class="feature-squircle-btn" onclick="showQiblaCompassPage()">
+                <div class="feature-icon-squircle" style="background:linear-gradient(135deg, #F59E0B 0%, #B45309 100%)">
                   <i class="fa-solid fa-compass"></i>
                 </div>
-                <div class="nu-mod-info">
-                  <div class="nu-mod-title">Kompas Kiblat</div>
-                  <div class="nu-mod-sub">Arah Kiblat Digital Presisi 3D</div>
+                <div>
+                  <div class="feature-label-title">Arah Kiblat</div>
+                  <div class="feature-label-sub">Sensor Presisi 3D Ka'bah</div>
                 </div>
-                <div class="nu-mod-arrow"><i class="fa-solid fa-chevron-right"></i></div>
               </div>
 
-              <!-- Module 4: Tasbih Digital -->
-              <div class="nu-mod-card active" onclick="showTasbihDigitalPage()">
-                <div class="nu-mod-icon-wrap" style="background:linear-gradient(135deg, #8B5CF6, #6D28D9)">
+              <!-- Feature 4: Tasbih Digital Counter -->
+              <div class="feature-squircle-btn" onclick="showTasbihDigitalPage()">
+                <div class="feature-icon-squircle" style="background:linear-gradient(135deg, #8B5CF6 0%, #6D28D9 100%)">
                   <i class="fa-solid fa-dharmachakra"></i>
                 </div>
-                <div class="nu-mod-info">
-                  <div class="nu-mod-title">Tasbih Digital</div>
-                  <div class="nu-mod-sub">Hitungan Dzikir Interaktif, Suara &amp; Getar</div>
+                <div>
+                  <div class="feature-label-title">Tasbih Counter</div>
+                  <div class="feature-label-sub">Hitungan Dzikir Haptik &amp; Audio</div>
                 </div>
-                <div class="nu-mod-arrow"><i class="fa-solid fa-chevron-right"></i></div>
               </div>
             </div>
 
-            <div style="margin-top:28px;text-align:center;font-size:0.72rem;color:var(--clr-text-subtle);line-height:1.6">
-              © 2026 Pendamping Amalan • Developed by Prabu26.dev
+            <!-- SECTION 2: PRAYER ALARM & JADWAL SHALAT -->
+            <div class="section-header-modern" style="margin-top:28px">
+              <div class="section-title-modern">
+                <i class="fa-solid fa-bell" style="color:#D4AF6A"></i> Prayer Alarm
+              </div>
+              <span class="section-link-more" onclick="showPrayerTimesPage()">See all</span>
+            </div>
+
+            <div class="prayer-alarm-card">
+              <!-- Next Prayer Live Countdown Box -->
+              <div class="next-prayer-hero-box">
+                <div>
+                  <div class="nu-prayer-label">WAKTU SHOLAT BERIKUTNYA</div>
+                  <div class="nu-prayer-main">
+                    <span class="nu-prayer-name" id="homePrayerName">Subuh</span>
+                    <span class="nu-prayer-time" id="homePrayerTime">04:40</span>
+                    <span class="nu-prayer-tz">WIB</span>
+                  </div>
+                  <div class="nu-prayer-countdown">
+                    <i class="fa-regular fa-clock"></i> Hitung Mundur: <strong id="prayerCountdown" style="color:#fff">- 00 : 00 : 00</strong>
+                  </div>
+                </div>
+                <div style="font-size:2rem;color:#22C7C2;opacity:0.85">
+                  <i class="fa-solid fa-mosque"></i>
+                </div>
+              </div>
+
+              <!-- List of 5 Prayers with Modern Toggle Switches -->
+              <div class="prayer-time-item active">
+                <div class="p-item-left">
+                  <div class="p-icon-box"><i class="fa-solid fa-cloud-sun"></i></div>
+                  <div>
+                    <div style="color:#fff;font-weight:700">Fajr (Subuh)</div>
+                    <div class="p-time-val" style="text-align:left;font-size:0.85rem;color:#22C7C2">${times.subuh} WIB</div>
+                  </div>
+                </div>
+                <label class="toggle-switch">
+                  <input type="checkbox" id="toggle_subuh" ${pNotifs.subuh !== false ? 'checked' : ''} onchange="togglePrayerNotif(null, 'subuh')">
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+
+              <div class="prayer-time-item">
+                <div class="p-item-left">
+                  <div class="p-icon-box"><i class="fa-solid fa-sun"></i></div>
+                  <div>
+                    <div style="color:#fff;font-weight:700">Dhuhr (Dzuhur)</div>
+                    <div class="p-time-val" style="text-align:left;font-size:0.85rem;color:#9AA6BD">${times.dzuhur} WIB</div>
+                  </div>
+                </div>
+                <label class="toggle-switch">
+                  <input type="checkbox" id="toggle_dzuhur" ${pNotifs.dzuhur !== false ? 'checked' : ''} onchange="togglePrayerNotif(null, 'dzuhur')">
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+
+              <div class="prayer-time-item">
+                <div class="p-item-left">
+                  <div class="p-icon-box"><i class="fa-solid fa-sun-cloud"></i></div>
+                  <div>
+                    <div style="color:#fff;font-weight:700">Asr (Ashar)</div>
+                    <div class="p-time-val" style="text-align:left;font-size:0.85rem;color:#9AA6BD">${times.ashar} WIB</div>
+                  </div>
+                </div>
+                <label class="toggle-switch">
+                  <input type="checkbox" id="toggle_ashar" ${pNotifs.ashar !== false ? 'checked' : ''} onchange="togglePrayerNotif(null, 'ashar')">
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+
+              <div class="prayer-time-item">
+                <div class="p-item-left">
+                  <div class="p-icon-box"><i class="fa-solid fa-sunset"></i></div>
+                  <div>
+                    <div style="color:#fff;font-weight:700">Maghrib</div>
+                    <div class="p-time-val" style="text-align:left;font-size:0.85rem;color:#9AA6BD">${times.maghrib} WIB</div>
+                  </div>
+                </div>
+                <label class="toggle-switch">
+                  <input type="checkbox" id="toggle_maghrib" ${pNotifs.maghrib !== false ? 'checked' : ''} onchange="togglePrayerNotif(null, 'maghrib')">
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+
+              <div class="prayer-time-item">
+                <div class="p-item-left">
+                  <div class="p-icon-box"><i class="fa-solid fa-moon"></i></div>
+                  <div>
+                    <div style="color:#fff;font-weight:700">Isha (Isya)</div>
+                    <div class="p-time-val" style="text-align:left;font-size:0.85rem;color:#9AA6BD">${times.isya} WIB</div>
+                  </div>
+                </div>
+                <label class="toggle-switch">
+                  <input type="checkbox" id="toggle_isya" ${pNotifs.isya !== false ? 'checked' : ''} onchange="togglePrayerNotif(null, 'isya')">
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+            </div>
+
+            <!-- FLOATING BOTTOM NAVIGATION DOCK -->
+            <div class="floating-dock-nav">
+              <button class="dock-item-btn active" onclick="showMainMenu()" title="Beranda">
+                <i class="fa-solid fa-house"></i>
+              </button>
+              <button class="dock-item-btn" onclick="openModule(0)" title="Wirid 31 Slide">
+                <i class="fa-solid fa-book-open"></i>
+              </button>
+              <button class="dock-item-btn" onclick="showQiblaCompassPage()" title="Kompas Kiblat">
+                <i class="fa-solid fa-compass"></i>
+              </button>
+              <button class="dock-item-btn" onclick="showTasbihDigitalPage()" title="Tasbih Digital">
+                <i class="fa-solid fa-dharmachakra"></i>
+              </button>
+              <button class="dock-item-btn" onclick="toggleSettings()" title="Pengaturan">
+                <i class="fa-solid fa-gear"></i>
+              </button>
+            </div>
+
+            <div style="margin-top:20px;text-align:center;font-size:0.72rem;color:#6D7B95;line-height:1.6">
+              © 2026 Pendamping Amalan Digital • Developed by Prabu26.dev
             </div>
           </div>
         `;
@@ -2110,14 +2252,47 @@
         }
       }
 
-      /* ===== TASBIH DIGITAL INTERAKTIF MODULE ===== */
+      /* ===== TASBIH DIGITAL INTERAKTIF MODULE (MATCHING SCREEN 3) ===== */
       let tasbihAudioCtx = null;
+      let tasbihTimerInterval = null;
+      let tasbihDzikirList = [
+        { ar: "اللهُ أَكْبَرُ", id: "Allāhu Akbar", sub: "Allah Maha Besar" },
+        { ar: "سُبْحَانَ اللهِ", id: "Subhānallāh", sub: "Maha Suci Allah" },
+        { ar: "اَلْحَمْدُ لِلَّهِ", id: "Alhamdulillāh", sub: "Segala Puji Bagi Allah" },
+        { ar: "أَسْتَغْفِرُ اللهَ", id: "Astaghfirullāh", sub: "Mohon Ampunan Allah" },
+        { ar: "لَا إِلٰهَ إِلَّا اللهُ", id: "Lā ilāha illallāh", sub: "Tiada Tuhan Selain Allah" },
+        { ar: "اللَّهُمَّ صَلِّ عَلَى مُحَمَّدٍ", id: "Shalawat", sub: "Rahmat Bagi Nabi" }
+      ];
+
       let tasbihState = {
         count: parseInt(localStorage.getItem("pad_tasbih_count")) || 0,
-        target: parseInt(localStorage.getItem("pad_tasbih_target")) || 33,
+        target: parseInt(localStorage.getItem("pad_tasbih_target")) || 100,
+        dzikirIdx: parseInt(localStorage.getItem("pad_tasbih_dzikir_idx")) || 0,
         soundEnabled: localStorage.getItem("pad_tasbih_sound") !== "0",
-        vibeEnabled: localStorage.getItem("pad_tasbih_vibe") !== "0"
+        vibeEnabled: localStorage.getItem("pad_tasbih_vibe") !== "0",
+        elapsedSeconds: 0,
+        setCount: 1
       };
+
+      function formatTasbihTimer(totalSeconds) {
+        const hrs = Math.floor(totalSeconds / 3600);
+        const mins = Math.floor((totalSeconds % 3600) / 60);
+        const secs = totalSeconds % 60;
+        return `${hrs}:${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+      }
+
+      function startTasbihTimer() {
+        if (tasbihTimerInterval) clearInterval(tasbihTimerInterval);
+        tasbihTimerInterval = setInterval(function() {
+          if (currentScreen === "tasbih") {
+            tasbihState.elapsedSeconds += 1;
+            const timerEl = document.getElementById("tasbihLiveTimer");
+            if (timerEl) {
+              timerEl.textContent = formatTasbihTimer(tasbihState.elapsedSeconds);
+            }
+          }
+        }, 1000);
+      }
 
       function playTasbihClickSound() {
         if (!tasbihState.soundEnabled) return;
@@ -2182,6 +2357,7 @@
         if (!main) return;
 
         renderTasbihDigitalPage();
+        startTasbihTimer();
 
         const navBar = document.getElementById("nav-bar");
         if (navBar) navBar.style.display = "none";
@@ -2191,6 +2367,13 @@
         if (slideChipWrap) slideChipWrap.style.display = "none";
       }
 
+      function nextTasbihDzikir() {
+        tasbihState.dzikirIdx = (tasbihState.dzikirIdx + 1) % tasbihDzikirList.length;
+        localStorage.setItem("pad_tasbih_dzikir_idx", tasbihState.dzikirIdx.toString());
+        if (tasbihState.vibeEnabled) vibrate([30]);
+        renderTasbihDigitalPage();
+      }
+
       function renderTasbihDigitalPage() {
         const main = document.getElementById("main");
         if (!main) return;
@@ -2198,112 +2381,115 @@
         const isLocked = tasbihState.count >= tasbihState.target;
         const currentTarget = tasbihState.target;
         const currentCount = tasbihState.count;
-        const pct = Math.min(Math.round((currentCount / currentTarget) * 100), 100);
-
-        // SVG Radial Arc calculations (Radius 100, Circumference 2 * PI * 100 = 628.3)
-        const radius = 100;
-        const strokeWidth = 14;
-        const circumference = 2 * Math.PI * radius;
-        const strokeDashoffset = circumference - (pct / 100) * circumference;
+        const currentDzikir = tasbihDzikirList[tasbihState.dzikirIdx] || tasbihDzikirList[0];
+        const formattedDigit = (currentCount < 1000) ? String(currentCount).padStart(3, '0') : String(currentCount);
 
         main.innerHTML = `
-          <div id="tasbihScreen" style="max-width:800px;margin:0 auto;width:100%;box-sizing:border-box;padding-bottom:32px;text-align:center">
+          <div id="tasbihScreen">
             
-            <!-- HEADER APP BAR -->
-            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--clr-border)">
-              <div style="display:flex;align-items:center;gap:12px">
-                <button class="icon-btn" onclick="showMainMenu()" style="width:38px;height:38px;border-radius:10px" title="Kembali ke Beranda">
-                  <i class="fa-solid fa-arrow-left"></i>
+            <!-- HEADER TOP BAR -->
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid rgba(255,255,255,0.09)">
+              <button class="icon-btn" onclick="showMainMenu()" style="width:38px;height:38px;border-radius:12px;background:rgba(16,36,64,0.65);border:1px solid rgba(255,255,255,0.12)" title="Kembali ke Beranda">
+                <i class="fa-solid fa-arrow-left"></i>
+              </button>
+              <h2 style="font-size:1.15rem;font-weight:800;margin:0;color:#ffffff">Tasbih Counter</h2>
+              <div style="display:flex;align-items:center;gap:8px">
+                <button class="icon-btn" onclick="toggleTasbihSound()" style="width:38px;height:38px;border-radius:12px;background:${tasbihState.soundEnabled ? 'rgba(34,199,194,0.2)' : 'rgba(16,36,64,0.65)'};border:1px solid ${tasbihState.soundEnabled ? '#22C7C2' : 'rgba(255,255,255,0.12)'};color:${tasbihState.soundEnabled ? '#22C7C2' : '#9AA6BD'}" title="Toggle Suara">
+                  <i class="fa-solid ${tasbihState.soundEnabled ? 'fa-bell' : 'fa-bell-slash'}"></i>
                 </button>
-                <h2 style="font-size:1.2rem;font-weight:800;margin:0;color:var(--clr-primary-dk)">📿 Tasbih Digital Interaktif</h2>
+                <button class="icon-btn" onclick="toggleTasbihVibe()" style="width:38px;height:38px;border-radius:12px;background:${tasbihState.vibeEnabled ? 'rgba(212,175,106,0.2)' : 'rgba(16,36,64,0.65)'};border:1px solid ${tasbihState.vibeEnabled ? '#D4AF6A' : 'rgba(255,255,255,0.12)'};color:${tasbihState.vibeEnabled ? '#D4AF6A' : '#9AA6BD'}" title="Toggle Getar">
+                  <i class="fa-solid ${tasbihState.vibeEnabled ? 'fa-mobile-retro' : 'fa-mobile-slash'}"></i>
+                </button>
               </div>
             </div>
 
-            <!-- TARGET PRESET SELECTOR BAR -->
-            <div style="background:var(--clr-surface);border:1.5px solid var(--clr-border);border-radius:20px;padding:14px;margin-bottom:20px;box-shadow:0 6px 20px rgba(0,0,0,0.04)">
-              <div style="font-size:0.75rem;font-weight:800;color:var(--clr-gold-dk);letter-spacing:1px;margin-bottom:10px;text-transform:uppercase">
-                🎯 PILIH TARGET DZIKIR (OPSIONAL / MANUAL)
+            <!-- MAIN SKY BACKDROP CARD (MATCHING MOCKUP SCREEN 3) -->
+            <div class="tasbih-sky-backdrop">
+              
+              <!-- Meta Info Row: Set & Range -->
+              <div class="tasbih-meta-row">
+                <div class="tasbih-meta-pill">Set: ${tasbihState.setCount}</div>
+                <div class="tasbih-meta-pill">Range: ${currentTarget}</div>
               </div>
-              <div style="display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap">
-                ${[11, 33, 70, 100].map(t => `
-                  <button onclick="setTasbihTarget(${t})" style="padding:8px 16px;border-radius:99px;font-weight:800;font-size:0.86rem;cursor:pointer;transition:all 0.2s ease;${tasbihState.target === t ? 'background:var(--clr-primary);color:#fff;border:none;box-shadow:0 4px 12px rgba(16,185,129,0.35)' : 'background:var(--clr-bg);color:var(--clr-text);border:1.5px solid var(--clr-border)'}">
-                    ${t}×
+
+              <!-- Arabic Calligraphy Dhikr Header -->
+              <div style="cursor:pointer;position:relative" onclick="nextTasbihDzikir()" title="Ketuk untuk Mengganti Lafaz Dzikir">
+                <div class="tasbih-arabic-hero ar" style="text-align:center !important">
+                  (${currentDzikir.ar})
+                </div>
+                <div style="font-size:0.8rem;color:#D4AF6A;font-weight:600;margin-top:-6px;display:flex;align-items:center;justify-content:center;gap:6px">
+                  <span>${currentDzikir.id}</span> • <span style="font-size:0.72rem;color:#9AA6BD">${currentDzikir.sub}</span> <i class="fa-solid fa-arrows-rotate" style="font-size:0.7rem"></i>
+                </div>
+              </div>
+
+              <!-- Live Timer Capsule (0:00:36) -->
+              <div style="margin: 16px 0 10px;">
+                <div class="tasbih-timer-capsule">
+                  <i class="fa-regular fa-clock" style="color:#22C7C2"></i>
+                  <span id="tasbihLiveTimer">${formatTasbihTimer(tasbihState.elapsedSeconds)}</span>
+                </div>
+              </div>
+
+              <!-- Counter Label & Big Glowing Digit -->
+              <div class="tasbih-counter-label">Tasbih Counter</div>
+              <div class="tasbih-counter-digit" id="tasbihDigitCount" onclick="handleTasbihTap()" style="cursor:pointer">
+                ${formattedDigit}
+              </div>
+
+              <!-- TACTILE 3D GLASS BEADS TAP BUTTON (PILL WITH 3 GLOWING BEADS) -->
+              <div>
+                <div class="tactile-beads-wrap" onclick="handleTasbihTap()" title="Ketuk untuk Menghitung Dzikir">
+                  <div class="tactile-bead"></div>
+                  <div class="tactile-bead"></div>
+                  <div class="tactile-bead"></div>
+                </div>
+              </div>
+
+              <!-- Status Completion Alert -->
+              ${isLocked ? `
+                <div style="background:rgba(239,68,68,0.2);border:1px solid #EF4444;border-radius:14px;padding:10px 14px;color:#FCA5A5;font-weight:800;font-size:0.84rem;margin:10px 0 16px;display:flex;align-items:center;justify-content:center;gap:8px">
+                  <i class="fa-solid fa-circle-check"></i> Alhamdulillah! Target ${currentTarget}× dzikir tercapai. Tekan ↺ Reset untuk mengulang.
+                </div>
+              ` : `
+                <div style="font-size:0.76rem;color:#9AA6BD;margin-bottom:14px">
+                  <i class="fa-solid fa-hand-pointer" style="color:#22C7C2;margin-right:4px"></i> Ketuk kapsul manik 3D atau angka di atas untuk berdzikir
+                </div>
+              `}
+
+              <!-- TARGET PRESET SELECTOR PILLS -->
+              <div style="border-top:1px solid rgba(255,255,255,0.08);padding-top:14px;margin-top:10px">
+                <div style="font-size:0.7rem;font-weight:800;color:#D4AF6A;letter-spacing:1px;margin-bottom:10px;text-transform:uppercase">
+                  PILIH TARGET HITUNGAN
+                </div>
+                <div style="display:flex;align-items:center;justify-content:center;gap:6px;flex-wrap:wrap">
+                  ${[11, 33, 70, 99, 100, 300, 1000].map(t => `
+                    <button onclick="setTasbihTarget(${t})" style="padding:6px 13px;border-radius:99px;font-weight:800;font-size:0.8rem;cursor:pointer;transition:all 0.2s ease;${tasbihState.target === t ? 'background:#22C7C2;color:#061320;border:none;box-shadow:0 0 12px rgba(34,199,194,0.6)' : 'background:rgba(255,255,255,0.06);color:#9AA6BD;border:1px solid rgba(255,255,255,0.09)'}">
+                      ${t}×
+                    </button>
+                  `).join('')}
+                  <button onclick="promptManualTasbihTarget()" style="padding:6px 13px;border-radius:99px;font-weight:800;font-size:0.8rem;cursor:pointer;transition:all 0.2s ease;${![11, 33, 70, 99, 100, 300, 1000].includes(tasbihState.target) ? 'background:#D4AF6A;color:#061320;border:none;box-shadow:0 0 12px rgba(212,175,106,0.5)' : 'background:rgba(255,255,255,0.06);color:#9AA6BD;border:1px solid rgba(255,255,255,0.09)'}">
+                    Custom (${![11, 33, 70, 99, 100, 300, 1000].includes(tasbihState.target) ? tasbihState.target : 'Manual'})
                   </button>
-                `).join('')}
-                <button onclick="promptManualTasbihTarget()" style="padding:8px 16px;border-radius:99px;font-weight:800;font-size:0.86rem;cursor:pointer;transition:all 0.2s ease;${![11, 33, 70, 100].includes(tasbihState.target) ? 'background:#F59E0B;color:#000;border:none;box-shadow:0 4px 12px rgba(245,158,11,0.35)' : 'background:var(--clr-bg);color:var(--clr-text);border:1.5px solid var(--clr-border)'}">
-                  ✏️ Custom (${![11, 33, 70, 100].includes(tasbihState.target) ? tasbihState.target : 'Manual'})
-                </button>
+                </div>
               </div>
-            </div>
-
-            <!-- MAIN INTERACTIVE RADIAL PROGRESS COUNTER CIRCLE -->
-            <div style="position:relative;width:270px;height:270px;margin:20px auto 24px;display:grid;place-items:center">
-              
-              <!-- SVG Radial Ring Canvas -->
-              <svg width="270" height="270" viewBox="0 0 240 240" style="position:absolute;inset:0;transform:rotate(-90deg)">
-                <defs>
-                  <linearGradient id="tasbihGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stop-color="#10B981" />
-                    <stop offset="60%" stop-color="#F59E0B" />
-                    <stop offset="100%" stop-color="#FFD700" />
-                  </linearGradient>
-                </defs>
-                <!-- Outer Background Circle Track -->
-                <circle cx="120" cy="120" r="${radius}" fill="none" stroke="color-mix(in srgb, var(--clr-primary) 12%, transparent)" stroke-width="${strokeWidth}" />
-                <!-- Thickening Radial Progress Arc -->
-                <circle cx="120" cy="120" r="${radius}" fill="none" stroke="url(#tasbihGrad)" stroke-width="${strokeWidth}" stroke-linecap="round"
-                        stroke-dasharray="${circumference}" stroke-dashoffset="${strokeDashoffset}"
-                        style="transition: stroke-dashoffset 0.25s cubic-bezier(0.4, 0, 0.2, 1)" />
-              </svg>
-
-              <!-- CENTER TAP BUTTON CIRCLE (ONLY COUNT & TARGET DISPLAY) -->
-              <button onclick="handleTasbihTap()" style="position:relative;z-index:2;width:196px;height:196px;border-radius:50%;background:linear-gradient(145deg, var(--clr-surface) 0%, var(--clr-bg) 100%);border:2px solid ${isLocked ? '#EF4444' : 'rgba(212,175,55,0.4)'};color:var(--clr-text);display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:${isLocked ? 'not-allowed' : 'pointer'};box-shadow:0 12px 32px rgba(0,0,0,0.12), inset 0 2px 6px rgba(255,255,255,0.1);transition:all 0.15s ease;user-select:none;-webkit-tap-highlight-color:transparent">
-                ${isLocked ? `
-                  <div style="font-size:0.75rem;font-weight:900;background:#EF4444;color:#fff;padding:3px 10px;border-radius:99px;margin-bottom:6px;letter-spacing:1px">
-                    🔒 SELESAI
-                  </div>
-                ` : ''}
-                <div style="font-size:3.4rem;font-weight:900;line-height:1;color:${isLocked ? '#EF4444' : 'var(--clr-primary-dk)'};font-family:monospace">
-                  ${currentCount}
-                </div>
-                <div style="font-size:0.88rem;font-weight:700;color:var(--clr-text-subtle);margin-top:6px">
-                  Target: / ${currentTarget}
-                </div>
-              </button>
 
             </div>
 
-            <!-- STATUS / LOCK BANNER -->
-            ${isLocked ? `
-              <div style="background:color-mix(in srgb, #EF4444 15%, transparent);border:1.5px solid #EF4444;border-radius:16px;padding:12px;margin-bottom:24px;color:#EF4444;font-weight:800;font-size:0.88rem;display:flex;align-items:center;justify-content:center;gap:8px">
-                <i class="fa-solid fa-circle-check"></i> Alhamdulillah! Target ${currentTarget}× dzikir telah tercapai. Tekan ↺ Reset untuk mengulang.
-              </div>
-            ` : `
-              <div style="font-size:0.82rem;color:var(--clr-text-subtle);margin-bottom:24px;font-weight:600">
-                <i class="fa-solid fa-hand-pointer" style="color:var(--clr-primary);margin-right:4px"></i> Ketuk lingkaran di atas untuk menambah hitungan dzikir
-              </div>
-            `}
-
-            <!-- ICON-ONLY BOTTOM CONTROL TOOLBAR (SUARA, GETAR, KURANGI, RESET) -->
-            <div style="display:flex;align-items:center;justify-content:center;gap:14px;max-width:360px;margin:0 auto">
+            <!-- ACTION CONTROLS TOOLBAR (GANTI DZIKIR, KURANGI, RESET) -->
+            <div style="display:flex;align-items:center;justify-content:center;gap:12px;max-width:320px;margin:0 auto">
               
-              <!-- TOGGLE SUARA (ICON ONLY) -->
-              <button onclick="toggleTasbihSound()" style="width:54px;height:54px;border-radius:16px;border:1.5px solid ${tasbihState.soundEnabled ? 'var(--clr-primary)' : 'var(--clr-border)'};background:${tasbihState.soundEnabled ? 'color-mix(in srgb, var(--clr-primary) 15%, transparent)' : 'var(--clr-surface)'};color:${tasbihState.soundEnabled ? 'var(--clr-primary-dk)' : 'var(--clr-text-subtle)'};font-size:1.25rem;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;transition:all 0.2s ease" title="${tasbihState.soundEnabled ? 'Matikan Suara Klik' : 'Aktifkan Suara Klik'}">
-                <i class="fa-solid ${tasbihState.soundEnabled ? 'fa-volume-high' : 'fa-volume-xmark'}"></i>
+              <!-- GANTI LAFAZ DZIKIR -->
+              <button onclick="nextTasbihDzikir()" class="icon-btn" style="flex:1;height:46px;border-radius:14px;background:rgba(16,36,64,0.72);border:1px solid rgba(255,255,255,0.12);color:#ffffff;font-size:0.84rem;font-weight:700;display:inline-flex;align-items:center;justify-content:center;gap:6px" title="Ganti Lafaz Dzikir">
+                <i class="fa-solid fa-arrows-rotate" style="color:#22C7C2"></i> Ganti
               </button>
 
-              <!-- TOGGLE GETAR (ICON ONLY) -->
-              <button onclick="toggleTasbihVibe()" style="width:54px;height:54px;border-radius:16px;border:1.5px solid ${tasbihState.vibeEnabled ? '#F59E0B' : 'var(--clr-border)'};background:${tasbihState.vibeEnabled ? 'color-mix(in srgb, #F59E0B 15%, transparent)' : 'var(--clr-surface)'};color:${tasbihState.vibeEnabled ? '#D97706' : 'var(--clr-text-subtle)'};font-size:1.25rem;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;transition:all 0.2s ease" title="${tasbihState.vibeEnabled ? 'Matikan Getaran' : 'Aktifkan Getaran'}">
-                <i class="fa-solid ${tasbihState.vibeEnabled ? 'fa-mobile-retro' : 'fa-mobile-slash'}"></i>
-              </button>
-
-              <!-- KURANGI -1 (ICON ONLY) -->
-              <button onclick="decrementTasbihCount()" style="width:54px;height:54px;border-radius:16px;border:1.5px solid var(--clr-border);background:var(--clr-surface);color:var(--clr-text);font-size:1.25rem;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;transition:all 0.2s ease" title="Kurangi Hitungan (-1)">
+              <!-- KURANGI -1 -->
+              <button onclick="decrementTasbihCount()" class="icon-btn" style="width:46px;height:46px;border-radius:14px;background:rgba(16,36,64,0.72);border:1px solid rgba(255,255,255,0.12);color:#9AA6BD;font-size:1.1rem" title="Kurangi Hitungan (-1)">
                 <i class="fa-solid fa-minus"></i>
               </button>
 
-              <!-- RESET 0 (ICON ONLY) -->
-              <button onclick="resetTasbihCount()" style="width:54px;height:54px;border-radius:16px;border:1.5px solid #EF4444;background:color-mix(in srgb, #EF4444 12%, transparent);color:#EF4444;font-size:1.25rem;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;transition:all 0.2s ease" title="Reset Hitungan (↺)">
+              <!-- RESET 0 -->
+              <button onclick="resetTasbihCount()" class="icon-btn" style="width:46px;height:46px;border-radius:14px;background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.4);color:#EF4444;font-size:1.1rem" title="Reset Hitungan (↺)">
                 <i class="fa-solid fa-rotate-left"></i>
               </button>
 
@@ -2326,6 +2512,7 @@
 
         if (reachedTarget) {
           // TARGET REACHED! LONG VIBRATION & CELEBRATION
+          tasbihState.setCount += 1;
           if (tasbihState.vibeEnabled) {
             vibrate([200, 100, 200, 100, 400]); // Long vibration pattern
           }
@@ -2514,22 +2701,31 @@
       }
 
       :root {
-        /* Palette */
-        --clr-bg: #f5f0e8;
-        --clr-surface: #fffdf8;
-        --clr-surface2: #f0ead6;
-        --clr-border: #e2d9c5;
-        --clr-primary: #0b5940;
-        --clr-primary-lt: #147a55;
-        --clr-primary-dk: #073d2b;
-        --clr-gold: #c27c15;
-        --clr-gold-lt: #e8971a;
-        --clr-gold-dk: #9a6010;
-        --clr-text: #1c2b22;
-        --clr-text-muted: #2d4536;
-        --clr-text-subtle: #456150;
-        --clr-success: #15803d;
-        --clr-danger: #b91c1c;
+        /* Palette — Luxury Midnight Obsidian Navy & Glowing Cyan/Gold */
+        --clr-bg: #061320;
+        --clr-bg-grad: radial-gradient(circle at 50% -20%, #0d2644 0%, #061320 65%, #030a12 100%);
+        --clr-surface: rgba(16, 36, 64, 0.72);
+        --clr-surface2: rgba(22, 48, 84, 0.85);
+        --clr-surface-card: linear-gradient(145deg, rgba(20, 44, 78, 0.85) 0%, rgba(10, 24, 46, 0.92) 100%);
+        --clr-border: rgba(255, 255, 255, 0.09);
+        --clr-border-glow: rgba(34, 199, 194, 0.35);
+        --clr-primary: #22C7C2;
+        --clr-primary-lt: #4EEDE8;
+        --clr-primary-dk: #149B97;
+        --clr-gold: #D4AF6A;
+        --clr-gold-lt: #F3D38C;
+        --clr-gold-dk: #A68038;
+        --clr-text: #FFFFFF;
+        --clr-text-muted: #9AA6BD;
+        --clr-text-subtle: #6D7B95;
+        --clr-success: #10B981;
+        --clr-danger: #EF4444;
+
+        /* Glow Shadows */
+        --glow-cyan: 0 0 24px rgba(34, 199, 194, 0.45);
+        --glow-cyan-sm: 0 0 12px rgba(34, 199, 194, 0.35);
+        --glow-gold: 0 0 24px rgba(212, 175, 106, 0.40);
+        --glow-gold-sm: 0 0 12px rgba(212, 175, 106, 0.30);
 
         /* Arabic & Latin Sizes */
         --arabic-font:
@@ -2554,19 +2750,20 @@
         /* Layout & Safe Areas */
         --safe-top: env(safe-area-inset-top, 0px);
         --safe-bottom: env(safe-area-inset-bottom, 0px);
-        --header-h: 62px;
-        --nav-h: 94px;
-        --radius-xl: 24px;
-        --radius-lg: 16px;
-        --radius-md: 12px;
-        --radius-sm: 8px;
+        --header-h: 64px;
+        --nav-h: 96px;
+        --radius-xl: 26px;
+        --radius-lg: 20px;
+        --radius-md: 14px;
+        --radius-sm: 10px;
 
-        /* Shadows */
-        --shadow-sm: 0 1px 4px rgba(0, 0, 0, 0.06);
-        --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.09);
-        --shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.12);
-        --shadow-gold: 0 4px 20px rgba(194, 124, 21, 0.25);
-        --shadow-green: 0 4px 20px rgba(11, 89, 64, 0.25);
+        /* Shadows & Glass */
+        --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.25);
+        --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.35);
+        --shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.50);
+        --shadow-glass: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        --shadow-gold: 0 4px 20px rgba(212, 175, 106, 0.35);
+        --shadow-cyan: 0 4px 20px rgba(34, 199, 194, 0.35);
 
         /* Transition */
         --ease: cubic-bezier(0.4, 0, 0.2, 1);
@@ -2575,20 +2772,42 @@
         --dur-slow: 420ms;
       }
 
+      [data-theme="light"] {
+        --clr-bg: #0d1e33;
+        --clr-bg-grad: radial-gradient(circle at 50% -20%, #153459 0%, #0d1e33 65%, #081321 100%);
+        --clr-surface: rgba(22, 48, 82, 0.78);
+        --clr-surface2: rgba(28, 58, 98, 0.88);
+        --clr-surface-card: linear-gradient(145deg, rgba(26, 56, 96, 0.88) 0%, rgba(14, 32, 60, 0.94) 100%);
+        --clr-border: rgba(255, 255, 255, 0.12);
+        --clr-border-glow: rgba(34, 199, 194, 0.40);
+        --clr-primary: #22C7C2;
+        --clr-primary-lt: #4EEDE8;
+        --clr-primary-dk: #149B97;
+        --clr-gold: #D4AF6A;
+        --clr-gold-lt: #F3D38C;
+        --clr-gold-dk: #A68038;
+        --clr-text: #FFFFFF;
+        --clr-text-muted: #A8B8D0;
+        --clr-text-subtle: #7A8CA8;
+      }
+
       [data-theme="dark"] {
-        --clr-bg: #0c1811;
-        --clr-surface: #132218;
-        --clr-surface2: #1c3328;
-        --clr-border: #2a4035;
-        --clr-primary: #1db97b;
-        --clr-primary-lt: #25d68e;
-        --clr-primary-dk: #15985f;
-        --clr-gold: #f0a837;
-        --clr-gold-lt: #f7c05a;
-        --clr-gold-dk: #c68820;
-        --clr-text: #e8f5ee;
-        --clr-text-muted: #bbf7d0;
-        --clr-text-subtle: #86efac;
+        --clr-bg: #061320;
+        --clr-bg-grad: radial-gradient(circle at 50% -20%, #0d2644 0%, #061320 65%, #030a12 100%);
+        --clr-surface: rgba(16, 36, 64, 0.72);
+        --clr-surface2: rgba(22, 48, 84, 0.85);
+        --clr-surface-card: linear-gradient(145deg, rgba(20, 44, 78, 0.85) 0%, rgba(10, 24, 46, 0.92) 100%);
+        --clr-border: rgba(255, 255, 255, 0.09);
+        --clr-border-glow: rgba(34, 199, 194, 0.35);
+        --clr-primary: #22C7C2;
+        --clr-primary-lt: #4EEDE8;
+        --clr-primary-dk: #149B97;
+        --clr-gold: #D4AF6A;
+        --clr-gold-lt: #F3D38C;
+        --clr-gold-dk: #A68038;
+        --clr-text: #FFFFFF;
+        --clr-text-muted: #9AA6BD;
+        --clr-text-subtle: #6D7B95;
       }
 
       /* ============================================================
@@ -4165,12 +4384,14 @@
 
       /* ============================================================
          ELEGANT CLEAN BANKING SPLASH SCREEN CSS
+      /* ============================================================
+         MIDNIGHT ISLAMIC GLASSMORPHISM SPLASH SCREEN CSS
       ============================================================ */
       #splashScreen {
         position: fixed;
         inset: 0;
         z-index: var(--z-splash, 1000);
-        background: #030f0b;
+        background: radial-gradient(circle at 50% 15%, #0e294b 0%, #061320 60%, #030810 100%);
         display: flex;
         flex-direction: column;
         align-items: center;
@@ -4178,10 +4399,39 @@
         padding: 28px 24px;
         color: #fff;
         text-align: center;
-        transition:
-          opacity 0.5s var(--ease),
-          visibility 0.5s var(--ease);
+        transition: opacity 0.5s var(--ease), visibility 0.5s var(--ease);
         overflow: hidden;
+      }
+
+      /* Starfield & Ambient Bokeh Accents */
+      #splashScreen::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background-image: 
+          radial-gradient(1.5px 1.5px at 20px 30px, #ffffff, rgba(0,0,0,0)),
+          radial-gradient(1.5px 1.5px at 70px 120px, #a5f3fc, rgba(0,0,0,0)),
+          radial-gradient(1.5px 1.5px at 150px 60px, #ffd700, rgba(0,0,0,0)),
+          radial-gradient(2px 2px at 240px 180px, #ffffff, rgba(0,0,0,0)),
+          radial-gradient(1.5px 1.5px at 310px 90px, #67e8f9, rgba(0,0,0,0)),
+          radial-gradient(2px 2px at 380px 240px, #ffd700, rgba(0,0,0,0));
+        background-repeat: repeat;
+        background-size: 400px 400px;
+        opacity: 0.65;
+        pointer-events: none;
+      }
+
+      #splashScreen::after {
+        content: '';
+        position: absolute;
+        bottom: -60px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 120%;
+        height: 240px;
+        background: radial-gradient(ellipse at center, rgba(212, 175, 106, 0.18) 0%, rgba(34, 199, 194, 0.12) 45%, transparent 75%);
+        filter: blur(40px);
+        pointer-events: none;
       }
 
       #splashScreen.hidden {
@@ -4191,66 +4441,155 @@
         display: none !important;
       }
 
-      /* Clean Banking-Style Logo (Glow STRICTLY on Logo Contours) */
+      /* Hanging Lanterns & Crescent Ornament Header in Splash */
+      .splash-ornament-header {
+        position: relative;
+        width: 100%;
+        max-width: 320px;
+        height: 110px;
+        margin-bottom: 8px;
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-around;
+        pointer-events: none;
+        z-index: 2;
+      }
+
+      .lantern-decor {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        animation: lanternSway 4s ease-in-out infinite alternate;
+        transform-origin: top center;
+      }
+      .lantern-decor:nth-child(2) {
+        animation-delay: -1.5s;
+        animation-duration: 4.8s;
+      }
+      .lantern-decor:nth-child(3) {
+        animation-delay: -3s;
+        animation-duration: 4.2s;
+      }
+
+      @keyframes lanternSway {
+        0% { transform: rotate(-3deg); }
+        100% { transform: rotate(3deg); }
+      }
+
+      .lantern-chain {
+        width: 1px;
+        background: linear-gradient(180deg, rgba(212,175,106,0.2) 0%, rgba(212,175,106,0.85) 100%);
+      }
+      .lantern-body {
+        position: relative;
+        filter: drop-shadow(0 0 14px rgba(255, 215, 0, 0.75));
+      }
+
+      /* Logo Wrap with Glowing Aura */
       .splash-logo-wrap {
         position: relative;
-        width: 170px;
-        height: 170px;
+        width: 140px;
+        height: 140px;
         display: grid;
         place-items: center;
-        margin-bottom: 20px;
+        margin-bottom: 16px;
+        z-index: 3;
+      }
+
+      .splash-logo-wrap::before {
+        content: '';
+        position: absolute;
+        inset: -10px;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(34, 199, 194, 0.25) 0%, rgba(212, 175, 106, 0.15) 60%, transparent 75%);
+        filter: blur(14px);
+        animation: auraPulse 3.5s ease-in-out infinite alternate;
+      }
+
+      @keyframes auraPulse {
+        0% { transform: scale(0.9); opacity: 0.5; }
+        100% { transform: scale(1.15); opacity: 1; }
       }
 
       .splash-logo-img {
-        width: 160px;
-        height: 160px;
+        width: 125px;
+        height: 125px;
         object-fit: contain;
-        border-radius: 0 !important;
-        border: none !important;
-        outline: none !important;
-        background: transparent !important;
-        box-shadow: none !important;
-        filter: drop-shadow(0 0 24px rgba(212, 175, 55, 0.75)) drop-shadow(0 6px 16px rgba(0,0,0,0.7));
+        position: relative;
+        z-index: 4;
+        filter: drop-shadow(0 0 20px rgba(212, 175, 106, 0.85)) drop-shadow(0 6px 14px rgba(0,0,0,0.8));
         animation: logoBreathing 3.5s ease-in-out infinite alternate;
       }
 
       @keyframes logoBreathing {
         0% {
-          transform: scale(0.95);
-          filter: drop-shadow(0 0 16px rgba(212, 175, 55, 0.55)) drop-shadow(0 4px 12px rgba(0,0,0,0.6));
+          transform: scale(0.96);
+          filter: drop-shadow(0 0 16px rgba(212, 175, 106, 0.65)) drop-shadow(0 4px 10px rgba(0,0,0,0.7));
         }
         100% {
-          transform: scale(1.05);
-          filter: drop-shadow(0 0 30px rgba(212, 175, 55, 0.95)) drop-shadow(0 8px 20px rgba(0,0,0,0.8));
+          transform: scale(1.04);
+          filter: drop-shadow(0 0 32px rgba(34, 199, 194, 0.95)) drop-shadow(0 8px 18px rgba(0,0,0,0.9));
         }
       }
 
       .splash-title {
-        font-size: clamp(1.5rem, 5.8vw, 2.1rem);
-        font-weight: 900;
-        letter-spacing: 2px;
-        background: linear-gradient(135deg, #fff6d6 0%, #f59e0b 50%, #d4af37 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        text-shadow: 0 4px 25px rgba(212, 175, 55, 0.3);
+        font-size: clamp(1.4rem, 5.2vw, 1.95rem);
+        font-weight: 800;
+        letter-spacing: 2.5px;
+        color: #ffffff;
+        text-shadow: 0 0 20px rgba(34, 199, 194, 0.5), 0 4px 12px rgba(0,0,0,0.6);
         margin-bottom: 6px;
+        z-index: 3;
       }
 
       .splash-subtitle {
-        font-size: 0.88rem;
-        color: rgba(255, 255, 255, 0.82);
+        font-size: 0.86rem;
+        color: #9AA6BD;
         font-weight: 500;
-        font-style: italic;
-        letter-spacing: 0.5px;
-        margin-bottom: 24px;
+        letter-spacing: 0.6px;
+        margin-bottom: 22px;
+        z-index: 3;
+      }
+
+      /* Mode Badge — MEMUAT / MENGUNDUH */
+      .splash-mode-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 0.7rem;
+        font-weight: 800;
+        letter-spacing: 1.2px;
+        padding: 7px 18px;
+        border-radius: 99px;
+        margin-bottom: 22px;
+        text-transform: uppercase;
+        z-index: 3;
+        backdrop-filter: blur(12px);
+      }
+      .splash-mode-badge.mode-loading {
+        background: rgba(34, 199, 194, 0.15);
+        color: #22C7C2;
+        border: 1px solid rgba(34, 199, 194, 0.4);
+        box-shadow: 0 0 16px rgba(34, 199, 194, 0.25);
+      }
+      .splash-mode-badge.mode-downloading {
+        background: rgba(245, 158, 11, 0.2);
+        color: #F59E0B;
+        border: 1px solid rgba(245, 158, 11, 0.45);
+        box-shadow: 0 0 18px rgba(245, 158, 11, 0.3);
+        animation: badgePulse 1.5s ease-in-out infinite;
+      }
+      @keyframes badgePulse {
+        0%, 100% { opacity: 1; transform: scale(1); }
+        50% { opacity: 0.75; transform: scale(0.98); }
       }
 
       .splash-loader-box {
         position: absolute;
-        bottom: max(36px, calc(env(safe-area-inset-bottom, 0px) + 36px));
+        bottom: max(34px, calc(env(safe-area-inset-bottom, 0px) + 34px));
         left: 50%;
         transform: translateX(-50%);
-        width: min(85vw, 340px);
+        width: min(86vw, 340px);
         display: flex;
         flex-direction: column;
         gap: 8px;
@@ -4260,19 +4599,19 @@
       .splash-loader {
         width: 100%;
         height: 7px;
-        background: rgba(255, 255, 255, 0.1);
-        border: 1px solid rgba(255, 255, 255, 0.2);
+        background: rgba(255, 255, 255, 0.08);
+        border: 1px solid rgba(255, 255, 255, 0.15);
         border-radius: 99px;
         overflow: hidden;
         padding: 0;
-        box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.5);
+        box-shadow: inset 0 1px 4px rgba(0, 0, 0, 0.6);
       }
 
       .splash-progress {
         height: 100%;
         width: 0%;
-        background: linear-gradient(90deg, #10b981 0%, #f59e0b 60%, #ffd700 100%);
-        box-shadow: 0 0 14px rgba(255, 215, 0, 0.85);
+        background: linear-gradient(90deg, #149B97 0%, #22C7C2 50%, #4EEDE8 100%);
+        box-shadow: 0 0 16px rgba(34, 199, 194, 0.9);
         transition: width 0.08s linear;
         border-radius: 99px;
       }
@@ -4285,457 +4624,710 @@
       }
 
       .splash-status {
-        font-size: 0.7rem;
-        color: rgba(255, 255, 255, 0.75);
+        font-size: 0.72rem;
+        color: #9AA6BD;
         letter-spacing: 0.5px;
         font-weight: 500;
       }
 
       .splash-percent {
-        font-size: 0.72rem;
+        font-size: 0.74rem;
         font-weight: 800;
-        color: #ffd700;
+        color: #22C7C2;
+        text-shadow: 0 0 10px rgba(34, 199, 194, 0.6);
       }
 
-      /* Mode Badge — MEMUAT / MENGUNDUH */
-      .splash-mode-badge {
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        font-size: 0.68rem;
-        font-weight: 800;
-        letter-spacing: 1.2px;
-        padding: 6px 16px;
-        border-radius: 99px;
-        margin-bottom: 20px;
-        text-transform: uppercase;
-      }
-      .splash-mode-badge.mode-loading {
-        background: rgba(11, 89, 64, 0.35);
-        color: #10B981;
-        border: 1px solid rgba(16, 185, 129, 0.35);
-      }
-      .splash-mode-badge.mode-downloading {
-        background: rgba(245, 158, 11, 0.25);
-        color: #F59E0B;
-        border: 1px solid rgba(245, 158, 11, 0.35);
-        animation: badgePulse 1.5s ease-in-out infinite;
-      }
-      @keyframes badgePulse {
-        0%, 100% { opacity: 1; }
-        50% { opacity: 0.65; }
-      }
-
-      /* NU ONLINE INSPIRED HOME DASHBOARD - ULTRA LUXURY */
-      .nu-dome-header {
-        background: #093326 url('assets/images/islamic_dome_bg.jpg') center/cover no-repeat !important;
-        border-radius: var(--radius-xl);
-        padding: 22px;
-        color: #ffffff !important;
-        margin-bottom: 22px;
-        box-shadow: 0 12px 35px rgba(9, 51, 38, 0.35);
-        position: relative;
-        overflow: hidden;
-        border: 2px solid #D4AF37 !important;
-      }
-
-      .nu-header-top {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 8px;
-        flex-wrap: wrap;
-        margin-bottom: 18px;
-        font-size: 0.8rem;
-      }
-
-      .nu-location-badge {
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        background: rgba(0, 0, 0, 0.45);
-        padding: 5px 12px;
-        border-radius: 99px;
-        border: 1px solid rgba(212, 175, 55, 0.4);
-        color: #FFD54F !important;
-        font-weight: 600;
-        backdrop-filter: blur(8px);
-      }
-
-      .nu-date-badge {
-        color: #ffffff !important;
-        background: rgba(0, 0, 0, 0.45);
-        padding: 5px 12px;
-        border-radius: 99px;
-        border: 1px solid rgba(255, 255, 255, 0.15);
-        font-weight: 500;
-        backdrop-filter: blur(8px);
-      }
-
-      .nu-dome-card {
-        background: rgba(4, 24, 18, 0.82) !important;
-        backdrop-filter: blur(12px);
-        border: 1.5px solid rgba(212, 175, 55, 0.45) !important;
-        border-radius: var(--radius-lg);
-        padding: 20px;
-        text-align: center;
-        position: relative;
-        box-shadow: inset 0 0 25px rgba(212, 175, 55, 0.12), 0 8px 24px rgba(0,0,0,0.3);
-      }
-
-      .nu-location-pill {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        gap: 6px;
-        background: rgba(0, 0, 0, 0.45);
-        border: 1px solid rgba(212, 175, 55, 0.4);
-        padding: 5px 14px;
-        border-radius: 99px;
-        margin: 8px auto 10px;
-        cursor: pointer;
-        transition: all 0.25s var(--ease);
-        backdrop-filter: blur(8px);
-      }
-
-      .nu-location-pill:hover {
-        background: rgba(212, 175, 55, 0.18);
-        border-color: #F59E0B;
-        transform: translateY(-1px);
-        box-shadow: 0 4px 12px rgba(212, 175, 55, 0.25);
-      }
-
-      .nu-prayer-label {
-        font-size: 0.72rem;
-        font-weight: 800;
-        letter-spacing: 2px;
-        color: #D4AF37 !important;
-        margin-bottom: 6px;
-        text-transform: uppercase;
-      }
-
-      .nu-prayer-main {
-        display: flex;
-        align-items: baseline;
-        justify-content: center;
-        gap: 10px;
-        margin-bottom: 8px;
-      }
-
-      .nu-prayer-name {
-        font-size: 1.45rem;
-        font-weight: 900;
-        color: #FFFFFF !important;
-      }
-
-      .nu-prayer-time {
-        font-size: 2.1rem;
-        font-weight: 900;
-        color: #FFC107 !important;
-        font-family: 'Inter', monospace;
-        text-shadow: 0 2px 12px rgba(255, 193, 7, 0.4);
-      }
-
-      .nu-prayer-tz {
-        font-size: 0.85rem;
-        color: rgba(255, 255, 255, 0.85) !important;
-        font-weight: 700;
-      }
-
-      .nu-prayer-countdown {
-        font-size: 0.82rem;
-        color: #E0E0E0 !important;
-        font-weight: 500;
-      }
-
-      .nu-search-box {
-        position: relative;
-        margin-bottom: 22px;
-      }
-
-      .nu-search-icon {
-        position: absolute;
-        left: 16px;
-        top: 50%;
-        transform: translateY(-50%);
-        color: var(--clr-gold-dk);
-        font-size: 0.95rem;
-      }
-
-      .nu-search-input {
-        width: 100%;
-        padding: 14px 16px 14px 44px;
-        border-radius: var(--radius-md);
-        border: 1.5px solid color-mix(in srgb, var(--clr-gold) 40%, var(--clr-border));
-        background: var(--clr-surface);
-        color: var(--clr-text);
-        font-size: 0.9rem;
-        box-sizing: border-box;
-        outline: none;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.03);
-        transition: border-color 0.2s ease;
-      }
-
-      .nu-search-input:focus {
-        border-color: var(--clr-primary);
-      }
-
-      .nu-modules-grid {
-        display: flex;
-        flex-direction: column;
-        gap: 14px;
-      }
-
-      .nu-mod-card {
-        background: var(--clr-surface);
-        border: 1.5px solid color-mix(in srgb, var(--clr-gold) 35%, var(--clr-border));
-        border-radius: var(--radius-lg);
-        padding: 18px;
-        display: flex;
-        align-items: center;
-        gap: 16px;
-        cursor: pointer;
-        transition: all 0.25s ease;
-        box-shadow: 0 4px 16px rgba(0,0,0,0.04);
-      }
-
-      .nu-mod-card:hover {
-        border-color: var(--clr-primary);
-        transform: translateY(-2px);
-        box-shadow: var(--shadow-md);
-      }
-
-      .nu-mod-icon-wrap {
-        width: 52px;
-        height: 52px;
-        border-radius: 16px;
-        display: grid;
-        place-items: center;
-        color: #fff;
-        font-size: 1.4rem;
-        flex-shrink: 0;
-        box-shadow: 0 6px 16px rgba(0,0,0,0.18);
-      }
-
-      .nu-mod-info {
-        flex: 1;
-      }
-
-      .nu-mod-title {
-        font-size: 1.05rem;
-        font-weight: 800;
-        color: var(--clr-primary-dk);
-        margin-bottom: 3px;
-      }
-
-      .nu-mod-sub {
-        font-size: 0.8rem;
-        color: var(--clr-text-subtle);
-      }
-
-      .nu-mod-arrow {
-        color: var(--clr-gold-dk);
-        font-size: 0.95rem;
-      }
-
-      .prayer-row {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 8px 6px;
-        border-bottom: 1px solid var(--clr-border);
-        font-size: 0.88rem;
-      }
-
-      .prayer-time-item {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 12px 14px;
-        border-bottom: 1px solid var(--clr-border);
-        font-size: 0.95rem;
-        transition: background 0.2s ease;
-      }
-      .prayer-time-item:last-child {
-        border-bottom: none;
-      }
-      .p-item-left {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        color: var(--clr-text);
-        font-weight: 600;
-      }
-      .p-icon {
-        width: 24px;
-        text-align: center;
-        color: var(--clr-gold-dk);
-        font-size: 1.1rem;
-      }
-      .p-item-right {
-        display: flex;
-        align-items: center;
-        gap: 16px;
-        font-size: 1.05rem;
-        color: var(--clr-text);
-      }
-      .p-time-val {
-        min-width: 54px;
-        text-align: right;
-        display: inline-block;
-      }
-      .p-notif-btn {
-        width: 28px;
-        height: 28px;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        text-align: center;
-        cursor: pointer;
-        flex-shrink: 0;
-      }
-
-      /* MAIN MENU DASHBOARD SCREEN */
+      /* ============================================================
+         MIDNIGHT ISLAMIC GLASS DASHBOARD STYLES
+      ============================================================ */
       #mainMenuScreen {
-        padding: 0 0 16px;
+        padding: 0 0 80px;
         max-width: 900px;
         margin: 0 auto;
         width: 100%;
         box-sizing: border-box;
       }
 
-      .menu-hero {
-        background: linear-gradient(
-          135deg,
-          var(--clr-primary-dk),
-          var(--clr-primary)
-        );
-        border-radius: var(--radius-xl);
-        padding: 16px 18px;
-        color: #fff;
-        margin-bottom: 16px;
-        box-shadow: var(--shadow-md);
-        position: relative;
-        overflow: hidden;
-      }
-
-      .menu-hero-title {
-        font-size: clamp(1.1rem, 3.5vw, 1.4rem);
-        font-weight: 800;
-        margin-bottom: 6px;
-      }
-
-      .menu-hero-sub {
-        font-size: 0.82rem;
-        color: rgba(255, 255, 255, 0.8);
-        line-height: 1.5;
-      }
-
-      .modules-grid {
-        display: grid;
-        grid-template-columns: 1fr;
-        gap: 12px;
-      }
-
-      @media (min-width: 600px) {
-        .modules-grid {
-          grid-template-columns: repeat(2, 1fr);
-        }
-      }
-
-      .module-card {
-        background: var(--clr-surface);
-        border: 1.5px solid var(--clr-border);
-        border-radius: var(--radius-lg);
-        padding: 20px;
-        transition: all var(--dur-fast) var(--ease);
-        cursor: pointer;
+      /* Top Gregorian & Hijri Date Capsule */
+      .dashboard-date-bar {
         display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-        position: relative;
-        overflow: hidden;
-      }
-
-      .module-card:hover {
-        border-color: var(--clr-primary);
-        transform: translateY(-3px);
-        box-shadow: var(--shadow-md);
-      }
-
-      .module-card.active {
-        border-color: var(--clr-primary);
-        background: color-mix(
-          in srgb,
-          var(--clr-primary) 4%,
-          var(--clr-surface)
-        );
-      }
-
-      .module-card.disabled {
-        opacity: 0.65;
-        cursor: default;
-      }
-
-      .module-card.disabled:hover {
-        transform: none;
-        box-shadow: none;
-        border-color: var(--clr-border);
-      }
-
-      .module-badge {
-        display: inline-flex;
         align-items: center;
-        gap: 4px;
-        align-self: flex-start;
-        font-size: 0.62rem;
-        font-weight: 800;
-        padding: 3px 9px;
-        border-radius: 99px;
-        text-transform: uppercase;
-        letter-spacing: 0.6px;
-        margin-bottom: 12px;
+        justify-content: space-between;
+        margin-bottom: 14px;
+        font-size: 0.8rem;
       }
 
-      .module-badge.active {
-        background: color-mix(in srgb, var(--clr-primary) 15%, transparent);
-        color: var(--clr-primary);
-      }
-
-      .module-badge.coming {
-        background: color-mix(in srgb, var(--clr-gold) 15%, transparent);
-        color: var(--clr-gold-dk);
-      }
-
-      .module-title {
-        font-size: 1rem;
-        font-weight: 800;
-        color: var(--clr-text);
-        margin-bottom: 6px;
-      }
-
-      .module-desc {
-        font-size: 0.78rem;
-        color: var(--clr-text-subtle);
-        line-height: 1.55;
-        margin-bottom: 16px;
-      }
-
-      .module-btn {
+      .date-capsule {
         display: inline-flex;
         align-items: center;
         gap: 8px;
-        font-size: 0.8rem;
+        background: rgba(16, 36, 64, 0.65);
+        backdrop-filter: blur(14px);
+        -webkit-backdrop-filter: blur(14px);
+        padding: 6px 14px;
+        border-radius: 99px;
+        border: 1px solid rgba(255, 255, 255, 0.09);
+        color: #FFFFFF;
+        font-weight: 500;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+      }
+
+      .date-capsule .hijri-text {
+        color: #D4AF6A;
         font-weight: 700;
-        color: var(--clr-primary);
+      }
+
+      /* HERO PROMO BANNER (Start Tasbih & Wirid Tracking) */
+      .nu-dome-header, .hero-promo-card {
+        background: linear-gradient(135deg, rgba(17, 39, 72, 0.92) 0%, rgba(8, 22, 43, 0.96) 100%) !important;
+        border: 1px solid rgba(255, 255, 255, 0.12) !important;
+        border-radius: var(--radius-xl);
+        padding: 22px;
+        color: #ffffff !important;
+        margin-bottom: 20px;
+        box-shadow: 0 14px 36px rgba(0, 0, 0, 0.45);
+        position: relative;
+        overflow: hidden;
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+      }
+
+      .hero-promo-card::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background-image: 
+          radial-gradient(1.5px 1.5px at 30px 25px, #ffffff, rgba(0,0,0,0)),
+          radial-gradient(1.5px 1.5px at 120px 80px, #a5f3fc, rgba(0,0,0,0)),
+          radial-gradient(1.5px 1.5px at 200px 35px, #ffd700, rgba(0,0,0,0)),
+          radial-gradient(2px 2px at 280px 110px, #ffffff, rgba(0,0,0,0));
+        background-repeat: repeat;
+        background-size: 300px 300px;
+        opacity: 0.45;
+        pointer-events: none;
+      }
+
+      /* Hero Content & Decorative Crescent / Lantern Side Graphic */
+      .hero-content-wrap {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        position: relative;
+        z-index: 2;
+      }
+
+      .hero-text-side {
+        flex: 1;
+        padding-right: 12px;
+      }
+
+      .hero-badge-tag {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 0.68rem;
+        font-weight: 800;
+        letter-spacing: 1.2px;
+        text-transform: uppercase;
+        color: #22C7C2;
+        background: rgba(34, 199, 194, 0.14);
+        border: 1px solid rgba(34, 199, 194, 0.35);
+        padding: 4px 10px;
+        border-radius: 99px;
+        margin-bottom: 8px;
+      }
+
+      .hero-title-main {
+        font-size: clamp(1.15rem, 4vw, 1.45rem);
+        font-weight: 800;
+        color: #ffffff;
+        line-height: 1.3;
+        margin-bottom: 6px;
+      }
+
+      .hero-sub-text {
+        font-size: 0.8rem;
+        color: #9AA6BD;
+        line-height: 1.45;
+        margin-bottom: 14px;
+      }
+
+      .hero-cta-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 9px 18px;
+        border-radius: 99px;
+        background: #22C7C2;
+        color: #061320;
+        font-size: 0.84rem;
+        font-weight: 800;
+        border: none;
+        cursor: pointer;
+        box-shadow: 0 4px 16px rgba(34, 199, 194, 0.45);
+        transition: all 0.2s ease;
+      }
+      .hero-cta-btn:hover {
+        background: #4EEDE8;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(34, 199, 194, 0.6);
+      }
+
+      .hero-graphic-side {
+        position: relative;
+        width: 105px;
+        height: 105px;
+        display: grid;
+        place-items: center;
+        flex-shrink: 0;
+      }
+
+      /* Carousel Pagination Dots */
+      .hero-pagination-dots {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        margin-top: 14px;
+        position: relative;
+        z-index: 2;
+      }
+      .p-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 99px;
+        background: rgba(255, 255, 255, 0.25);
+        transition: all 0.25s ease;
+      }
+      .p-dot.active {
+        width: 22px;
+        background: #22C7C2;
+        box-shadow: 0 0 10px rgba(34, 199, 194, 0.6);
+      }
+
+      /* SECTION HEADERS (Features & Prayer Alarm) */
+      .section-header-modern {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin: 22px 0 12px;
+      }
+
+      .section-title-modern {
+        font-size: 1.05rem;
+        font-weight: 800;
+        color: #ffffff;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .section-link-more {
+        font-size: 0.78rem;
+        font-weight: 700;
+        color: #22C7C2;
+        cursor: pointer;
+        text-decoration: none;
+        transition: color 0.2s ease;
+      }
+      .section-link-more:hover {
+        color: #4EEDE8;
+      }
+
+      /* FEATURES QUICK GRID (Squircle Glass Buttons) */
+      .features-quick-grid, .nu-modules-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+      }
+
+      @media (min-width: 640px) {
+        .features-quick-grid, .nu-modules-grid {
+          grid-template-columns: repeat(4, 1fr);
+        }
+      }
+
+      .nu-mod-card, .feature-squircle-btn {
+        background: rgba(16, 36, 64, 0.72) !important;
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border: 1px solid rgba(255, 255, 255, 0.09) !important;
+        border-radius: var(--radius-lg);
+        padding: 16px 14px;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 12px;
+        cursor: pointer;
+        transition: all 0.25s var(--ease);
+        box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+        position: relative;
+        overflow: hidden;
+      }
+
+      .nu-mod-card:hover, .feature-squircle-btn:hover {
+        border-color: rgba(34, 199, 194, 0.5) !important;
+        background: rgba(22, 48, 84, 0.85) !important;
+        transform: translateY(-3px);
+        box-shadow: 0 8px 24px rgba(0,0,0,0.35), 0 0 16px rgba(34, 199, 194, 0.25);
+      }
+
+      .feature-icon-squircle, .nu-mod-icon-wrap {
+        width: 44px;
+        height: 44px;
+        border-radius: 14px;
+        display: grid;
+        place-items: center;
+        font-size: 1.25rem;
+        flex-shrink: 0;
+        color: #ffffff;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      }
+
+      .feature-label-title, .nu-mod-title {
+        font-size: 0.95rem;
+        font-weight: 800;
+        color: #ffffff !important;
+        margin-bottom: 2px;
+      }
+
+      .feature-label-sub, .nu-mod-sub {
+        font-size: 0.74rem;
+        color: #9AA6BD !important;
+        line-height: 1.35;
+      }
+
+      /* PRAYER ALARM CARD & TOGGLE SWITCHES */
+      .prayer-alarm-card {
+        background: rgba(16, 36, 64, 0.72);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border: 1px solid rgba(255, 255, 255, 0.09);
+        border-radius: var(--radius-xl);
+        padding: 16px;
+        box-shadow: 0 8px 28px rgba(0,0,0,0.3);
+        margin-bottom: 20px;
+      }
+
+      /* Next Prayer Highlight Hero inside Card */
+      .next-prayer-hero-box {
+        background: linear-gradient(135deg, rgba(34, 199, 194, 0.12) 0%, rgba(212, 175, 106, 0.08) 100%);
+        border: 1px solid rgba(34, 199, 194, 0.35);
+        border-radius: var(--radius-md);
+        padding: 14px 16px;
+        margin-bottom: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .nu-prayer-label {
+        font-size: 0.68rem;
+        font-weight: 800;
+        letter-spacing: 1.5px;
+        color: #22C7C2 !important;
+        margin-bottom: 4px;
+        text-transform: uppercase;
+      }
+
+      .nu-prayer-main {
+        display: flex;
+        align-items: baseline;
+        gap: 8px;
+      }
+
+      .nu-prayer-name {
+        font-size: 1.25rem;
+        font-weight: 900;
+        color: #FFFFFF !important;
+      }
+
+      .nu-prayer-time {
+        font-size: 1.7rem;
+        font-weight: 900;
+        color: #22C7C2 !important;
+        font-family: 'Inter', monospace;
+        text-shadow: 0 0 14px rgba(34, 199, 194, 0.5);
+      }
+
+      .nu-prayer-tz {
+        font-size: 0.78rem;
+        color: #9AA6BD !important;
+        font-weight: 700;
+      }
+
+      .nu-prayer-countdown {
+        font-size: 0.78rem;
+        color: #D4AF6A !important;
+        font-weight: 600;
+        margin-top: 4px;
+      }
+
+      /* Prayer Times Modern Row List */
+      .prayer-time-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 11px 12px;
+        border-radius: var(--radius-md);
+        margin-bottom: 4px;
+        transition: background 0.2s ease;
+      }
+      .prayer-time-item:hover {
+        background: rgba(255, 255, 255, 0.04);
+      }
+      .prayer-time-item.active {
+        background: rgba(34, 199, 194, 0.12);
+        border: 1px solid rgba(34, 199, 194, 0.3);
+      }
+
+      .p-item-left {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        color: #ffffff;
+        font-weight: 600;
+        font-size: 0.92rem;
+      }
+      .p-icon-box {
+        width: 34px;
+        height: 34px;
+        border-radius: 10px;
+        background: rgba(255, 255, 255, 0.06);
+        display: grid;
+        place-items: center;
+        color: #D4AF6A;
+        font-size: 0.95rem;
+      }
+      .prayer-time-item.active .p-icon-box {
+        background: #22C7C2;
+        color: #061320;
+      }
+
+      .p-item-right {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+      }
+      .p-time-val {
+        font-size: 1rem;
+        font-weight: 700;
+        color: #ffffff;
+        min-width: 50px;
+        text-align: right;
+        font-family: 'Inter', monospace;
+      }
+      .prayer-time-item.active .p-time-val {
+        color: #22C7C2;
+      }
+
+      /* IOS / MATERIAL GLASS TOGGLE SWITCH */
+      .toggle-switch {
+        position: relative;
+        display: inline-block;
+        width: 44px;
+        height: 24px;
+        flex-shrink: 0;
+        cursor: pointer;
+      }
+      .toggle-switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+      }
+      .toggle-slider {
+        position: absolute;
+        inset: 0;
+        background-color: rgba(255, 255, 255, 0.14);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 99px;
+        transition: all 0.25s var(--ease);
+      }
+      .toggle-slider::before {
+        position: absolute;
+        content: "";
+        height: 18px;
+        width: 18px;
+        left: 2px;
+        bottom: 2px;
+        background-color: #ffffff;
+        border-radius: 50%;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+        transition: all 0.25s var(--ease);
+      }
+      .toggle-switch input:checked + .toggle-slider {
+        background-color: #22C7C2;
+        border-color: #22C7C2;
+        box-shadow: 0 0 12px rgba(34, 199, 194, 0.5);
+      }
+      .toggle-switch input:checked + .toggle-slider::before {
+        transform: translateX(20px);
+        background-color: #061320;
+      }
+
+      /* UNIVERSAL SEARCH BOX */
+      .nu-search-box {
+        position: relative;
+        margin-bottom: 20px;
+      }
+      .nu-search-icon {
+        position: absolute;
+        left: 16px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #9AA6BD;
+        font-size: 0.95rem;
+      }
+      .nu-search-input {
+        width: 100%;
+        padding: 13px 16px 13px 44px;
+        border-radius: var(--radius-md);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        background: rgba(16, 36, 64, 0.65);
+        color: #ffffff;
+        font-size: 0.88rem;
+        box-sizing: border-box;
+        outline: none;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+        transition: all 0.2s ease;
+      }
+      .nu-search-input:focus {
+        border-color: #22C7C2;
+        box-shadow: 0 0 16px rgba(34, 199, 194, 0.35);
+        background: rgba(20, 44, 78, 0.85);
+      }
+
+      /* ============================================================
+         TASBIH COUNTER MODULE (MATCHING MOCKUP SCREEN 3)
+      ============================================================ */
+      #tasbihScreen {
+        max-width: 800px;
+        margin: 0 auto;
+        width: 100%;
+        box-sizing: border-box;
+        padding-bottom: 32px;
+        text-align: center;
+        position: relative;
+      }
+
+      /* Mosque Dome Silhouette & Night Sky Backdrop */
+      .tasbih-sky-backdrop {
+        position: relative;
+        background: linear-gradient(180deg, rgba(14, 34, 62, 0.9) 0%, rgba(6, 19, 32, 0.95) 100%);
+        border: 1px solid rgba(255, 255, 255, 0.09);
+        border-radius: var(--radius-xl);
+        padding: 20px 16px;
+        margin-bottom: 18px;
+        box-shadow: 0 12px 36px rgba(0,0,0,0.4);
+        overflow: hidden;
+      }
+
+      .tasbih-meta-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        color: #9AA6BD;
+        font-size: 0.82rem;
+        font-weight: 600;
+        margin-bottom: 12px;
+      }
+
+      .tasbih-meta-pill {
+        background: rgba(255, 255, 255, 0.07);
+        padding: 4px 12px;
+        border-radius: 99px;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+      }
+
+      /* Calligraphy Dhikr Header */
+      .tasbih-arabic-hero {
+        font-family: var(--arabic-font);
+        font-size: clamp(2rem, 7vw, 2.8rem);
+        color: #FFFFFF;
+        line-height: 1.5;
+        margin: 4px 0 12px;
+        text-shadow: 0 0 20px rgba(255, 255, 255, 0.35);
+      }
+
+      /* Live Timer Capsule (0:00:36) */
+      .tasbih-timer-capsule {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: rgba(0, 0, 0, 0.35);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        padding: 4px 14px;
+        border-radius: 99px;
+        color: #9AA6BD;
+        font-size: 0.78rem;
+        font-family: monospace;
+        font-weight: 700;
+        margin-bottom: 16px;
+      }
+
+      /* Big Glowing Counter Digit (099) */
+      .tasbih-counter-label {
+        font-size: 0.74rem;
+        font-weight: 700;
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+        color: #9AA6BD;
+        margin-bottom: 4px;
+      }
+
+      .tasbih-counter-digit {
+        font-size: clamp(4rem, 14vw, 5.2rem);
+        font-weight: 900;
+        line-height: 1;
+        color: #22C7C2;
+        font-family: 'Inter', monospace;
+        text-shadow: 0 0 28px rgba(34, 199, 194, 0.75), 0 0 60px rgba(34, 199, 194, 0.35);
+        margin-bottom: 20px;
+        user-select: none;
+      }
+
+      /* Tactile 3D Glass Beads Tap Button (Pill with 3 Glowing Beads) */
+      .tactile-beads-wrap {
+        background: rgba(10, 24, 46, 0.85);
+        border: 1.5px solid rgba(34, 199, 194, 0.35);
+        border-radius: 99px;
+        padding: 10px 18px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 14px;
+        cursor: pointer;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.4), inset 0 2px 8px rgba(255,255,255,0.08);
+        transition: all 0.15s ease;
+        user-select: none;
+        -webkit-tap-highlight-color: transparent;
+        margin: 0 auto 20px;
+      }
+      .tactile-beads-wrap:active {
+        transform: scale(0.94);
+        box-shadow: 0 4px 14px rgba(0,0,0,0.5), inset 0 1px 4px rgba(0,0,0,0.5);
+      }
+
+      .tactile-bead {
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        background: radial-gradient(circle at 35% 35%, #4EEDE8 0%, #22C7C2 50%, #0d6b67 100%);
+        box-shadow: 0 4px 14px rgba(34, 199, 194, 0.55), inset 0 2px 4px rgba(255,255,255,0.6);
+        transition: transform 0.12s ease;
+      }
+      .tactile-bead:nth-child(2) {
+        width: 44px;
+        height: 44px;
+        box-shadow: 0 6px 18px rgba(34, 199, 194, 0.75), inset 0 2px 5px rgba(255,255,255,0.8);
+      }
+      .tactile-beads-wrap:active .tactile-bead {
+        transform: scale(0.92);
+      }
+
+      /* FLOATING BOTTOM NAVIGATION DOCK (BERANDA) */
+      .floating-dock-nav {
+        position: fixed;
+        bottom: max(16px, calc(env(safe-area-inset-bottom, 0px) + 16px));
+        left: 50%;
+        transform: translateX(-50%);
+        width: min(92vw, 420px);
+        height: 62px;
+        background: rgba(10, 24, 46, 0.85);
+        backdrop-filter: blur(24px) saturate(180%);
+        -webkit-backdrop-filter: blur(24px) saturate(180%);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 99px;
+        display: flex;
+        align-items: center;
+        justify-content: space-around;
+        padding: 0 8px;
+        box-shadow: 0 14px 36px rgba(0, 0, 0, 0.6);
+        z-index: var(--z-navbar, 100);
+      }
+
+      .dock-item-btn {
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        background: transparent;
+        border: none;
+        color: #9AA6BD;
+        font-size: 1.15rem;
+        display: grid;
+        place-items: center;
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+      .dock-item-btn:hover {
+        color: #22C7C2;
+      }
+      .dock-item-btn.active {
+        background: #ffffff;
+        color: #061320;
+        box-shadow: 0 4px 14px rgba(255, 255, 255, 0.4);
       }
     </style>
   </head>
 
   <body>
-    <!-- ===== ELEGANT CLEAN BANKING SPLASH SCREEN ===== -->
+    <!-- ===== MIDNIGHT ISLAMIC GLASS SPLASH SCREEN ===== -->
     <div id="splashScreen">
-      <!-- Logo Neon Breathing Pulse (Glow strictly on logo contour) -->
+      <!-- Decorative Hanging Lanterns & Crescent Header -->
+      <div class="splash-ornament-header">
+        <div class="lantern-decor">
+          <div class="lantern-chain" style="height: 38px"></div>
+          <svg class="lantern-body" width="28" height="42" viewBox="0 0 24 36" fill="none">
+            <path d="M12 2L14 6H10L12 2Z" fill="#D4AF6A"/>
+            <path d="M7 6H17L19 14L12 22L5 14L7 6Z" fill="url(#lantGoldGrad)" stroke="#F3D38C" stroke-width="0.8"/>
+            <path d="M9 10H15V16H9V10Z" fill="#FFF2B2" opacity="0.9" filter="drop-shadow(0 0 6px #FFE066)"/>
+            <path d="M12 22V32M10 32H14" stroke="#D4AF6A" stroke-width="1.2"/>
+            <defs>
+              <linearGradient id="lantGoldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#F3D38C"/>
+                <stop offset="50%" stop-color="#D4AF6A"/>
+                <stop offset="100%" stop-color="#A68038"/>
+              </linearGradient>
+            </defs>
+          </svg>
+        </div>
+
+        <!-- Center Crescent Moon with Geometric Filigree -->
+        <div class="crescent-decor" style="display:flex;flex-direction:column;align-items:center;animation:auraPulse 4s ease-in-out infinite alternate">
+          <svg width="54" height="54" viewBox="0 0 48 48" fill="none">
+            <path d="M26 6C14.954 6 6 14.954 6 26C6 37.046 14.954 46 26 46C31.624 46 36.702 43.682 40.324 39.952C30.2 39.124 22.2 30.684 22.2 20.3C22.2 13.988 25.32 8.412 30.12 5.084C28.784 4.384 27.424 4 26 4V6Z" fill="url(#crescGrad)" stroke="#F3D38C" stroke-width="1.2" filter="drop-shadow(0 0 12px rgba(243,211,140,0.6))"/>
+            <circle cx="28" cy="18" r="2" fill="#FFFFFF" filter="drop-shadow(0 0 4px #4EEDE8)"/>
+            <circle cx="34" cy="24" r="1.5" fill="#4EEDE8"/>
+            <defs>
+              <linearGradient id="crescGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#FFEBB3"/>
+                <stop offset="45%" stop-color="#D4AF6A"/>
+                <stop offset="100%" stop-color="#8C651E"/>
+              </linearGradient>
+            </defs>
+          </svg>
+        </div>
+
+        <div class="lantern-decor">
+          <div class="lantern-chain" style="height: 52px"></div>
+          <svg class="lantern-body" width="32" height="46" viewBox="0 0 24 36" fill="none">
+            <path d="M12 2L14 6H10L12 2Z" fill="#D4AF6A"/>
+            <path d="M7 6H17L19 14L12 22L5 14L7 6Z" fill="url(#lantGoldGrad2)" stroke="#F3D38C" stroke-width="0.8"/>
+            <path d="M9 10H15V16H9V10Z" fill="#FFF2B2" opacity="0.9" filter="drop-shadow(0 0 6px #FFE066)"/>
+            <path d="M12 22V32M10 32H14" stroke="#D4AF6A" stroke-width="1.2"/>
+            <defs>
+              <linearGradient id="lantGoldGrad2" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#FFE599"/>
+                <stop offset="60%" stop-color="#D4AF6A"/>
+                <stop offset="100%" stop-color="#8C651E"/>
+              </linearGradient>
+            </defs>
+          </svg>
+        </div>
+      </div>
+
+      <!-- Logo Neon Breathing Pulse & Aura -->
       <div class="splash-logo-wrap">
         <img
           src="assets/images/Logo_Pesantren.png"
@@ -4744,9 +5336,9 @@
         />
       </div>
 
-      <!-- Judul & Sub-judul Minimalis -->
+      <!-- Judul & Sub-judul Minimalis Modern -->
       <h1 class="splash-title">PENDAMPING AMALAN</h1>
-      <p class="splash-subtitle">Teman Setia Menuju Ridha-Nya</p>
+      <p class="splash-subtitle">Teman Setia Menuju Ridha-Nya &amp; Keberkahan</p>
 
       <!-- Mode Badge (Loading / Downloading) — diisi oleh setSplashMode() -->
       <div id="splashModeBadge" class="splash-mode-badge mode-loading">
