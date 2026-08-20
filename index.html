@@ -120,7 +120,7 @@
             if (currentScreen === "reader") {
               homeBtn.setAttribute("title", "Kembali ke Katalog Wirid & Doa");
               homeBtn.onclick = function() { openWiridCatalog(); };
-            } else if (currentScreen === "zakat_pertanian" || currentScreen === "zakat_perdagangan" || currentScreen === "zakat_emas" || currentScreen === "zakat_tambak") {
+            } else if (currentScreen === "zakat_pertanian" || currentScreen === "zakat_perdagangan" || currentScreen === "zakat_emas" || currentScreen === "zakat_tambak" || currentScreen === "zakat_tanaman") {
               homeBtn.setAttribute("title", "Kembali ke Menu Zakat");
               homeBtn.onclick = function() { showZakatMenuPage(); };
             } else {
@@ -2729,6 +2729,98 @@
         }
       }
 
+      var TANAMAN_PRODUKTIF_DATA = {
+        perkebunan: [
+          { id: "sawit", name: "Kelapa Sawit (TBS)", icon: "🌴", desc: "Tandan Buah Segar kelapa sawit" },
+          { id: "karet", name: "Karet (Lateks / Bokar)", icon: "🪵", desc: "Getah karet beku / lateks cair" },
+          { id: "kopi", name: "Kopi (Robusta / Arabika)", icon: "☕", desc: "Biji kopi gelondong / ose / green bean" },
+          { id: "kakao", name: "Kakao / Cokelat", icon: "🍫", desc: "Biji kakao kering / basah fermentasi" },
+          { id: "cengkeh", name: "Cengkeh", icon: "🌿", desc: "Bunga cengkeh basah / kering" },
+          { id: "lada", name: "Lada / Merica", icon: "🧂", desc: "Lada putih / lada hitam" },
+          { id: "teh", name: "Pucuk Daun Teh", icon: "🍃", desc: "Pucuk basah daun teh perkebunan" },
+          { id: "kelapa", name: "Kelapa (Kopra / Butir)", icon: "🥥", desc: "Kelapa butiran tua / daging kopra" },
+          { id: "tebu", name: "Tebu", icon: "🎋", desc: "Batang tebu panen giling" },
+          { id: "tembakau", name: "Tembakau", icon: "🍂", desc: "Daun tembakau rajangan / kerosok" },
+          { id: "pala", name: "Pala & Fuli", icon: "🌰", desc: "Biji pala dan bunga fuli" },
+          { id: "vanili", name: "Vanili", icon: "🌱", desc: "Polong vanili basah / kering" },
+          { id: "nilam", name: "Nilam (Minyak Atsiri)", icon: "🌾", desc: "Daun nilam / minyak suling nilam" }
+        ],
+        buah: [
+          { id: "durian", name: "Durian", icon: "🍈", desc: "Musang King, Montong, Bawor, Lokal" },
+          { id: "alpukat", name: "Alpukat", icon: "🥑", desc: "Alpukat Aligator, Miki, Mentega" },
+          { id: "mangga", name: "Mangga", icon: "🥭", desc: "Harum Manis, Gedong Gincu, Manalagi" },
+          { id: "jeruk", name: "Jeruk", icon: "🍊", desc: "Jeruk Siam, Medan, Lemon, Nipis" },
+          { id: "buah_naga", name: "Buah Naga", icon: "🐉", desc: "Buah naga merah / putih" },
+          { id: "melon_semangka", name: "Melon & Semangka", icon: "🍉", desc: "Melon golden, hidroponik & semangka" },
+          { id: "pisang", name: "Pisang", icon: "🍌", desc: "Pisang Cavendish, Kepok, Raja, Tanduk" },
+          { id: "nanas", name: "Nanas", icon: "🍍", desc: "Nanas Madu, Honi, Subang" },
+          { id: "salak", name: "Salak", icon: "🤎", desc: "Salak Pondoh, Madu, Gula Pasir" },
+          { id: "pepaya", name: "Pepaya", icon: "🧡", desc: "Pepaya California, Calina, Jinggo" }
+        ],
+        hortikultura: [
+          { id: "cabai_rawit", name: "Cabai Rawit Merah", icon: "🌶️", desc: "Cabai rawit setan / ori" },
+          { id: "cabai_merah", name: "Cabai Merah Keriting / Besar", icon: "🌶️", desc: "Cabai keriting & cabai TW" },
+          { id: "bawang_merah", name: "Bawang Merah", icon: "🧅", desc: "Bawang merah panen umbi" },
+          { id: "bawang_putih", name: "Bawang Putih", icon: "🧄", desc: "Bawang putih lokal / kating" },
+          { id: "tomat", name: "Tomat", icon: "🍅", desc: "Tomat buah & tomat sayur" },
+          { id: "kentang", name: "Kentang", icon: "🥔", desc: "Kentang granola / sayur" },
+          { id: "wortel", name: "Wortel", icon: "🥕", desc: "Wortel panen umbi" },
+          { id: "jamur", name: "Jamur Tiram / Jamur Kancing", icon: "🍄", desc: "Jamur budidaya kumbung" },
+          { id: "sayur_daun", name: "Sayuran Daun Hijau", icon: "🥬", desc: "Kubis, Sawi, Selada, Kangkung" },
+          { id: "bunga_hias", name: "Tanaman Hias & Bunga Potong", icon: "💐", desc: "Krisan, Mawar, Anggrek, Tanaman Potong" }
+        ]
+      };
+
+      var zakatTanamanState = {
+        categoryGroup: "perkebunan", // "perkebunan", "buah", "hortikultura", "custom"
+        selectedItem: "sawit",
+        customName: "",
+        grainPricePerKg: 14500,
+        grossRevenue: "",
+        operationalCost: "",
+        calcMethod: "netto", // "netto" (Fatwa MUI / BAZNAS: (Kotor - Biaya) * 5%) vs "bruto" (Kotor * 5%)
+        isCalculated: false,
+        fiqhExpanded: false,
+        isSyncingPrice: false,
+        detectedRegion: "Jawa Barat (Nasional)",
+        lastPriceSync: "Hari ini"
+      };
+
+      function syncRegionalTanamanBerasPrice(forceNotify) {
+        zakatTanamanState.isSyncingPrice = true;
+        var regKey = detectCurrentRegion();
+        var priceTable = REGIONAL_PANGAN_PRICES[regKey] || REGIONAL_PANGAN_PRICES["default"];
+        
+        var regionDisplayName = "Nasional / Jawa Barat";
+        if (pLocation && pLocation.name) {
+          regionDisplayName = pLocation.name;
+        } else {
+          if (regKey === "dki jakarta") regionDisplayName = "DKI Jakarta";
+          else if (regKey === "jawa tengah") regionDisplayName = "Jawa Tengah";
+          else if (regKey === "jawa timur") regionDisplayName = "Jawa Timur";
+          else if (regKey === "sumatera") regionDisplayName = "Sumatera";
+          else if (regKey === "sulawesi") regionDisplayName = "Sulawesi";
+          else if (regKey === "kalimantan") regionDisplayName = "Kalimantan";
+          else if (regKey === "banten") regionDisplayName = "Banten";
+        }
+        
+        zakatTanamanState.detectedRegion = regionDisplayName;
+        zakatTanamanState.grainPricePerKg = priceTable.beras || 14500;
+        
+        var now = new Date();
+        var timeStr = String(now.getHours()).padStart(2, "0") + ":" + String(now.getMinutes()).padStart(2, "0");
+        zakatTanamanState.lastPriceSync = "Hari ini " + timeStr;
+        zakatTanamanState.isSyncingPrice = false;
+
+        if (forceNotify && typeof showToast === "function") {
+          showToast("🟢 Harga beras nishab wilayah " + regionDisplayName + " berhasil diperbarui!");
+        }
+
+        if (currentScreen === "zakat_tanaman") {
+          renderZakatTanamanPage();
+        }
+      }
+
       function showZakatMenuPage() {
         currentScreen = "zakat_menu";
         syncUpdateBtnVisibility();
@@ -2874,9 +2966,9 @@
                 </div>
               </div>
 
-              <!-- 5. Zakat Tanaman Produktif -->
-              <div class="nu-mod-card" style="border:1.5px solid var(--clr-border);border-radius:18px;padding:20px;background:var(--clr-surface);cursor:pointer;display:flex;align-items:center;gap:18px;opacity:0.9" onclick="showToast('ℹ️ Modul Zakat Tanaman Produktif akan segera dibuka berikutnya.')">
-                <div class="nu-mod-icon-wrap" style="width:54px;height:54px;border-radius:16px;background:linear-gradient(135deg, #059669, #047857);display:grid;place-items:center;flex-shrink:0">
+              <!-- 5. Zakat Tanaman Produktif (AKTIF) -->
+              <div class="nu-mod-card active" onclick="showZakatTanamanPage()" style="border:1.5px solid var(--clr-border);border-radius:18px;padding:20px;box-shadow:0 4px 14px rgba(0,0,0,0.03);background:var(--clr-surface);cursor:pointer;display:flex;align-items:center;gap:18px;transition:all 0.25s ease">
+                <div class="nu-mod-icon-wrap" style="width:54px;height:54px;border-radius:16px;background:linear-gradient(135deg, #059669, #047857);display:grid;place-items:center;flex-shrink:0;box-shadow:0 4px 14px rgba(5,150,105,0.25)">
                   <i class="fa-solid fa-seedling" style="color:#ffffff;font-size:1.4rem"></i>
                 </div>
                 <div class="nu-mod-info" style="flex:1">
@@ -2885,7 +2977,7 @@
                     <span style="font-size:0.68rem;background:var(--clr-surface2);color:var(--clr-text-subtle);font-weight:700;padding:2px 8px;border-radius:99px;border:1px solid var(--clr-border)">Nisab 520 kg</span>
                   </div>
                   <div class="nu-mod-sub" style="font-size:0.8rem;color:var(--clr-text-subtle);margin-top:4px;line-height:1.45">
-                    Kelapa Sawit, Karet, Kopi, Cengkeh &amp; Buah Tahunan • Tarif 5%
+                    Kelapa Sawit, Karet, Kopi, Cengkeh, Buah &amp; Hortikultura • Tarif 5%
                   </div>
                 </div>
                 <div class="nu-mod-arrow" style="width:34px;height:34px;border-radius:10px;background:var(--clr-surface2);display:grid;place-items:center;flex-shrink:0">
@@ -5316,6 +5408,594 @@
                   <div>
                     <strong style="color:var(--clr-text-main)">Boleh Dicicil Per Siklus Panen (*Ta'jil az-Zakat*):</strong>
                     <span style="color:var(--clr-text-subtle)"> Petambak diperbolehkan menyicil pembayaran zakat setiap kali panen siklus (misal siklus 90–120 hari) untuk memudahkan arus kas modal kerja tambak berikutnya.</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        `;
+      }
+
+      function showZakatTanamanPage() {
+        currentScreen = "zakat_tanaman";
+        syncUpdateBtnVisibility();
+
+        const main = document.getElementById("main");
+        if (!main) return;
+
+        if (!zakatTanamanState.grainPricePerKg || zakatTanamanState.grainPricePerKg === 14500) {
+          syncRegionalTanamanBerasPrice(false);
+        }
+
+        renderZakatTanamanPage();
+
+        const navBar = document.getElementById("nav-bar");
+        if (navBar) navBar.style.display = "none";
+        const progressTrack = document.getElementById("progress-track");
+        if (progressTrack) progressTrack.style.display = "none";
+        const slideChipWrap = document.getElementById("slideChipWrap");
+        if (slideChipWrap) slideChipWrap.style.display = "none";
+        const catalogChipWrap = document.getElementById("catalogChipWrap");
+        if (catalogChipWrap) catalogChipWrap.style.display = "none";
+      }
+
+      function toggleZakatTanamanFiqhAccordion() {
+        zakatTanamanState.fiqhExpanded = !zakatTanamanState.fiqhExpanded;
+        var el = document.getElementById("zakatTanamanFiqhBody");
+        var icon = document.getElementById("zakatTanamanFiqhIcon");
+        if (el) {
+          el.style.display = zakatTanamanState.fiqhExpanded ? "block" : "none";
+        }
+        if (icon) {
+          icon.style.transform = zakatTanamanState.fiqhExpanded ? "rotate(180deg)" : "rotate(0deg)";
+        }
+      }
+
+      function setZakatTanamanCategory(cat) {
+        zakatTanamanState.categoryGroup = cat;
+        if (cat === "perkebunan") zakatTanamanState.selectedItem = "sawit";
+        else if (cat === "buah") zakatTanamanState.selectedItem = "durian";
+        else if (cat === "hortikultura") zakatTanamanState.selectedItem = "cabai_rawit";
+        else if (cat === "custom") zakatTanamanState.selectedItem = "custom";
+        zakatTanamanState.isCalculated = false;
+        renderZakatTanamanPage();
+      }
+
+      function setZakatTanamanItem(itemId) {
+        zakatTanamanState.selectedItem = itemId;
+        zakatTanamanState.isCalculated = false;
+        renderZakatTanamanPage();
+      }
+
+      function updateZakatTanamanCustomName(val) {
+        zakatTanamanState.customName = val;
+      }
+
+      function updateZakatTanamanGrainPrice(val) {
+        var clean = String(val).replace(/[^0-9]/g, "");
+        var num = parseInt(clean, 10);
+        zakatTanamanState.grainPricePerKg = isNaN(num) ? 0 : num;
+        var el = document.getElementById("zakatTanamanGrainPriceInput");
+        if (el) {
+          el.value = (zakatTanamanState.grainPricePerKg > 0) ? zakatTanamanState.grainPricePerKg.toLocaleString("id-ID") : "";
+        }
+      }
+
+      function updateZakatTanamanCalcMethod(method) {
+        zakatTanamanState.calcMethod = method;
+        zakatTanamanState.isCalculated = false;
+        renderZakatTanamanPage();
+      }
+
+      function updateZakatTanamanGrossRevenue(val) {
+        var clean = String(val).replace(/[^0-9]/g, "");
+        var num = parseInt(clean, 10);
+        zakatTanamanState.grossRevenue = isNaN(num) ? 0 : num;
+        var el = document.getElementById("input_tnm_grossRevenue");
+        if (el) {
+          el.value = (zakatTanamanState.grossRevenue > 0) ? zakatTanamanState.grossRevenue.toLocaleString("id-ID") : "";
+        }
+      }
+
+      function updateZakatTanamanOperationalCost(val) {
+        var clean = String(val).replace(/[^0-9]/g, "");
+        var num = parseInt(clean, 10);
+        zakatTanamanState.operationalCost = isNaN(num) ? 0 : num;
+        var el = document.getElementById("input_tnm_operationalCost");
+        if (el) {
+          el.value = (zakatTanamanState.operationalCost > 0) ? zakatTanamanState.operationalCost.toLocaleString("id-ID") : "";
+        }
+      }
+
+      function calculateZakatTanaman() {
+        var pGrain = document.getElementById("zakatTanamanGrainPriceInput");
+        if (pGrain) {
+          var cleanP = String(pGrain.value).replace(/[^0-9]/g, "");
+          var pNum = parseInt(cleanP, 10);
+          zakatTanamanState.grainPricePerKg = isNaN(pNum) ? 14500 : pNum;
+        }
+
+        var pGross = document.getElementById("input_tnm_grossRevenue");
+        if (pGross) {
+          var cleanG = String(pGross.value).replace(/[^0-9]/g, "");
+          var gNum = parseInt(cleanG, 10);
+          zakatTanamanState.grossRevenue = isNaN(gNum) ? 0 : gNum;
+        }
+
+        var pCost = document.getElementById("input_tnm_operationalCost");
+        if (pCost) {
+          var cleanC = String(pCost.value).replace(/[^0-9]/g, "");
+          var cNum = parseInt(cleanC, 10);
+          zakatTanamanState.operationalCost = isNaN(cNum) ? 0 : cNum;
+        }
+
+        var customEl = document.getElementById("input_tnm_customName");
+        if (customEl) {
+          zakatTanamanState.customName = customEl.value.trim();
+        }
+
+        if (!zakatTanamanState.grossRevenue || zakatTanamanState.grossRevenue <= 0) {
+          if (typeof showToast === "function") showToast("⚠️ Masukkan total hasil penjualan panen kotor (Rp).");
+          return;
+        }
+
+        zakatTanamanState.isCalculated = true;
+        renderZakatTanamanPage();
+
+        setTimeout(function() {
+          var resCard = document.getElementById("zakatTanamanResultSection");
+          if (resCard) {
+            resCard.scrollIntoView({ behavior: "smooth", block: "nearest" });
+          }
+        }, 100);
+      }
+
+      function resetZakatTanamanForm() {
+        zakatTanamanState.grossRevenue = "";
+        zakatTanamanState.operationalCost = "";
+        zakatTanamanState.customName = "";
+        zakatTanamanState.isCalculated = false;
+        renderZakatTanamanPage();
+        if (typeof showToast === "function") showToast("Formulir zakat tanaman produktif berhasil direset.");
+      }
+
+      // Expose to window
+      window.showZakatTanamanPage = showZakatTanamanPage;
+      window.renderZakatTanamanPage = renderZakatTanamanPage;
+      window.syncRegionalTanamanBerasPrice = syncRegionalTanamanBerasPrice;
+      window.toggleZakatTanamanFiqhAccordion = toggleZakatTanamanFiqhAccordion;
+      window.setZakatTanamanCategory = setZakatTanamanCategory;
+      window.setZakatTanamanItem = setZakatTanamanItem;
+      window.updateZakatTanamanCustomName = updateZakatTanamanCustomName;
+      window.updateZakatTanamanGrainPrice = updateZakatTanamanGrainPrice;
+      window.updateZakatTanamanCalcMethod = updateZakatTanamanCalcMethod;
+      window.updateZakatTanamanGrossRevenue = updateZakatTanamanGrossRevenue;
+      window.updateZakatTanamanOperationalCost = updateZakatTanamanOperationalCost;
+      window.calculateZakatTanaman = calculateZakatTanaman;
+      window.resetZakatTanamanForm = resetZakatTanamanForm;
+
+      function renderZakatTanamanPage() {
+        const main = document.getElementById("main");
+        if (!main) return;
+
+        var nisabKg = 520; // 5 Wasaq beras bersih
+        var grainPrice = zakatTanamanState.grainPricePerKg || 14500;
+        var nisabRp = nisabKg * grainPrice;
+
+        var kotor = parseFloat(zakatTanamanState.grossRevenue) || 0;
+        var biaya = parseFloat(zakatTanamanState.operationalCost) || 0;
+        var bersih = Math.max(0, kotor - biaya);
+
+        var isNetto = (zakatTanamanState.calcMethod === "netto");
+        var basisZakat = isNetto ? bersih : kotor;
+        var tarif = 0.05; // 5%
+        var tarifLabel = isNetto ? "5% dari Hasil Bersih (Netto Biaya Panen)" : "5% dari Hasil Kotor (Bruto)";
+
+        var isWajib = (basisZakat >= nisabRp) && (kotor > 0);
+        var zakatPanenRp = isWajib ? (basisZakat * tarif) : 0;
+        var kekuranganRp = Math.max(0, nisabRp - basisZakat);
+
+        // Resolve Commodity Display Name & Icon
+        var currentCat = zakatTanamanState.categoryGroup;
+        var currentItemName = "Kelapa Sawit (TBS)";
+        var currentItemIcon = "🌴";
+        var currentItemDesc = "Tandan Buah Segar kelapa sawit";
+
+        if (currentCat === "custom") {
+          currentItemName = zakatTanamanState.customName || "Komoditas Lainnya";
+          currentItemIcon = "🌿";
+          currentItemDesc = "Komoditas kebun / tanaman produktif kustom";
+        } else {
+          var list = TANAMAN_PRODUKTIF_DATA[currentCat] || [];
+          var found = list.find(function(it) { return it.id === zakatTanamanState.selectedItem; });
+          if (found) {
+            currentItemName = found.name;
+            currentItemIcon = found.icon;
+            currentItemDesc = found.desc;
+          }
+        }
+
+        main.innerHTML = `
+          <div id="zakatTanamanScreen" style="max-width:800px;margin:0 auto;width:100%;box-sizing:border-box;padding:8px 16px 60px">
+            
+            <!-- HEADER APP BAR -->
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;padding-bottom:16px;border-bottom:1.5px solid var(--clr-border)">
+              <div style="display:flex;align-items:center;gap:14px">
+                <button class="icon-btn" onclick="showZakatMenuPage()" style="width:42px;height:42px;border-radius:12px;background:var(--clr-surface);border:1.5px solid var(--clr-border);box-shadow:0 2px 8px rgba(0,0,0,0.04);cursor:pointer;display:grid;place-items:center;color:var(--clr-text)" title="Kembali ke Menu Zakat">
+                  <i class="fa-solid fa-arrow-left" style="font-size:1rem"></i>
+                </button>
+                <div>
+                  <div style="display:flex;align-items:center;gap:8px">
+                    <h2 style="font-size:1.25rem;font-weight:800;margin:0;color:var(--clr-primary-dk);letter-spacing:-0.3px">
+                      Zakat Tanaman Produktif &amp; Kebun
+                    </h2>
+                  </div>
+                  <div style="font-size:0.78rem;color:var(--clr-text-subtle);margin-top:2px">
+                    Kelapa Sawit, Karet, Kopi, Cengkeh, Buah &amp; Hortikultura
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- LOCATION & GRAIN NISHAB BADGE (MINIMALIST) -->
+            <div style="background:color-mix(in srgb, #059669 10%, var(--clr-surface));border:1.5px solid color-mix(in srgb, #059669 30%, var(--clr-border));border-radius:16px;padding:14px 18px;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;box-shadow:0 4px 14px rgba(5,150,105,0.06)">
+              <div style="display:flex;align-items:center;gap:10px">
+                <div style="width:36px;height:36px;border-radius:10px;background:#059669;display:grid;place-items:center;color:#ffffff;font-size:1.1rem;flex-shrink:0">
+                  <i class="fa-solid fa-location-dot"></i>
+                </div>
+                <div>
+                  <div style="font-size:0.84rem;font-weight:800;color:var(--clr-primary-dk)">
+                    Wilayah Acuan: ${zakatTanamanState.detectedRegion}
+                  </div>
+                  <div style="font-size:0.73rem;color:var(--clr-text-subtle);margin-top:1px">
+                    Harga Beras Nishab: <strong>Rp ${grainPrice.toLocaleString('id-ID')}/kg</strong> • Nishab: <strong>Rp ${nisabRp.toLocaleString('id-ID')}</strong> (520 kg)
+                  </div>
+                </div>
+              </div>
+              <button onclick="syncRegionalTanamanBerasPrice(true)" style="background:var(--clr-surface);border:1.5px solid color-mix(in srgb, #059669 35%, var(--clr-border));padding:6px 12px;border-radius:10px;font-size:0.75rem;font-weight:800;color:#047857;cursor:pointer;display:inline-flex;align-items:center;gap:6px">
+                <i class="fa-solid fa-rotate ${zakatTanamanState.isSyncingPrice ? 'fa-spin' : ''}" style="color:#059669"></i> Cek Harga
+              </button>
+            </div>
+
+            <!-- FIQH DALIL ACCORDION -->
+            <div style="background:var(--clr-surface);border:1.5px solid color-mix(in srgb, #059669 40%, var(--clr-border));border-radius:18px;margin-bottom:24px;overflow:hidden;box-shadow:0 4px 16px rgba(5,150,105,0.05)">
+              <div onclick="toggleZakatTanamanFiqhAccordion()" style="padding:14px 18px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;background:color-mix(in srgb, #059669 10%, var(--clr-surface))">
+                <div style="display:flex;align-items:center;gap:10px;font-weight:800;font-size:0.9rem;color:#047857">
+                  <i class="fa-solid fa-book-quran" style="font-size:1.1rem"></i>
+                  <span>Dasar Hukum &amp; Ketentuan Syariat Zakat Kebun / Tanaman Produktif</span>
+                </div>
+                <div style="width:28px;height:28px;border-radius:8px;background:var(--clr-surface);display:grid;place-items:center;box-shadow:0 2px 6px rgba(0,0,0,0.04)">
+                  <i id="zakatTanamanFiqhIcon" class="fa-solid fa-chevron-down" style="font-size:0.75rem;color:#047857;transition:transform 0.25s ease;${zakatTanamanState.fiqhExpanded ? 'transform:rotate(180deg)' : ''}"></i>
+                </div>
+              </div>
+              <div id="zakatTanamanFiqhBody" style="display:${zakatTanamanState.fiqhExpanded ? 'block' : 'none'};padding:18px 20px;font-size:0.82rem;color:var(--clr-text-subtle);line-height:1.65;border-top:1px solid var(--clr-border)">
+                <div style="background:var(--clr-surface2);padding:12px 14px;border-radius:12px;margin-bottom:12px;border-left:4px solid #059669">
+                  <strong style="color:var(--clr-text-main);display:block;margin-bottom:2px">1. Landasan Syariat Wajib Zakat Setiap Panen (QS. Al-An'am: 141):</strong>
+                  <em>"Dan berikanlah haknya (zakatnya) pada hari memetik hasilnya (panen)..."</em> Zakat kebun ditunaikan setiap kali panen tanpa menunggu haul 1 tahun.
+                </div>
+                <div style="background:var(--clr-surface2);padding:12px 14px;border-radius:12px;margin-bottom:12px;border-left:4px solid var(--clr-gold)">
+                  <strong style="color:var(--clr-text-main);display:block;margin-bottom:2px">2. Batas Nishab &amp; Tarif Zakat (Fatwa MUI No. 1/2003 &amp; BAZNAS):</strong>
+                  Nishab setara <strong>5 Wasaq (520 kg Beras)</strong> senilai harga beras saat panen. Tarif zakat sebesar <strong>5%</strong> dari hasil panen bersih (setelah dikurangi biaya operasional panen).
+                </div>
+                <div style="background:var(--clr-surface2);padding:12px 14px;border-radius:12px;border-left:4px solid #10B981">
+                  <strong style="color:var(--clr-text-main);display:block;margin-bottom:2px">3. Aset Pokok Kebun Bebas Zakat (Amwal al-Qun-yah):</strong>
+                  Tanah kebun, pohon induk sawit/karet/kopi, traktor, tangki semprot, dan gudang kebun <strong>bebas zakat</strong> dan tidak dihitung.
+                </div>
+              </div>
+            </div>
+
+            <!-- FORM CARD -->
+            <div style="background:var(--clr-surface);border:1.5px solid color-mix(in srgb, #059669 30%, var(--clr-border));border-radius:22px;padding:24px 22px;box-shadow:0 6px 24px rgba(0,0,0,0.04)">
+              
+              <!-- 1. Kategori Sektor Tanaman (Pills) -->
+              <div style="margin-bottom:22px">
+                <label style="display:flex;align-items:center;gap:8px;font-size:0.88rem;font-weight:800;color:var(--clr-text-main);margin-bottom:10px">
+                  <i class="fa-solid fa-layer-group" style="color:#059669"></i> 1. Kategori Komoditas Tanaman:
+                </label>
+                
+                <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(130px, 1fr));gap:8px">
+                  <button type="button" onclick="setZakatTanamanCategory('perkebunan')" style="padding:10px 8px;border-radius:12px;border:1.5px solid ${currentCat === 'perkebunan' ? '#059669' : 'var(--clr-border)'};background:${currentCat === 'perkebunan' ? 'color-mix(in srgb, #059669 12%, var(--clr-surface))' : 'var(--clr-surface2)'};color:${currentCat === 'perkebunan' ? '#047857' : 'var(--clr-text-main)'};font-size:0.8rem;font-weight:800;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;transition:all 0.2s ease">
+                    <span style="font-size:1.2rem">🌴</span>
+                    <span>Perkebunan</span>
+                  </button>
+
+                  <button type="button" onclick="setZakatTanamanCategory('buah')" style="padding:10px 8px;border-radius:12px;border:1.5px solid ${currentCat === 'buah' ? '#059669' : 'var(--clr-border)'};background:${currentCat === 'buah' ? 'color-mix(in srgb, #059669 12%, var(--clr-surface))' : 'var(--clr-surface2)'};color:${currentCat === 'buah' ? '#047857' : 'var(--clr-text-main)'};font-size:0.8rem;font-weight:800;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;transition:all 0.2s ease">
+                    <span style="font-size:1.2rem">🍎</span>
+                    <span>Buah-Buahan</span>
+                  </button>
+
+                  <button type="button" onclick="setZakatTanamanCategory('hortikultura')" style="padding:10px 8px;border-radius:12px;border:1.5px solid ${currentCat === 'hortikultura' ? '#059669' : 'var(--clr-border)'};background:${currentCat === 'hortikultura' ? 'color-mix(in srgb, #059669 12%, var(--clr-surface))' : 'var(--clr-surface2)'};color:${currentCat === 'hortikultura' ? '#047857' : 'var(--clr-text-main)'};font-size:0.8rem;font-weight:800;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;transition:all 0.2s ease">
+                    <span style="font-size:1.2rem">🌶️</span>
+                    <span>Hortikultura / Sayur</span>
+                  </button>
+
+                  <button type="button" onclick="setZakatTanamanCategory('custom')" style="padding:10px 8px;border-radius:12px;border:1.5px solid ${currentCat === 'custom' ? '#059669' : 'var(--clr-border)'};background:${currentCat === 'custom' ? 'color-mix(in srgb, #059669 12%, var(--clr-surface))' : 'var(--clr-surface2)'};color:${currentCat === 'custom' ? '#047857' : 'var(--clr-text-main)'};font-size:0.8rem;font-weight:800;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;transition:all 0.2s ease">
+                    <span style="font-size:1.2rem">✏️</span>
+                    <span>Lainnya (Kustom)</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- 2. Pilihan Jenis Komoditas atau Input Manual -->
+              <div style="margin-bottom:24px">
+                <label style="display:flex;align-items:center;gap:8px;font-size:0.88rem;font-weight:800;color:var(--clr-text-main);margin-bottom:8px">
+                  <i class="fa-solid fa-seedling" style="color:#059669"></i> 2. Jenis Komoditas yang Dipanen:
+                </label>
+
+                ${currentCat === 'custom' ? `
+                  <div style="position:relative">
+                    <input id="input_tnm_customName" type="text" value="${zakatTanamanState.customName || ''}" oninput="updateZakatTanamanCustomName(this.value)" placeholder="Tuliskan nama tanaman / komoditas Anda (misal: Sengon, Porang, Nilam...)" style="width:100%;height:48px;box-sizing:border-box;padding:0 16px;border-radius:12px;border:1.5px solid var(--clr-border);background:var(--clr-surface2);color:var(--clr-text-main);font-size:0.95rem;font-weight:700;outline:none" />
+                  </div>
+                ` : `
+                  <div style="position:relative">
+                    <select onchange="setZakatTanamanItem(this.value)" style="width:100%;height:48px;box-sizing:border-box;padding:0 36px 0 16px;border-radius:12px;border:1.5px solid var(--clr-border);background:var(--clr-surface2);color:var(--clr-text-main);font-size:0.95rem;font-weight:800;outline:none;appearance:none;cursor:pointer">
+                      ${(TANAMAN_PRODUKTIF_DATA[currentCat] || []).map(function(it) {
+                        return `<option value="${it.id}" ${zakatTanamanState.selectedItem === it.id ? 'selected' : ''}>${it.icon} ${it.name} — ${it.desc}</option>`;
+                      }).join('')}
+                    </select>
+                    <div style="position:absolute;right:14px;top:50%;transform:translateY(-50%);pointer-events:none;color:var(--clr-text-subtle)">
+                      <i class="fa-solid fa-chevron-down"></i>
+                    </div>
+                  </div>
+                `}
+
+                <div style="margin-top:8px;font-size:0.76rem;color:var(--clr-text-subtle);background:var(--clr-surface2);padding:8px 12px;border-radius:8px;border-left:3px solid #059669">
+                  Komoditas Terpilih: <strong>${currentItemIcon} ${currentItemName}</strong> (${currentItemDesc})
+                </div>
+              </div>
+
+              <!-- 3. Batas Nishab Beras Acuan -->
+              <div style="margin-bottom:24px">
+                <label style="display:flex;align-items:center;gap:8px;font-size:0.88rem;font-weight:800;color:var(--clr-text-main);margin-bottom:8px">
+                  <i class="fa-solid fa-scale-balanced" style="color:#059669"></i> 3. Batas Nishab (Setara 520 kg Beras):
+                </label>
+                
+                <div style="position:relative">
+                  <span style="position:absolute;left:16px;top:50%;transform:translateY(-50%);font-weight:800;color:#059669;font-size:0.95rem">Rp</span>
+                  <input id="zakatTanamanGrainPriceInput" type="text" value="${grainPrice.toLocaleString('id-ID')}" oninput="updateZakatTanamanGrainPrice(this.value)" placeholder="Harga Beras per Kg" style="width:100%;height:48px;box-sizing:border-box;padding:0 80px 0 46px;border-radius:12px;border:1.5px solid var(--clr-border);background:var(--clr-surface2);color:var(--clr-text-main);font-size:1rem;font-weight:800;outline:none" />
+                  <span style="position:absolute;right:14px;top:50%;transform:translateY(-50%);font-size:0.8rem;font-weight:800;color:var(--clr-text-subtle)">/ Kg</span>
+                </div>
+
+                <div style="margin-top:8px;font-size:0.78rem;color:#047857;background:color-mix(in srgb, #059669 10%, var(--clr-surface));padding:10px 14px;border-radius:10px;border:1px solid color-mix(in srgb, #059669 25%, var(--clr-border));display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px">
+                  <span>Batas Nishab Panen (520 kg): <strong>Rp ${nisabRp.toLocaleString('id-ID')}</strong></span>
+                  <span style="font-size:0.72rem;color:var(--clr-text-subtle)">Wajib zakat jika hasil panen ≥ nishab</span>
+                </div>
+              </div>
+
+              <!-- 4. Pilihan Metode Penghitungan (Netto vs Bruto) -->
+              <div style="margin-bottom:24px">
+                <label style="display:flex;align-items:center;gap:8px;font-size:0.88rem;font-weight:800;color:var(--clr-text-main);margin-bottom:8px">
+                  <i class="fa-solid fa-calculator" style="color:#059669"></i> 4. Pilihan Metode Penghitungan Fiqh:
+                </label>
+
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+                  <div onclick="updateZakatTanamanCalcMethod('netto')" style="cursor:pointer;padding:12px 14px;border-radius:12px;border:2px solid ${isNetto ? '#059669' : 'var(--clr-border)'};background:${isNetto ? 'color-mix(in srgb, #059669 10%, var(--clr-surface))' : 'var(--clr-surface2)'};transition:all 0.2s ease">
+                    <div style="font-weight:800;font-size:0.85rem;color:var(--clr-text-main);display:flex;align-items:center;justify-content:space-between">
+                      <span>Metode Bersih (Netto)</span>
+                      <span style="font-size:0.75rem;font-weight:800;color:#047857;background:var(--clr-surface);padding:2px 6px;border-radius:6px;border:1px solid var(--clr-border)">5%</span>
+                    </div>
+                    <div style="font-size:0.72rem;color:var(--clr-text-subtle);margin-top:3px">Dikurangi biaya pupuk, obat &amp; upah panen (Standar Fatwa MUI &amp; BAZNAS)</div>
+                  </div>
+
+                  <div onclick="updateZakatTanamanCalcMethod('bruto')" style="cursor:pointer;padding:12px 14px;border-radius:12px;border:2px solid ${!isNetto ? '#059669' : 'var(--clr-border)'};background:${!isNetto ? 'color-mix(in srgb, #059669 10%, var(--clr-surface))' : 'var(--clr-surface2)'};transition:all 0.2s ease">
+                    <div style="font-weight:800;font-size:0.85rem;color:var(--clr-text-main);display:flex;align-items:center;justify-content:space-between">
+                      <span>Metode Kotor (Bruto)</span>
+                      <span style="font-size:0.75rem;font-weight:800;color:#047857;background:var(--clr-surface);padding:2px 6px;border-radius:6px;border:1px solid var(--clr-border)">5%</span>
+                    </div>
+                    <div style="font-size:0.72rem;color:var(--clr-text-subtle);margin-top:3px">Langsung 5% dari total nilai jual panen tanpa potongan biaya</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 5. Total Pendapatan Kotor Panen -->
+              <div style="margin-bottom:16px">
+                <label style="display:block;font-size:0.82rem;font-weight:700;color:var(--clr-text-main);margin-bottom:6px">
+                  5. Total Penjualan Hasil Panen Kotor (Rp):
+                </label>
+                <div style="position:relative">
+                  <span style="position:absolute;left:16px;top:50%;transform:translateY(-50%);font-weight:800;color:var(--clr-text-subtle);font-size:0.95rem">Rp</span>
+                  <input id="input_tnm_grossRevenue" type="text" value="${zakatTanamanState.grossRevenue ? zakatTanamanState.grossRevenue.toLocaleString('id-ID') : ''}" oninput="updateZakatTanamanGrossRevenue(this.value)" placeholder="0" style="width:100%;height:48px;box-sizing:border-box;padding:0 16px 0 46px;border-radius:12px;border:1.5px solid var(--clr-border);background:var(--clr-surface2);color:var(--clr-text-main);font-size:1.05rem;font-weight:800;outline:none" />
+                </div>
+                <div style="font-size:0.72rem;color:var(--clr-text-subtle);margin-top:3px">Total nilai rupiah dari penjualan TBS sawit, getah karet, kopi, buah atau sayur pada panen ini.</div>
+              </div>
+
+              <!-- 6. Biaya Operasional Panen (Pengurang) -->
+              <div style="margin-bottom:24px">
+                <label style="display:block;font-size:0.82rem;font-weight:700;color:var(--clr-text-main);margin-bottom:6px">
+                  6. Biaya Operasional Panen (Pengurang) (Rp):
+                </label>
+                <div style="position:relative">
+                  <span style="position:absolute;left:16px;top:50%;transform:translateY(-50%);font-weight:800;color:#EF4444;font-size:0.95rem">Rp</span>
+                  <input id="input_tnm_operationalCost" type="text" value="${zakatTanamanState.operationalCost ? zakatTanamanState.operationalCost.toLocaleString('id-ID') : ''}" oninput="updateZakatTanamanOperationalCost(this.value)" placeholder="0" style="width:100%;height:48px;box-sizing:border-box;padding:0 16px 0 46px;border-radius:12px;border:1.5px solid var(--clr-border);background:var(--clr-surface2);color:var(--clr-text-main);font-size:1.05rem;font-weight:800;outline:none" />
+                </div>
+                <div style="font-size:0.72rem;color:var(--clr-text-subtle);margin-top:3px">Biaya pupuk, pestisida/obat, BBM traktor/pompa, dan upah buruh panen/petik untuk siklus panen ini.</div>
+              </div>
+
+              <!-- Info Aset Pokok Bebas Zakat -->
+              <div style="background:var(--clr-surface2);border:1px dashed var(--clr-border);border-radius:12px;padding:12px 14px;margin-bottom:24px;display:flex;align-items:flex-start;gap:10px">
+                <i class="fa-solid fa-circle-info" style="color:#059669;font-size:1rem;margin-top:2px;flex-shrink:0"></i>
+                <div style="font-size:0.76rem;color:var(--clr-text-subtle);line-height:1.5">
+                  <strong>Catatan Fiqh:</strong> Aset pokok kebun seperti <strong>tanah kebun, pohon induk sawit/karet/kopi, mesin traktor, tangki semprot, dan bangunan gudang BEBAS ZAKAT</strong>.
+                </div>
+              </div>
+
+              <!-- Action Buttons -->
+              <div style="display:flex;gap:12px">
+                <button type="button" onclick="calculateZakatTanaman()" style="flex:2;height:52px;background:linear-gradient(135deg, #059669, #047857);color:#ffffff;border:none;border-radius:14px;font-size:1rem;font-weight:800;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:10px;box-shadow:0 6px 18px rgba(5,150,105,0.3);transition:all 0.2s ease">
+                  <i class="fa-solid fa-calculator" style="font-size:1.1rem"></i> Hitung Zakat Kebun
+                </button>
+                <button type="button" onclick="resetZakatTanamanForm()" style="flex:1;height:52px;background:var(--clr-surface2);color:var(--clr-text-main);border:1.5px solid var(--clr-border);border-radius:14px;font-size:0.9rem;font-weight:700;cursor:pointer;transition:all 0.2s ease">
+                  Reset
+                </button>
+              </div>
+
+            </div>
+
+            <!-- RESULT SECTION -->
+            ${zakatTanamanState.isCalculated ? `
+              <div id="zakatTanamanResultSection" style="margin-top:32px;animation:fadeIn 0.35s ease">
+                
+                <!-- Status Banner -->
+                <div style="background:${isWajib ? 'linear-gradient(135deg, #047857 0%, #059669 100%)' : 'linear-gradient(135deg, #78350F 0%, #92400E 100%)'};color:#ffffff;border-radius:20px;padding:22px 24px;margin-bottom:20px;box-shadow:0 10px 28px rgba(0,0,0,0.12)">
+                  <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px">
+                    <div style="width:40px;height:40px;border-radius:12px;background:rgba(255,255,255,0.15);display:grid;place-items:center;flex-shrink:0">
+                      <i class="fa-solid ${isWajib ? 'fa-circle-check' : 'fa-circle-exclamation'}" style="font-size:1.4rem;color:${isWajib ? '#6EE7B7' : '#FBBF24'}"></i>
+                    </div>
+                    <h3 style="margin:0;font-size:1.2rem;font-weight:800;letter-spacing:0.3px">
+                      ${isWajib ? 'WAJIB MENGELUARKAN ZAKAT PANEN KEBUN' : 'BELUM WAJIB ZAKAT (TIDAK MENCAPAI NISHAB)'}
+                    </h3>
+                  </div>
+                  <div style="font-size:0.86rem;opacity:0.95;line-height:1.55">
+                    ${isWajib 
+                      ? `Alhamdulillah, hasil panen komoditas <strong>${currentItemName}</strong> Anda (<strong>Rp ${basisZakat.toLocaleString('id-ID')}</strong>) telah mencapai batas nishab syariat (520 kg Beras = <strong>Rp ${nisabRp.toLocaleString('id-ID')}</strong>).`
+                      : `Hasil panen komoditas <strong>${currentItemName}</strong> Anda (<strong>Rp ${basisZakat.toLocaleString('id-ID')}</strong>) belum mencapai batas nishab minimal syariat (520 kg Beras = <strong>Rp ${nisabRp.toLocaleString('id-ID')}</strong>). Selisih kekurangan: <strong>Rp ${kekuranganRp.toLocaleString('id-ID')}</strong>.`
+                    }
+                  </div>
+                </div>
+
+                ${isWajib ? `
+                  <!-- Output Card: Zakat Wajib Per Panen -->
+                  <div style="background:var(--clr-surface);border:2px solid #059669;border-radius:18px;padding:22px 24px;box-shadow:0 6px 20px rgba(5,150,105,0.08);margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px">
+                    <div>
+                      <div style="display:flex;align-items:center;gap:8px;font-size:0.8rem;font-weight:800;color:#059669;text-transform:uppercase;margin-bottom:6px">
+                        <i class="fa-solid fa-hand-holding-dollar"></i> ZAKAT WAJIB DITUNAIKAN PADA PANEN INI
+                      </div>
+                      <div style="font-size:2rem;font-weight:900;color:#047857;line-height:1.1">
+                        Rp ${Math.round(zakatPanenRp).toLocaleString('id-ID')}
+                      </div>
+                      <div style="font-size:0.75rem;color:var(--clr-text-subtle);margin-top:6px">
+                        *Dikeluarkan pada hari panen komoditas ${currentItemName} (${tarifLabel}).
+                      </div>
+                    </div>
+
+                    <div style="background:color-mix(in srgb, #059669 10%, var(--clr-surface));padding:10px 16px;border-radius:12px;border:1px solid color-mix(in srgb, #059669 30%, var(--clr-border));text-align:right">
+                      <div style="font-size:0.72rem;color:var(--clr-text-subtle);font-weight:700">KOMODITAS</div>
+                      <div style="font-size:0.95rem;font-weight:800;color:#047857">${currentItemIcon} ${currentItemName}</div>
+                    </div>
+                  </div>
+
+                  <!-- Summary Table -->
+                  <div style="background:var(--clr-surface);border:1.5px solid var(--clr-border);border-radius:18px;padding:20px 22px;margin-bottom:20px;box-shadow:0 4px 16px rgba(0,0,0,0.02)">
+                    <h4 style="margin:0 0 16px;font-size:0.92rem;font-weight:800;color:var(--clr-text-main);display:flex;align-items:center;gap:8px">
+                      <i class="fa-solid fa-list-check" style="color:#059669"></i> Rincian Perhitungan Panen
+                    </h4>
+                    
+                    <div style="display:flex;flex-direction:column;gap:10px;font-size:0.84rem">
+                      <div style="display:flex;justify-content:space-between;align-items:center;padding-bottom:8px;border-bottom:1px dashed var(--clr-border)">
+                        <span style="color:var(--clr-text-subtle)">1. Komoditas Panen:</span>
+                        <span style="font-weight:800;color:var(--clr-text-main)">${currentItemIcon} ${currentItemName}</span>
+                      </div>
+                      <div style="display:flex;justify-content:space-between;align-items:center;padding-bottom:8px;border-bottom:1px dashed var(--clr-border)">
+                        <span style="color:var(--clr-text-subtle)">2. Penjualan Hasil Panen Kotor:</span>
+                        <span style="font-weight:800;color:var(--clr-text-main)">Rp ${kotor.toLocaleString('id-ID')}</span>
+                      </div>
+                      <div style="display:flex;justify-content:space-between;align-items:center;padding-bottom:8px;border-bottom:1px dashed var(--clr-border)">
+                        <span style="color:#EF4444">3. Biaya Operasional Panen:</span>
+                        <span style="font-weight:800;color:#EF4444">- Rp ${biaya.toLocaleString('id-ID')}</span>
+                      </div>
+                      <div style="display:flex;justify-content:space-between;align-items:center;padding-bottom:8px;border-bottom:1px dashed var(--clr-border)">
+                        <span style="color:var(--clr-text-subtle)">4. Basis Nilai Kena Zakat (${isNetto ? 'Netto' : 'Bruto'}):</span>
+                        <span style="font-weight:800;color:var(--clr-primary-dk)">Rp ${basisZakat.toLocaleString('id-ID')}</span>
+                      </div>
+                      <div style="display:flex;justify-content:space-between;align-items:center;padding-bottom:8px;border-bottom:1px dashed var(--clr-border)">
+                        <span style="color:var(--clr-text-subtle)">5. Batas Nishab (520 kg Beras):</span>
+                        <span style="font-weight:800;color:var(--clr-text-main)">Rp ${nisabRp.toLocaleString('id-ID')}</span>
+                      </div>
+                      <div style="display:flex;justify-content:space-between;align-items:center;padding-top:4px">
+                        <span style="color:var(--clr-text-subtle)">Formula Perhitungan:</span>
+                        <span style="font-weight:800;color:#047857">Rp ${basisZakat.toLocaleString('id-ID')} × 5% = Rp ${Math.round(zakatPanenRp).toLocaleString('id-ID')}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Doa Muzakki Panen Kebun -->
+                  <div style="background:linear-gradient(135deg, color-mix(in srgb, #059669 12%, var(--clr-surface)) 0%, color-mix(in srgb, var(--clr-gold) 10%, var(--clr-surface)) 100%);border:1.5px solid color-mix(in srgb, #059669 45%, var(--clr-border));border-radius:20px;padding:22px 24px;text-align:center;box-shadow:0 6px 20px rgba(5,150,105,0.06)">
+                    <div style="font-size:0.78rem;font-weight:800;color:#047857;margin-bottom:10px;text-transform:uppercase;letter-spacing:1px;display:flex;align-items:center;justify-content:center;gap:6px">
+                      <span>🤲</span> DOA KEBERKAHAN PANEN KEBUN &amp; TANAMAN
+                    </div>
+                    <div style="font-family:'Amiri', serif;font-size:1.35rem;color:var(--clr-primary-dk);direction:rtl;margin-bottom:10px;line-height:2.2;text-shadow:0 1px 2px rgba(0,0,0,0.05)">
+                      اللَّهُمَّ بَارِكْ لَنَا فِي ثِمَارِنَا وَزُرُوعِنَا، وَاجْعَلْهَا بَرَكَةً لَنَا وَلِعِيَالِنَا، وَتَقَبَّلْ زَكَاتَنَا يَا كَرِيمُ
+                    </div>
+                    <div style="font-size:0.8rem;color:var(--clr-text-subtle);font-style:italic;line-height:1.5">
+                      "Ya Allah, berkahilah buah-buahan dan hasil panen tanaman kami, jadikanlah ia sumber keberkahan bagi kami dan keluarga kami, serta terimalah zakat kami wahai Dzat Yang Maha Mulia."
+                    </div>
+                  </div>
+                ` : `
+                  <!-- Belum Nishab Guidance -->
+                  <div style="background:var(--clr-surface);border:1.5px solid var(--clr-border);border-radius:18px;padding:22px 24px;text-align:center;box-shadow:0 4px 16px rgba(0,0,0,0.02)">
+                    <div style="width:48px;height:48px;border-radius:14px;background:color-mix(in srgb, #059669 15%, var(--clr-surface));display:grid;place-items:center;margin:0 auto 12px;color:#059669;font-size:1.3rem">
+                      <i class="fa-solid fa-hand-holding-heart"></i>
+                    </div>
+                    <div style="font-size:0.92rem;font-weight:800;color:var(--clr-text-main);margin-bottom:4px">
+                      Anjuran Sedekah &amp; Infaq Panen
+                    </div>
+                    <div style="font-size:0.82rem;color:var(--clr-text-subtle);line-height:1.55;max-width:500px;margin:0 auto">
+                      Hasil panen pada siklus ini belum mencapai batas nishab wajib zakat. Namun, Anda tetap sangat dianjurkan untuk mengeluarkan <strong>infaq dan sedekah panen</strong> agar kebun senantiasa subur, terhindar dari hama penyakit, dan dilipatgandakan panen berikutnya.
+                    </div>
+                  </div>
+                `}
+
+              </div>
+            ` : ''}
+
+            <!-- EDUKASI & ASPEK PENGHITUNGAN ZAKAT TANAMAN PRODUKTIF -->
+            <div style="margin-top:32px;background:var(--clr-surface);border:1.5px solid color-mix(in srgb, #059669 30%, var(--clr-border));border-radius:20px;padding:22px 24px;box-shadow:0 6px 20px rgba(0,0,0,0.03)">
+              <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--clr-border)">
+                <div style="width:36px;height:36px;border-radius:10px;background:color-mix(in srgb, #059669 12%, var(--clr-surface));display:grid;place-items:center;color:#059669">
+                  <i class="fa-solid fa-lightbulb" style="font-size:1.1rem"></i>
+                </div>
+                <div>
+                  <h4 style="margin:0;font-size:0.95rem;font-weight:800;color:#047857">
+                    Panduan Fiqh &amp; Aspek Yang Dihitung (Zakat Tanaman Produktif &amp; Kebun)
+                  </h4>
+                  <div style="font-size:0.75rem;color:var(--clr-text-subtle)">Kaidah syariat kelapa sawit, karet, kopi, cengkeh, buah &amp; hortikultura</div>
+                </div>
+              </div>
+
+              <div style="display:flex;flex-direction:column;gap:14px;font-size:0.82rem;line-height:1.6">
+                <!-- Point 1 -->
+                <div style="display:flex;align-items:flex-start;gap:10px">
+                  <span style="display:inline-block;width:22px;height:22px;border-radius:6px;background:#D1FAE5;color:#059669;font-weight:800;font-size:0.75rem;text-align:center;line-height:22px;flex-shrink:0">1</span>
+                  <div>
+                    <strong style="color:var(--clr-text-main)">Waktu Pengeluaran (Setiap Kali Panen):</strong>
+                    <span style="color:var(--clr-text-subtle)"> Berdasarkan QS. Al-An'am: 141 dan Fatwa MUI No. 1/2003, zakat tanaman produktif dan perkebunan dikeluarkan <strong>setiap kali panen</strong>, bukan menunggu 1 tahun (tanpa syarat haul).</span>
+                  </div>
+                </div>
+
+                <!-- Point 2 -->
+                <div style="display:flex;align-items:flex-start;gap:10px">
+                  <span style="display:inline-block;width:22px;height:22px;border-radius:6px;background:#D1FAE5;color:#059669;font-weight:800;font-size:0.75rem;text-align:center;line-height:22px;flex-shrink:0">2</span>
+                  <div>
+                    <strong style="color:var(--clr-text-main)">Nishab Setara 520 kg Beras:</strong>
+                    <span style="color:var(--clr-text-subtle)"> Batas minimal panen wajib zakat dikonversikan setara dengan <strong>5 Wasaq beras makanan pokok (520 kg beras)</strong> dikalikan harga pasar beras di wilayah panen saat itu.</span>
+                  </div>
+                </div>
+
+                <!-- Point 3 -->
+                <div style="display:flex;align-items:flex-start;gap:10px">
+                  <span style="display:inline-block;width:22px;height:22px;border-radius:6px;background:#D1FAE5;color:#059669;font-weight:800;font-size:0.75rem;text-align:center;line-height:22px;flex-shrink:0">3</span>
+                  <div>
+                    <strong style="color:var(--clr-text-main)">Tarif Zakat 5% dari Hasil Bersih (Netto):</strong>
+                    <span style="color:var(--clr-text-subtle)"> Menurut fatwa ulama kontemporer dan standar BAZNAS RI, zakat perkebunan bertarif <strong>5% dari hasil panen bersih</strong> setelah dipotong biaya operasional panen (pupuk, pestisida, upah pemetik).</span>
+                  </div>
+                </div>
+
+                <!-- Point 4 -->
+                <div style="display:flex;align-items:flex-start;gap:10px">
+                  <span style="display:inline-block;width:22px;height:22px;border-radius:6px;background:#D1FAE5;color:#059669;font-weight:800;font-size:0.75rem;text-align:center;line-height:22px;flex-shrink:0">4</span>
+                  <div>
+                    <strong style="color:var(--clr-text-main)">Aset Pokok &amp; Pohon Induk Bebas Zakat:</strong>
+                    <span style="color:var(--clr-text-subtle)"> Tanah kebun, pohon induk yang ditanam, mesin pemotong, traktor, tangki semprot, dan bangunan mess/gudang <strong>tidak dikenakan zakat</strong> (*Amwal al-Qun-yah*).</span>
+                  </div>
+                </div>
+
+                <!-- Point 5 -->
+                <div style="display:flex;align-items:flex-start;gap:10px">
+                  <span style="display:inline-block;width:22px;height:22px;border-radius:6px;background:#D1FAE5;color:#059669;font-weight:800;font-size:0.75rem;text-align:center;line-height:22px;flex-shrink:0">5</span>
+                  <div>
+                    <strong style="color:var(--clr-text-main)">Bentuk Penunaian Zakat:</strong>
+                    <span style="color:var(--clr-text-subtle)"> Zakat dapat ditunaikan dalam bentuk uang tunai rupiah hasil penjualan panen ataupun disalurkan langsung melalui amil zakat terpercaya (seperti BAZNAS / LAZ) kepada para mustahik di sekitar area kebun.</span>
                   </div>
                 </div>
               </div>
