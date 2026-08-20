@@ -1539,6 +1539,166 @@
         document.body.appendChild(modal);
       }
 
+      /* ===== INFORMASI & INFAQ DONASI DEVELOPER MODAL ===== */
+      function openAppInfoModal() {
+        const old = document.getElementById("appInfoModal");
+        if (old) old.remove();
+
+        const modal = document.createElement("div");
+        modal.id = "appInfoModal";
+        modal.style.cssText = `
+          position: fixed; inset: 0; background: var(--clr-bg); z-index: var(--z-full-modal, 700);
+          overflow-y: auto; overflow-x: hidden; padding: max(44px, env(safe-area-inset-top, 44px)) 16px 40px;
+          box-sizing: border-box;
+        `;
+
+        modal.innerHTML = `
+          <div style="max-width:680px;margin:0 auto;width:100%;box-sizing:border-box;padding-bottom:32px">
+            
+            <!-- HEADER APP BAR -->
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;padding-bottom:14px;border-bottom:1px solid var(--clr-border)">
+              <div style="display:flex;align-items:center;gap:12px">
+                <button class="icon-btn" onclick="document.getElementById('appInfoModal').remove()" style="width:38px;height:38px;border-radius:12px" title="Kembali">
+                  <i class="fa-solid fa-arrow-left"></i>
+                </button>
+                <div>
+                  <h2 style="font-size:1.15rem;font-weight:800;margin:0;color:var(--clr-primary-dk)">Informasi &amp; Infaq</h2>
+                  <div style="font-size:0.75rem;color:var(--clr-text-subtle);margin-top:2px">Pendamping Amalan Digital • v1.0.0</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- HERO BRAND CARD -->
+            <div class="ios-grouped-card" style="padding:22px;text-align:center;margin-bottom:20px;background:linear-gradient(135deg, color-mix(in srgb, var(--clr-primary) 10%, var(--clr-surface)) 0%, color-mix(in srgb, var(--clr-gold) 12%, var(--clr-surface)) 100%);border:1px solid color-mix(in srgb, var(--clr-gold) 35%, var(--clr-border))">
+              <div style="width:64px;height:64px;margin:0 auto 12px;display:flex;align-items:center;justify-content:center">
+                <img src="assets/images/Logo.png" alt="Logo" style="width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 4px 12px rgba(10,108,74,0.25))" />
+              </div>
+              <h3 style="font-size:1.15rem;font-weight:900;margin:0 0 4px;color:var(--clr-primary-dk);letter-spacing:0.5px">PENDAMPING AMALAN DIGITAL</h3>
+              <div style="font-size:0.78rem;color:var(--clr-gold-dk);font-weight:700;margin-bottom:12px">Teman Setia Menuju Ridha-Nya</div>
+              <p style="font-size:0.84rem;color:var(--clr-text-muted);line-height:1.6;margin:0;text-align:justify;text-justify:inter-word">
+                Aplikasi ini dikembangkan sebagai sarana digital penunjang ibadah harian umat Islam—mulai dari wirid pembuka rezeki, jadwal sholat presisi Kemenag RI, kompas arah kiblat, tasbih digital, hingga kalkulator zakat terpadu sesuai ketentuan syariat Fiqh.
+              </p>
+            </div>
+
+            <!-- DUKUNGAN / INFAQ SECTION -->
+            <div style="font-size:0.78rem;font-weight:800;color:var(--clr-gold-dk);letter-spacing:1.2px;text-transform:uppercase;margin:0 0 12px;display:flex;align-items:center;gap:6px">
+              <i class="fa-solid fa-hand-holding-heart"></i> INFAQ &amp; DUKUNGAN PENGEMBANG
+            </div>
+
+            <div class="ios-grouped-card" style="padding:16px 18px;margin-bottom:18px;background:color-mix(in srgb, var(--clr-gold) 8%, var(--clr-surface));border:1px solid color-mix(in srgb, var(--clr-gold) 25%, var(--clr-border))">
+              <p style="font-size:0.82rem;color:var(--clr-text-muted);line-height:1.55;margin:0">
+                Aplikasi ini disediakan gratis tanpa iklan yang mengganggu. Bagi Anda yang ingin berpartisipasi menyalurkan infaq/donasi terbaik untuk mendukung biaya server, database, pembaruan konten amalan, serta keberlanjutan pengembangan aplikasi dakwah ini, dapat disalurkan melalui rekening berikut:
+              </p>
+            </div>
+
+            <!-- BANK LIST (BJB, MANDIRI, SEABANK) -->
+            <div style="display:flex;flex-direction:column;gap:14px">
+              
+              <!-- 1. BANK BJB -->
+              <div class="ios-grouped-card" style="padding:18px;margin:0;display:flex;align-items:center;justify-content:space-between;gap:16px">
+                <div style="display:flex;align-items:center;gap:14px;flex:1;min-width:0">
+                  <div style="width:52px;height:52px;border-radius:14px;background:#004B87;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#ffffff;font-family:'Inter',sans-serif;box-shadow:0 4px 12px rgba(0,75,135,0.25);flex-shrink:0">
+                    <div style="width:12px;height:12px;background:#FFD100;transform:rotate(45deg);margin-bottom:2px;border-radius:2px"></div>
+                    <span style="font-size:0.75rem;line-height:1;font-weight:900">bjb</span>
+                  </div>
+                  <div style="min-width:0;flex:1">
+                    <div style="font-size:0.72rem;font-weight:800;color:var(--clr-text-subtle);text-transform:uppercase;letter-spacing:0.5px">BANK BJB</div>
+                    <div style="font-size:1.05rem;font-weight:900;color:var(--clr-text);font-family:monospace;letter-spacing:0.5px;margin:2px 0">0145399017100</div>
+                    <div style="font-size:0.75rem;color:var(--clr-text-muted);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">a.n. IMAM AL FIDA NURHASBY</div>
+                  </div>
+                </div>
+                <button onclick="copyRekeningNumber('0145399017100', 'Bank BJB')" class="icon-btn" style="width:40px;height:40px;border-radius:12px;background:var(--clr-surface2);border:1px solid var(--clr-border);color:var(--clr-primary);cursor:pointer;flex-shrink:0" title="Salin Nomor Rekening BJB">
+                  <i class="fa-regular fa-copy" style="font-size:1rem"></i>
+                </button>
+              </div>
+
+              <!-- 2. BANK MANDIRI -->
+              <div class="ios-grouped-card" style="padding:18px;margin:0;display:flex;align-items:center;justify-content:space-between;gap:16px">
+                <div style="display:flex;align-items:center;gap:14px;flex:1;min-width:0">
+                  <div style="width:52px;height:52px;border-radius:14px;background:#003868;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#ffffff;font-family:'Inter',sans-serif;box-shadow:0 4px 12px rgba(0,56,104,0.25);flex-shrink:0">
+                    <svg width="26" height="12" viewBox="0 0 40 20" fill="none">
+                      <path d="M4 14C10 6 20 6 26 10C30 13 34 14 38 12" stroke="#FFB81C" stroke-width="4" stroke-linecap="round"/>
+                      <circle cx="34" cy="6" r="3" fill="#FFB81C"/>
+                    </svg>
+                    <span style="font-size:0.58rem;line-height:1;font-weight:800;letter-spacing:0.3px;margin-top:2px;color:#FFB81C">mandiri</span>
+                  </div>
+                  <div style="min-width:0;flex:1">
+                    <div style="font-size:0.72rem;font-weight:800;color:var(--clr-text-subtle);text-transform:uppercase;letter-spacing:0.5px">BANK MANDIRI</div>
+                    <div style="font-size:1.05rem;font-weight:900;color:var(--clr-text);font-family:monospace;letter-spacing:0.5px;margin:2px 0">1330035325471</div>
+                    <div style="font-size:0.75rem;color:var(--clr-text-muted);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">a.n. IMAM AL FIDA NURHASBY</div>
+                  </div>
+                </div>
+                <button onclick="copyRekeningNumber('1330035325471', 'Bank Mandiri')" class="icon-btn" style="width:40px;height:40px;border-radius:12px;background:var(--clr-surface2);border:1px solid var(--clr-border);color:var(--clr-primary);cursor:pointer;flex-shrink:0" title="Salin Nomor Rekening Mandiri">
+                  <i class="fa-regular fa-copy" style="font-size:1rem"></i>
+                </button>
+              </div>
+
+              <!-- 3. SEABANK -->
+              <div class="ios-grouped-card" style="padding:18px;margin:0;display:flex;align-items:center;justify-content:space-between;gap:16px">
+                <div style="display:flex;align-items:center;gap:14px;flex:1;min-width:0">
+                  <div style="width:52px;height:52px;border-radius:14px;background:#FF5722;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#ffffff;font-family:'Inter',sans-serif;box-shadow:0 4px 12px rgba(255,87,34,0.25);flex-shrink:0">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+                      <path d="M17 7C16 5 14 4 11.5 4C8.5 4 6.5 6 6.5 8.5C6.5 13 17.5 11 17.5 16C17.5 19 14.5 20.5 11.5 20.5C8 20.5 6 18.5 5 16.5" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    <span style="font-size:0.54rem;line-height:1;font-weight:900;letter-spacing:0.2px;margin-top:1px">SeaBank</span>
+                  </div>
+                  <div style="min-width:0;flex:1">
+                    <div style="font-size:0.72rem;font-weight:800;color:var(--clr-text-subtle);text-transform:uppercase;letter-spacing:0.5px">SEABANK</div>
+                    <div style="font-size:1.05rem;font-weight:900;color:var(--clr-text);font-family:monospace;letter-spacing:0.5px;margin:2px 0">901099619878</div>
+                    <div style="font-size:0.75rem;color:var(--clr-text-muted);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">a.n. IMAM AL FIDA NURHASBY</div>
+                  </div>
+                </div>
+                <button onclick="copyRekeningNumber('901099619878', 'SeaBank')" class="icon-btn" style="width:40px;height:40px;border-radius:12px;background:var(--clr-surface2);border:1px solid var(--clr-border);color:var(--clr-primary);cursor:pointer;flex-shrink:0" title="Salin Nomor Rekening SeaBank">
+                  <i class="fa-regular fa-copy" style="font-size:1rem"></i>
+                </button>
+              </div>
+
+            </div>
+
+            <!-- FOOTER JAZAKALLAH -->
+            <div style="margin-top:28px;text-align:center;padding:16px;border-radius:16px;background:var(--clr-surface);border:1px solid var(--clr-border)">
+              <div class="ar" style="font-size:1.3rem;color:var(--clr-primary);text-align:center !important;text-align-last:center !important;margin-bottom:6px">جَزَاكُمُ اللهُ خَيْرًا كَثِيْرًا</div>
+              <p style="font-size:0.8rem;color:var(--clr-text-subtle);margin:0;line-height:1.5">
+                Semoga Allah SWT membalas setiap kebaikan, melipatgandakan rezeki, dan mencatatnya sebagai amal jariyah yang tak terputus. Aamiin.
+              </p>
+            </div>
+
+          </div>
+        `;
+        document.body.appendChild(modal);
+      }
+
+      function copyRekeningNumber(num, bankName) {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(num).then(function() {
+            if (typeof showToast === 'function') showToast("Rekening " + bankName + " (" + num + ") berhasil disalin! ✓");
+            if (typeof vibrate === 'function') vibrate([30]);
+          }).catch(function() {
+            fallbackCopyText(num, bankName);
+          });
+        } else {
+          fallbackCopyText(num, bankName);
+        }
+      }
+
+      function fallbackCopyText(text, bankName) {
+        var textArea = document.createElement("textarea");
+        textArea.value = text;
+        textArea.style.position = "fixed";
+        textArea.style.left = "-999999px";
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        try {
+          document.execCommand('copy');
+          if (typeof showToast === 'function') showToast("Rekening " + bankName + " (" + text + ") berhasil disalin! ✓");
+          if (typeof vibrate === 'function') vibrate([30]);
+        } catch (err) {
+          if (typeof showToast === 'function') showToast("Gagal menyalin otomatis. Silakan catat: " + text);
+        }
+        document.body.removeChild(textArea);
+      }
+
       function getSelectedAudioUrl(key) {
         const val = localStorage.getItem('pad_audio_' + key) || (key === 'subuh' ? 'subuh_bahanan' : (key === 'tarhim' || key === 'imsak' ? 'tarhim_hussary' : 'mekkah'));
         const PRAYER_AUDIO_CATALOG = {
@@ -9171,6 +9331,15 @@
               <span id="slideIndicatorChip">1 / 31</span>
             </button>
           </div>
+          <!-- Tombol Informasi & Infaq Donasi Developer -->
+          <button
+            class="icon-btn"
+            id="appInfoBtn"
+            onclick="openAppInfoModal()"
+            title="Informasi & Infaq Pengembangan"
+          >
+            <i class="fa-solid fa-circle-info"></i>
+          </button>
           <!-- SLOT 1: Tombol Dinamis Bergantian (Update saat di Beranda, Beranda saat di Modul) -->
           <div class="action-slot-dynamic" style="position:relative;width:36px;height:36px;flex-shrink:0;display:inline-flex;align-items:center;justify-content:center">
             <button
