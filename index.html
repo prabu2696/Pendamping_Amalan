@@ -8317,21 +8317,33 @@
         background: transparent !important;
         box-shadow: none !important;
         filter: drop-shadow(0 0 20px rgba(212, 175, 55, 0.8)) drop-shadow(0 0 36px rgba(255, 215, 0, 0.45)) drop-shadow(0 8px 24px rgba(0,0,0,0.9));
-        animation: logoTripleZoom 3.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        animation: logoTripleZoom 3.5s cubic-bezier(0.25, 1, 0.5, 1) forwards;
       }
 
-      /* 3-Step Sequence: Zoom In -> Zoom Out -> Zoom In */
+      /* Relaxed & Delayed 3-Step Sequence: Zoom In -> Hold -> Zoom Out -> Hold -> Final Zoom In */
       @keyframes logoTripleZoom {
         0% {
-          transform: scale(0.86);
-          filter: drop-shadow(0 0 12px rgba(212, 175, 55, 0.5)) drop-shadow(0 0 20px rgba(16, 185, 129, 0.2));
+          transform: scale(0.88);
+          filter: drop-shadow(0 0 12px rgba(212, 175, 55, 0.45)) drop-shadow(0 0 20px rgba(16, 185, 129, 0.2));
         }
-        33% {
+        12% {
+          transform: scale(0.88);
+          filter: drop-shadow(0 0 12px rgba(212, 175, 55, 0.45)) drop-shadow(0 0 20px rgba(16, 185, 129, 0.2));
+        }
+        36% {
           transform: scale(1.06);
           filter: drop-shadow(0 0 28px rgba(255, 215, 0, 0.95)) drop-shadow(0 0 45px rgba(212, 175, 55, 0.6));
         }
-        66% {
-          transform: scale(0.92);
+        48% {
+          transform: scale(1.06);
+          filter: drop-shadow(0 0 28px rgba(255, 215, 0, 0.95)) drop-shadow(0 0 45px rgba(212, 175, 55, 0.6));
+        }
+        70% {
+          transform: scale(0.93);
+          filter: drop-shadow(0 0 16px rgba(212, 175, 55, 0.6)) drop-shadow(0 0 26px rgba(16, 185, 129, 0.25));
+        }
+        80% {
+          transform: scale(0.93);
           filter: drop-shadow(0 0 16px rgba(212, 175, 55, 0.6)) drop-shadow(0 0 26px rgba(16, 185, 129, 0.25));
         }
         100% {
