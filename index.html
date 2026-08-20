@@ -6298,15 +6298,23 @@
       };
 
       function showZakatPeternakanPage() {
-        if (typeof showScreen === 'function') {
-          showScreen('zakatPeternakan');
-        } else {
-          currentScreen = 'zakatPeternakan';
-        }
-        var app = document.getElementById('app');
-        if (!app) return;
+        currentScreen = "zakat_peternakan";
+        syncUpdateBtnVisibility();
+
+        const main = document.getElementById("main");
+        if (!main) return;
+
         renderZakatPeternakanPage();
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+
+        const navBar = document.getElementById("nav-bar");
+        if (navBar) navBar.style.display = "none";
+        const progressTrack = document.getElementById("progress-track");
+        if (progressTrack) progressTrack.style.display = "none";
+        const slideChipWrap = document.getElementById("slideChipWrap");
+        if (slideChipWrap) slideChipWrap.style.display = "none";
+        const catalogChipWrap = document.getElementById("catalogChipWrap");
+        if (catalogChipWrap) catalogChipWrap.style.display = "none";
+        window.scrollTo({ top: 0, behavior: "smooth" });
       }
 
       function setZakatPeternakanType(type) {
@@ -6515,16 +6523,16 @@
 
       function renderZakatPeternakanPage() {
         var state = zakatPeternakanState;
-        var container = document.getElementById('mainContentArea') || document.getElementById('app');
-        if (!container) return;
+        const main = document.getElementById("main");
+        if (!main) return;
 
         var type = state.selectedType;
 
-        container.innerHTML = `
+        main.innerHTML = `
           <div id="zakatPeternakanScreen" style="max-width:800px;margin:0 auto;width:100%;box-sizing:border-box;padding:8px 16px 60px">
             
             <!-- HEADER APP BAR -->
-            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;padding-bottom:12px;border-bottom:1px solid var(--clr-border)">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;padding-bottom:12px;border-bottom:1.5px solid var(--clr-border)">
               <div style="display:flex;align-items:center;gap:12px">
                 <button class="icon-btn" onclick="showZakatMenuPage()" style="width:42px;height:42px;border-radius:12px;background:var(--clr-surface);border:1.5px solid var(--clr-border);box-shadow:0 2px 8px rgba(0,0,0,0.04);cursor:pointer;display:grid;place-items:center;color:var(--clr-text)" title="Kembali ke Menu Zakat">
                   <i class="fa-solid fa-arrow-left"></i>
@@ -6534,6 +6542,9 @@
                   <div style="font-size:0.75rem;color:var(--clr-text-subtle);margin-top:2px">Zakatul An'am (Sapi, Kambing, Domba, Unta)</div>
                 </div>
               </div>
+              <button class="chip" onclick="showMainMenu()" style="font-size:0.75rem;font-weight:700;background:var(--clr-surface2);border:1px solid var(--clr-border);cursor:pointer;padding:6px 12px;border-radius:10px" title="Kembali ke Beranda">
+                <i class="fa-solid fa-house"></i> Beranda
+              </button>
             </div>
 
             <!-- FIQH ACCORDION -->
@@ -6673,29 +6684,37 @@
          Standar Fiqh AAOIFI & BAZNAS RI (Nisab 85g Emas, 2.5%)
       ============================================================ */
       var zakatPerusahaanState = {
-        companyType: 'pt', // 'pt' | 'cv' | 'koperasi' | 'perseorangan'
+        companyType: 'pt',
         goldPrice: 1350000,
         kasDanBank: 0,
         piutangLancar: 0,
         persediaanBarang: 0,
         hutangLancarJatuhTempo: 0,
         kepemilikanMuslimPercent: 100,
-        calendarType: 'masehi', // 'masehi' (2.5%) | 'hijriah' (2.577%)
+        calendarType: 'masehi',
         isCalculated: false,
         fiqhExpanded: false,
         result: null
       };
 
       function showZakatPerusahaanPage() {
-        if (typeof showScreen === 'function') {
-          showScreen('zakatPerusahaan');
-        } else {
-          currentScreen = 'zakatPerusahaan';
-        }
-        var app = document.getElementById('app');
-        if (!app) return;
+        currentScreen = "zakat_perusahaan";
+        syncUpdateBtnVisibility();
+
+        const main = document.getElementById("main");
+        if (!main) return;
+
         renderZakatPerusahaanPage();
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+
+        const navBar = document.getElementById("nav-bar");
+        if (navBar) navBar.style.display = "none";
+        const progressTrack = document.getElementById("progress-track");
+        if (progressTrack) progressTrack.style.display = "none";
+        const slideChipWrap = document.getElementById("slideChipWrap");
+        if (slideChipWrap) slideChipWrap.style.display = "none";
+        const catalogChipWrap = document.getElementById("catalogChipWrap");
+        if (catalogChipWrap) catalogChipWrap.style.display = "none";
+        window.scrollTo({ top: 0, behavior: "smooth" });
       }
 
       function updateZakatPerusahaanField(field, val) {
@@ -6758,14 +6777,14 @@
 
       function renderZakatPerusahaanPage() {
         var state = zakatPerusahaanState;
-        var container = document.getElementById('mainContentArea') || document.getElementById('app');
-        if (!container) return;
+        const main = document.getElementById("main");
+        if (!main) return;
 
-        container.innerHTML = `
+        main.innerHTML = `
           <div id="zakatPerusahaanScreen" style="max-width:800px;margin:0 auto;width:100%;box-sizing:border-box;padding:8px 16px 60px">
             
             <!-- HEADER APP BAR -->
-            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;padding-bottom:12px;border-bottom:1px solid var(--clr-border)">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;padding-bottom:12px;border-bottom:1.5px solid var(--clr-border)">
               <div style="display:flex;align-items:center;gap:12px">
                 <button class="icon-btn" onclick="showZakatMenuPage()" style="width:42px;height:42px;border-radius:12px;background:var(--clr-surface);border:1.5px solid var(--clr-border);box-shadow:0 2px 8px rgba(0,0,0,0.04);cursor:pointer;display:grid;place-items:center;color:var(--clr-text)" title="Kembali ke Menu Zakat">
                   <i class="fa-solid fa-arrow-left"></i>
@@ -6775,6 +6794,9 @@
                   <div style="font-size:0.75rem;color:var(--clr-text-subtle);margin-top:2px">Zakat Asy-Syirkat (PT, CV, Koperasi &amp; Korporasi)</div>
                 </div>
               </div>
+              <button class="chip" onclick="showMainMenu()" style="font-size:0.75rem;font-weight:700;background:var(--clr-surface2);border:1px solid var(--clr-border);cursor:pointer;padding:6px 12px;border-radius:10px" title="Kembali ke Beranda">
+                <i class="fa-solid fa-house"></i> Beranda
+              </button>
             </div>
 
             <!-- FIQH ACCORDION -->
@@ -6894,7 +6916,7 @@
         propertyType: 'kos_kontrakan',
         customPropertyName: '',
         grainPricePerKg: 14500,
-        calcMethod: 'netto', // 'netto' (10%) | 'bruto' (5%)
+        calcMethod: 'netto',
         pendapatanSewaKotor: 0,
         biayaPerawatanDanPajak: 0,
         isCalculated: false,
@@ -6903,15 +6925,23 @@
       };
 
       function showZakatPropertiPage() {
-        if (typeof showScreen === 'function') {
-          showScreen('zakatProperti');
-        } else {
-          currentScreen = 'zakatProperti';
-        }
-        var app = document.getElementById('app');
-        if (!app) return;
+        currentScreen = "zakat_properti";
+        syncUpdateBtnVisibility();
+
+        const main = document.getElementById("main");
+        if (!main) return;
+
         renderZakatPropertiPage();
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+
+        const navBar = document.getElementById("nav-bar");
+        if (navBar) navBar.style.display = "none";
+        const progressTrack = document.getElementById("progress-track");
+        if (progressTrack) progressTrack.style.display = "none";
+        const slideChipWrap = document.getElementById("slideChipWrap");
+        if (slideChipWrap) slideChipWrap.style.display = "none";
+        const catalogChipWrap = document.getElementById("catalogChipWrap");
+        if (catalogChipWrap) catalogChipWrap.style.display = "none";
+        window.scrollTo({ top: 0, behavior: "smooth" });
       }
 
       function setZakatPropertiMethod(method) {
@@ -6980,14 +7010,14 @@
 
       function renderZakatPropertiPage() {
         var state = zakatPropertiState;
-        var container = document.getElementById('mainContentArea') || document.getElementById('app');
-        if (!container) return;
+        const main = document.getElementById("main");
+        if (!main) return;
 
-        container.innerHTML = `
+        main.innerHTML = `
           <div id="zakatPropertiScreen" style="max-width:800px;margin:0 auto;width:100%;box-sizing:border-box;padding:8px 16px 60px">
             
             <!-- HEADER APP BAR -->
-            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;padding-bottom:12px;border-bottom:1px solid var(--clr-border)">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;padding-bottom:12px;border-bottom:1.5px solid var(--clr-border)">
               <div style="display:flex;align-items:center;gap:12px">
                 <button class="icon-btn" onclick="showZakatMenuPage()" style="width:42px;height:42px;border-radius:12px;background:var(--clr-surface);border:1.5px solid var(--clr-border);box-shadow:0 2px 8px rgba(0,0,0,0.04);cursor:pointer;display:grid;place-items:center;color:var(--clr-text)" title="Kembali ke Menu Zakat">
                   <i class="fa-solid fa-arrow-left"></i>
@@ -6997,6 +7027,9 @@
                   <div style="font-size:0.75rem;color:var(--clr-text-subtle);margin-top:2px">Zakat Al-Mustaghallat (Kontrakan, Kos, Ruko &amp; Rental)</div>
                 </div>
               </div>
+              <button class="chip" onclick="showMainMenu()" style="font-size:0.75rem;font-weight:700;background:var(--clr-surface2);border:1px solid var(--clr-border);cursor:pointer;padding:6px 12px;border-radius:10px" title="Kembali ke Beranda">
+                <i class="fa-solid fa-house"></i> Beranda
+              </button>
             </div>
 
             <!-- FIQH ACCORDION -->
@@ -7127,15 +7160,23 @@
       };
 
       function showZakatProfesiPage() {
-        if (typeof showScreen === 'function') {
-          showScreen('zakatProfesi');
-        } else {
-          currentScreen = 'zakatProfesi';
-        }
-        var app = document.getElementById('app');
-        if (!app) return;
+        currentScreen = "zakat_profesi";
+        syncUpdateBtnVisibility();
+
+        const main = document.getElementById("main");
+        if (!main) return;
+
         renderZakatProfesiPage();
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+
+        const navBar = document.getElementById("nav-bar");
+        if (navBar) navBar.style.display = "none";
+        const progressTrack = document.getElementById("progress-track");
+        if (progressTrack) progressTrack.style.display = "none";
+        const slideChipWrap = document.getElementById("slideChipWrap");
+        if (slideChipWrap) slideChipWrap.style.display = "none";
+        const catalogChipWrap = document.getElementById("catalogChipWrap");
+        if (catalogChipWrap) catalogChipWrap.style.display = "none";
+        window.scrollTo({ top: 0, behavior: "smooth" });
       }
 
       function setZakatProfesiPeriod(period) {
@@ -7204,14 +7245,15 @@
 
       function renderZakatProfesiPage() {
         var state = zakatProfesiState;
-        var container = document.getElementById('mainContentArea') || document.getElementById('app');
-        if (!container) return;
+        const main = document.getElementById("main");
+        if (!main) return;
 
+        container = main;
         container.innerHTML = `
           <div id="zakatProfesiScreen" style="max-width:800px;margin:0 auto;width:100%;box-sizing:border-box;padding:8px 16px 60px">
             
             <!-- HEADER APP BAR -->
-            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;padding-bottom:12px;border-bottom:1px solid var(--clr-border)">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;padding-bottom:12px;border-bottom:1.5px solid var(--clr-border)">
               <div style="display:flex;align-items:center;gap:12px">
                 <button class="icon-btn" onclick="showZakatMenuPage()" style="width:42px;height:42px;border-radius:12px;background:var(--clr-surface);border:1.5px solid var(--clr-border);box-shadow:0 2px 8px rgba(0,0,0,0.04);cursor:pointer;display:grid;place-items:center;color:var(--clr-text)" title="Kembali ke Menu Zakat">
                   <i class="fa-solid fa-arrow-left"></i>
@@ -7221,6 +7263,9 @@
                   <div style="font-size:0.75rem;color:var(--clr-text-subtle);margin-top:2px">Zakat Penghasilan &amp; Gaji (Fatwa MUI No. 3/2003)</div>
                 </div>
               </div>
+              <button class="chip" onclick="showMainMenu()" style="font-size:0.75rem;font-weight:700;background:var(--clr-surface2);border:1px solid var(--clr-border);cursor:pointer;padding:6px 12px;border-radius:10px" title="Kembali ke Beranda">
+                <i class="fa-solid fa-house"></i> Beranda
+              </button>
             </div>
 
             <!-- FIQH ACCORDION -->
