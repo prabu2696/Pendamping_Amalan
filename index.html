@@ -2795,6 +2795,129 @@
         `;
       }
 
+      function showZakatPertanianPage() {
+        currentScreen = "zakat_pertanian";
+        syncUpdateBtnVisibility();
+
+        const main = document.getElementById("main");
+        if (!main) return;
+
+        if (!zakatPertanianState.pricePerKg || zakatPertanianState.pricePerKg === 14500) {
+          syncRegionalPanganPrice(false);
+        }
+
+        renderZakatPertanianPage();
+
+        const navBar = document.getElementById("nav-bar");
+        if (navBar) navBar.style.display = "none";
+        const progressTrack = document.getElementById("progress-track");
+        if (progressTrack) progressTrack.style.display = "none";
+        const slideChipWrap = document.getElementById("slideChipWrap");
+        if (slideChipWrap) slideChipWrap.style.display = "none";
+        const catalogChipWrap = document.getElementById("catalogChipWrap");
+        if (catalogChipWrap) catalogChipWrap.style.display = "none";
+      }
+
+      function toggleZakatFiqhAccordion() {
+        zakatPertanianState.fiqhExpanded = !zakatPertanianState.fiqhExpanded;
+        var el = document.getElementById("zakatFiqhBody");
+        var icon = document.getElementById("zakatFiqhIcon");
+        if (el) {
+          el.style.display = zakatPertanianState.fiqhExpanded ? "block" : "none";
+        }
+        if (icon) {
+          icon.style.transform = zakatPertanianState.fiqhExpanded ? "rotate(180deg)" : "rotate(0deg)";
+        }
+      }
+
+      function updateZakatPertanianCommodity(key) {
+        if (!COMMODITY_NISAB_DATA[key]) return;
+        zakatPertanianState.commodity = key;
+        var regKey = detectCurrentRegion();
+        var priceTable = REGIONAL_PANGAN_PRICES[regKey] || REGIONAL_PANGAN_PRICES["default"];
+        zakatPertanianState.pricePerKg = priceTable[key] || COMMODITY_NISAB_DATA[key].defaultPrice;
+        zakatPertanianState.isCalculated = false;
+        renderZakatPertanianPage();
+      }
+
+      function updateZakatPertanianUnit(u) {
+        zakatPertanianState.unit = u;
+        zakatPertanianState.isCalculated = false;
+        renderZakatPertanianPage();
+      }
+
+      function updateZakatPertanianIrrigation(irr) {
+        zakatPertanianState.irrigation = irr;
+        zakatPertanianState.isCalculated = false;
+        renderZakatPertanianPage();
+      }
+
+      function updateZakatPertanianAmountInput(val) {
+        var num = parseFloat(val);
+        zakatPertanianState.amount = isNaN(num) ? 0 : num;
+      }
+
+      function updateZakatPertanianPriceInput(val) {
+        var clean = String(val).replace(/[^0-9]/g, "");
+        var num = parseInt(clean, 10);
+        zakatPertanianState.pricePerKg = isNaN(num) ? 0 : num;
+        var inputEl = document.getElementById("zakatPriceInput");
+        if (inputEl) {
+          inputEl.value = (zakatPertanianState.pricePerKg > 0) ? zakatPertanianState.pricePerKg.toLocaleString("id-ID") : "";
+        }
+      }
+
+      function calculateZakatPertanian() {
+        var inputEl = document.getElementById("zakatAmountInput");
+        if (inputEl) {
+          var num = parseFloat(inputEl.value);
+          zakatPertanianState.amount = isNaN(num) ? 0 : num;
+        }
+        
+        var priceEl = document.getElementById("zakatPriceInput");
+        if (priceEl) {
+          var clean = String(priceEl.value).replace(/[^0-9]/g, "");
+          var pNum = parseInt(clean, 10);
+          zakatPertanianState.pricePerKg = isNaN(pNum) ? COMMODITY_NISAB_DATA[zakatPertanianState.commodity].defaultPrice : pNum;
+        }
+
+        if (!zakatPertanianState.amount || zakatPertanianState.amount <= 0) {
+          if (typeof showToast === "function") showToast("⚠️ Masukkan jumlah hasil panen terlebih dahulu.");
+          return;
+        }
+
+        zakatPertanianState.isCalculated = true;
+        renderZakatPertanianPage();
+
+        setTimeout(function() {
+          var resCard = document.getElementById("zakatResultSection");
+          if (resCard) {
+            resCard.scrollIntoView({ behavior: "smooth", block: "nearest" });
+          }
+        }, 100);
+      }
+
+      function resetZakatPertanianForm() {
+        zakatPertanianState.amount = "";
+        zakatPertanianState.isCalculated = false;
+        renderZakatPertanianPage();
+        if (typeof showToast === "function") showToast("Formulir zakat berhasil direset.");
+      }
+
+      // Expose to window object for bulletproof global accessibility
+      window.showZakatMenuPage = showZakatMenuPage;
+      window.renderZakatMenuPage = renderZakatMenuPage;
+      window.showZakatPertanianPage = showZakatPertanianPage;
+      window.renderZakatPertanianPage = renderZakatPertanianPage;
+      window.toggleZakatFiqhAccordion = toggleZakatFiqhAccordion;
+      window.updateZakatPertanianCommodity = updateZakatPertanianCommodity;
+      window.updateZakatPertanianUnit = updateZakatPertanianUnit;
+      window.updateZakatPertanianIrrigation = updateZakatPertanianIrrigation;
+      window.updateZakatPertanianAmountInput = updateZakatPertanianAmountInput;
+      window.updateZakatPertanianPriceInput = updateZakatPertanianPriceInput;
+      window.calculateZakatPertanian = calculateZakatPertanian;
+      window.resetZakatPertanianForm = resetZakatPertanianForm;
+
       function renderZakatPertanianPage() {
         const main = document.getElementById("main");
         if (!main) return;
