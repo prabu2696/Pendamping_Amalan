@@ -1473,15 +1473,22 @@
                       </span>
                     </div>
 
-                    <!-- SELECT DROPDOWN -->
+                    <!-- DIGITAL AUDIO TRIGGER -->
                     <div style="margin-bottom:14px">
-                      <select id="sel_audio_${p.key}" onchange="savePrayerAudioChoice('${p.key}')" style="width:100%;padding:12px 14px;border-radius:12px;border:1.5px solid var(--clr-border);background:var(--clr-bg);color:var(--clr-text);font-weight:700;font-size:0.88rem;outline:none;cursor:pointer">
-                        ${p.options.map(opt => `
-                          <option value="${opt.id}" ${opt.id === savedId ? 'selected' : ''}>
-                            ${opt.name}
-                          </option>
-                        `).join('')}
-                      </select>
+                      <div class="digital-select-trigger" onclick="openPrayerAudioPicker('${p.key}')" style="padding:12px 14px;background:var(--clr-bg);border:1.5px solid var(--clr-border);border-radius:14px">
+                        <div style="display:flex;align-items:center;gap:10px;overflow:hidden">
+                          <div style="width:32px;height:32px;border-radius:8px;background:color-mix(in srgb, var(--clr-primary) 15%, var(--clr-surface));display:grid;place-items:center;color:var(--clr-primary);flex-shrink:0">
+                            <i class="fa-solid fa-volume-high"></i>
+                          </div>
+                          <div style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:800;font-size:0.88rem;color:var(--clr-text)">
+                            ${currentOpt.name}
+                          </div>
+                        </div>
+                        <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
+                          <span style="font-size:0.72rem;font-weight:800;background:var(--clr-surface2);color:var(--clr-primary);padding:3px 8px;border-radius:6px;border:1px solid var(--clr-border)">Ganti</span>
+                          <i class="fa-solid fa-chevron-down" style="font-size:0.75rem;color:var(--clr-text-subtle)"></i>
+                        </div>
+                      </div>
                     </div>
 
                     <!-- PREVIEW TEST BUTTON -->
@@ -1504,17 +1511,22 @@
       }
 
       function getSelectedAudioUrl(key) {
-        // 1. Coba cari di elemen select (jika modal ringtone terbuka)
-        const sel = document.getElementById(`sel_audio_${key}`);
-        let val = '';
-
-        if (sel) {
-          val = sel.value;
-        } else {
-          // 2. Fallback ke localStorage (untuk layar jadwal shalat)
-          val = localStorage.getItem('pad_audio_' + key) || (key === 'subuh' ? 'subuh_bahanan' : (key === 'tarhim' || key === 'imsak' ? 'tarhim_hussary' : 'mekkah'));
-        }
-
+        const val = localStorage.getItem('pad_audio_' + key) || (key === 'subuh' ? 'subuh_bahanan' : (key === 'tarhim' || key === 'imsak' ? 'tarhim_hussary' : 'mekkah'));
+        const PRAYER_AUDIO_CATALOG = {
+          standard: [
+            { id: 'mekkah', url: 'assets/audio/adzan_mekkah_zahrani.mp3' },
+            { id: 'madinah', url: 'assets/audio/adzan_madinah_qassas.mp3' },
+            { id: 'kurdi', url: 'assets/audio/adzan_kurdi_mishary.mp3' },
+            { id: 'bayati', url: 'assets/audio/adzan_bayati_fahmi.mp3' }
+          ],
+          subuh: [
+            { id: 'subuh_bahanan', url: 'assets/audio/adzan_subuh_bahanan.mp3' },
+            { id: 'subuh_kurdi', url: 'assets/audio/adzan_subuh_kurdi_mishary.mp3' }
+          ],
+          tarhim: [
+            { id: 'tarhim_hussary', url: 'assets/audio/tarhim_hushariy.mp3' }
+          ]
+        };
         const allOpts = [...PRAYER_AUDIO_CATALOG.standard, ...PRAYER_AUDIO_CATALOG.subuh, ...PRAYER_AUDIO_CATALOG.tarhim];
         const match = allOpts.find(o => o.id === val);
         return match ? match.url : '';
@@ -3305,15 +3317,20 @@
                 <label style="display:flex;align-items:center;gap:8px;font-size:0.88rem;font-weight:800;color:var(--clr-text-main);margin-bottom:8px">
                   <i class="fa-solid fa-seedling" style="color:var(--clr-primary)"></i> 1. Jenis Komoditas Tanaman Pangan:
                 </label>
-                <div style="position:relative">
-                  <select onchange="updateZakatPertanianCommodity(this.value)" style="width:100%;height:50px;padding:0 40px 0 16px;border-radius:12px;border:1.5px solid var(--clr-border);background:var(--clr-surface2);color:var(--clr-text-main);font-weight:700;font-size:0.92rem;outline:none;appearance:none;-webkit-appearance:none;cursor:pointer">
-                    <option value="beras" ${zakatPertanianState.commodity === 'beras' ? 'selected' : ''}>🌾 Beras Putih (Nishab: 520 kg)</option>
-                    <option value="gabah" ${zakatPertanianState.commodity === 'gabah' ? 'selected' : ''}>🌾 Padi Kretek / Gabah Kering (Nishab: 653 kg)</option>
-                    <option value="padi_gagang" ${zakatPertanianState.commodity === 'padi_gagang' ? 'selected' : ''}>🌾 Padi Gagang / Bertangkai (Nishab: 1.306 kg)</option>
-                    <option value="kacang_hijau" ${zakatPertanianState.commodity === 'kacang_hijau' ? 'selected' : ''}>🌱 Kacang Hijau (Nishab: 520 kg)</option>
-                    <option value="kacang_tunggak" ${zakatPertanianState.commodity === 'kacang_tunggak' ? 'selected' : ''}>🌱 Kacang Tunggak / Tolo (Nishab: 520 kg)</option>
-                  </select>
-                  <i class="fa-solid fa-chevron-down" style="position:absolute;right:16px;top:50%;transform:translateY(-50%);pointer-events:none;color:var(--clr-text-subtle);font-size:0.85rem"></i>
+                <div class="digital-select-trigger" onclick="openPertanianCommodityPicker()">
+                  <div style="display:flex;align-items:center;gap:12px">
+                    <div style="width:38px;height:38px;border-radius:12px;background:linear-gradient(135deg, #16A34A, #15803D);color:#ffffff;display:grid;place-items:center;font-size:1.15rem;box-shadow:0 3px 10px rgba(22,163,74,0.25)">
+                      ${zakatPertanianState.commodity.startsWith('kacang') ? '🌱' : '🌾'}
+                    </div>
+                    <div>
+                      <div style="font-size:0.92rem;font-weight:800;color:var(--clr-text-main)">${curComm.name}</div>
+                      <div style="font-size:0.75rem;color:var(--clr-text-subtle)">Batas Nishab: <strong>${curComm.nisabLabel}</strong></div>
+                    </div>
+                  </div>
+                  <div style="display:flex;align-items:center;gap:8px">
+                    <span style="font-size:0.72rem;font-weight:800;background:var(--clr-surface);color:var(--clr-primary-dk);padding:4px 10px;border-radius:99px;border:1px solid var(--clr-border)">Pilih</span>
+                    <i class="fa-solid fa-chevron-down" style="color:var(--clr-text-subtle);font-size:0.8rem"></i>
+                  </div>
                 </div>
                 
                 <!-- Nishab Info Preview Badge -->
@@ -4581,14 +4598,13 @@
                       <span style="position:absolute;right:14px;top:50%;transform:translateY(-50%);font-size:0.82rem;font-weight:800;color:var(--clr-text-subtle)">Gram</span>
                     </div>
                     <div style="flex:1">
-                      <select id="select_goldJewelryKarat" onchange="updateZakatEmasField('goldJewelryKarat', this.value)" style="width:100%;height:48px;border-radius:12px;border:1.5px solid var(--clr-border);background:var(--clr-surface2);color:var(--clr-text-main);font-size:0.85rem;font-weight:800;padding:0 10px;outline:none;cursor:pointer">
-                        <option value="24k" ${zakatEmasState.goldJewelryKarat === '24k' ? 'selected' : ''}>24K (99.9%)</option>
-                        <option value="22k" ${zakatEmasState.goldJewelryKarat === '22k' ? 'selected' : ''}>22K (91.6%)</option>
-                        <option value="18k" ${zakatEmasState.goldJewelryKarat === '18k' ? 'selected' : ''}>18K (75%)</option>
-                        <option value="16k" ${zakatEmasState.goldJewelryKarat === '16k' ? 'selected' : ''}>16K (70%)</option>
-                        <option value="14k" ${zakatEmasState.goldJewelryKarat === '14k' ? 'selected' : ''}>14K (58%)</option>
-                        <option value="9k" ${zakatEmasState.goldJewelryKarat === '9k' ? 'selected' : ''}>9K (37.5%)</option>
-                      </select>
+                      <div onclick="openGoldKaratPicker()" style="cursor:pointer;height:48px;border-radius:12px;border:1.5px solid var(--clr-border);background:var(--clr-surface2);color:var(--clr-text-main);display:flex;align-items:center;justify-content:space-between;padding:0 12px;font-size:0.85rem;font-weight:800;box-sizing:border-box;transition:all 0.2s ease">
+                        <span style="display:flex;align-items:center;gap:6px">
+                          <span style="width:8px;height:8px;border-radius:50%;background:#D97706"></span>
+                          <span>${zakatEmasState.goldJewelryKarat.toUpperCase()}</span>
+                        </span>
+                        <i class="fa-solid fa-chevron-down" style="font-size:0.75rem;color:var(--clr-text-subtle)"></i>
+                      </div>
                     </div>
                   </div>
                   <div id="live_goldJewelry_estimate" style="font-size:0.72rem;color:var(--clr-gold-dk);margin-top:3px;font-weight:700">
@@ -5728,14 +5744,19 @@
                     <input id="input_tnm_customName" type="text" value="${zakatTanamanState.customName || ''}" oninput="updateZakatTanamanCustomName(this.value)" placeholder="Tuliskan nama tanaman / komoditas Anda (misal: Sengon, Porang, Nilam...)" style="width:100%;height:48px;box-sizing:border-box;padding:0 16px;border-radius:12px;border:1.5px solid var(--clr-border);background:var(--clr-surface2);color:var(--clr-text-main);font-size:0.95rem;font-weight:700;outline:none" />
                   </div>
                 ` : `
-                  <div style="position:relative">
-                    <select onchange="setZakatTanamanItem(this.value)" style="width:100%;height:48px;box-sizing:border-box;padding:0 36px 0 16px;border-radius:12px;border:1.5px solid var(--clr-border);background:var(--clr-surface2);color:var(--clr-text-main);font-size:0.95rem;font-weight:800;outline:none;appearance:none;cursor:pointer">
-                      ${(TANAMAN_PRODUKTIF_DATA[currentCat] || []).map(function(it) {
-                        return `<option value="${it.id}" ${zakatTanamanState.selectedItem === it.id ? 'selected' : ''}>${it.icon} ${it.name} — ${it.desc}</option>`;
-                      }).join('')}
-                    </select>
-                    <div style="position:absolute;right:14px;top:50%;transform:translateY(-50%);pointer-events:none;color:var(--clr-text-subtle)">
-                      <i class="fa-solid fa-chevron-down"></i>
+                  <div class="digital-select-trigger" onclick="openTanamanItemPicker()">
+                    <div style="display:flex;align-items:center;gap:12px">
+                      <div style="width:38px;height:38px;border-radius:12px;background:linear-gradient(135deg, #059669, #047857);color:#ffffff;display:grid;place-items:center;font-size:1.15rem;box-shadow:0 3px 10px rgba(5,150,105,0.25)">
+                        ${currentItemIcon}
+                      </div>
+                      <div>
+                        <div style="font-size:0.92rem;font-weight:800;color:var(--clr-text-main)">${currentItemName}</div>
+                        <div style="font-size:0.75rem;color:var(--clr-text-subtle)">${currentItemDesc}</div>
+                      </div>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:8px">
+                      <span style="font-size:0.72rem;font-weight:800;background:var(--clr-surface);color:#047857;padding:4px 10px;border-radius:99px;border:1px solid var(--clr-border)">Pilih</span>
+                      <i class="fa-solid fa-chevron-down" style="color:var(--clr-text-subtle);font-size:0.8rem"></i>
                     </div>
                   </div>
                 `}
@@ -6113,6 +6134,283 @@
           window.addEventListener('deviceorientation', handleOrientation, true);
         }
       }
+
+      /* ===== UNIVERSAL DIGITAL SELECTOR & PICKER ENGINE ===== */
+      window.__currentDigitalPickerCallback = null;
+
+      function openDigitalPicker(config) {
+        closeDigitalPicker();
+
+        const modal = document.createElement("div");
+        modal.id = "digitalPickerOverlay";
+        modal.style.position = "fixed";
+        modal.style.inset = "0";
+        modal.style.background = "rgba(0, 0, 0, 0.65)";
+        modal.style.backdropFilter = "blur(12px)";
+        modal.style.webkitBackdropFilter = "blur(12px)";
+        modal.style.zIndex = "950";
+        modal.style.display = "flex";
+        modal.style.alignItems = "flex-end";
+        modal.style.justifyContent = "center";
+        modal.style.padding = "0";
+        modal.style.boxSizing = "border-box";
+
+        modal.onclick = function(e) {
+          if (e.target === modal) closeDigitalPicker();
+        };
+
+        const title = config.title || "Pilih Opsi";
+        const subtitle = config.subtitle || "";
+        const icon = config.icon || "fa-list";
+        const selectedVal = config.selectedValue;
+        const options = config.options || [];
+        const isSearchable = config.searchable || options.length > 6;
+
+        let searchHtml = "";
+        if (isSearchable) {
+          searchHtml = `
+            <div style="position:relative;margin-bottom:14px">
+              <i class="fa-solid fa-magnifying-glass" style="position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--clr-text-subtle);font-size:0.85rem"></i>
+              <input id="digitalPickerSearchInput" type="text" placeholder="Cari pilihan..." oninput="filterDigitalPickerOptions(this.value)" style="width:100%;height:44px;box-sizing:border-box;padding:0 14px 0 38px;border-radius:12px;border:1.5px solid var(--clr-border);background:var(--clr-surface2);color:var(--clr-text-main);font-size:0.88rem;font-weight:700;outline:none" />
+            </div>
+          `;
+        }
+
+        const optionsHtml = options.map(function(opt) {
+          const isSelected = (String(opt.value) === String(selectedVal));
+          return `
+            <div class="digital-picker-opt" data-value="${opt.value}" data-text="${(opt.label + ' ' + (opt.desc || '')).toLowerCase()}" onclick="handleDigitalPickerSelect('${opt.value}')" style="cursor:pointer;background:${isSelected ? 'color-mix(in srgb, var(--clr-primary) 12%, var(--clr-surface))' : 'var(--clr-surface)'};border:1.5px solid ${isSelected ? 'var(--clr-primary)' : 'var(--clr-border)'};border-radius:16px;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px;transition:all 0.2s ease;box-shadow:${isSelected ? '0 4px 16px rgba(11,89,64,0.12)' : '0 2px 6px rgba(0,0,0,0.02)'}">
+              <div style="display:flex;align-items:center;gap:12px;flex:1">
+                <div style="width:40px;height:40px;border-radius:12px;background:${isSelected ? 'var(--clr-primary)' : 'var(--clr-surface2)'};color:${isSelected ? '#ffffff' : 'var(--clr-text-main)'};display:grid;place-items:center;font-size:1.15rem;flex-shrink:0;box-shadow:${isSelected ? '0 4px 12px rgba(11,89,64,0.25)' : 'none'}">
+                  ${opt.icon && opt.icon.startsWith('fa-') ? `<i class="fa-solid ${opt.icon}"></i>` : (opt.icon || '📌')}
+                </div>
+                <div style="flex:1">
+                  <div style="font-size:0.92rem;font-weight:800;color:${isSelected ? 'var(--clr-primary-dk)' : 'var(--clr-text-main)'}">
+                    ${opt.label}
+                  </div>
+                  ${opt.desc ? `<div style="font-size:0.75rem;color:var(--clr-text-subtle);margin-top:2px;line-height:1.4">${opt.desc}</div>` : ''}
+                </div>
+              </div>
+              
+              <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">
+                ${opt.badge ? `<span style="font-size:0.7rem;font-weight:800;background:${isSelected ? 'var(--clr-primary)' : 'var(--clr-surface2)'};color:${isSelected ? '#ffffff' : 'var(--clr-text-subtle)'};padding:3px 9px;border-radius:99px;border:1px solid ${isSelected ? 'var(--clr-primary)' : 'var(--clr-border)'}">${opt.badge}</span>` : ''}
+                <div style="width:24px;height:24px;border-radius:50%;border:1.5px solid ${isSelected ? 'var(--clr-primary)' : 'var(--clr-border)'};background:${isSelected ? 'var(--clr-primary)' : 'transparent'};display:grid;place-items:center;color:#ffffff;font-size:0.75rem">
+                  ${isSelected ? '<i class="fa-solid fa-check"></i>' : ''}
+                </div>
+              </div>
+            </div>
+          `;
+        }).join('');
+
+        modal.innerHTML = `
+          <div id="digitalPickerSheet" style="background:var(--clr-surface);width:100%;max-width:580px;max-height:85vh;border-radius:24px 24px 0 0;padding:20px 20px 32px;box-sizing:border-box;display:flex;flex-direction:column;box-shadow:0 -8px 32px rgba(0,0,0,0.2);animation:slideUpPicker 0.28s cubic-bezier(0.16, 1, 0.3, 1)">
+            
+            <!-- DRAG HANDLE -->
+            <div style="width:40px;height:4px;border-radius:99px;background:var(--clr-border);margin:0 auto 16px;opacity:0.8"></div>
+
+            <!-- HEADER -->
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--clr-border)">
+              <div style="display:flex;align-items:center;gap:10px">
+                <div style="width:36px;height:36px;border-radius:10px;background:color-mix(in srgb, var(--clr-primary) 15%, var(--clr-surface));display:grid;place-items:center;color:var(--clr-primary);font-size:1.05rem">
+                  ${icon.startsWith('fa-') ? `<i class="fa-solid ${icon}"></i>` : icon}
+                </div>
+                <div>
+                  <h3 style="margin:0;font-size:1.05rem;font-weight:800;color:var(--clr-text-main)">${title}</h3>
+                  ${subtitle ? `<div style="font-size:0.75rem;color:var(--clr-text-subtle);margin-top:1px">${subtitle}</div>` : ''}
+                </div>
+              </div>
+
+              <button onclick="closeDigitalPicker()" style="width:34px;height:34px;border-radius:10px;background:var(--clr-surface2);border:1px solid var(--clr-border);display:grid;place-items:center;cursor:pointer;color:var(--clr-text-subtle)" title="Tutup">
+                <i class="fa-solid fa-xmark"></i>
+              </button>
+            </div>
+
+            <!-- SEARCH INPUT -->
+            ${searchHtml}
+
+            <!-- OPTIONS LIST -->
+            <div id="digitalPickerOptionsContainer" style="display:flex;flex-direction:column;gap:10px;overflow-y:auto;max-height:calc(85vh - 180px);padding-right:4px;box-sizing:border-box">
+              ${optionsHtml}
+            </div>
+
+          </div>
+        `;
+
+        window.__currentDigitalPickerCallback = config.onSelect;
+        document.body.appendChild(modal);
+
+        if (isSearchable) {
+          setTimeout(function() {
+            var inp = document.getElementById("digitalPickerSearchInput");
+            if (inp) inp.focus();
+          }, 200);
+        }
+      }
+
+      function filterDigitalPickerOptions(q) {
+        var query = String(q || "").toLowerCase().trim();
+        var items = document.querySelectorAll(".digital-picker-opt");
+        items.forEach(function(el) {
+          var text = el.getAttribute("data-text") || "";
+          if (!query || text.indexOf(query) !== -1) {
+            el.style.display = "flex";
+          } else {
+            el.style.display = "none";
+          }
+        });
+      }
+
+      function handleDigitalPickerSelect(val) {
+        if (typeof vibrate === "function") vibrate([30]);
+        if (typeof window.__currentDigitalPickerCallback === "function") {
+          window.__currentDigitalPickerCallback(val);
+        }
+        closeDigitalPicker();
+      }
+
+      function closeDigitalPicker() {
+        var el = document.getElementById("digitalPickerOverlay");
+        if (el) {
+          el.remove();
+        }
+        window.__currentDigitalPickerCallback = null;
+      }
+
+      // Specialized Pickers
+      function openPertanianCommodityPicker() {
+        var opts = Object.keys(COMMODITY_NISAB_DATA).map(function(key) {
+          var item = COMMODITY_NISAB_DATA[key];
+          return {
+            value: key,
+            label: item.name,
+            icon: key.startsWith('kacang') ? '🌱' : '🌾',
+            desc: item.description,
+            badge: item.nisabLabel.split(' ')[0] + ' ' + item.nisabLabel.split(' ')[1]
+          };
+        });
+
+        openDigitalPicker({
+          title: "Pilih Komoditas Pangan",
+          subtitle: "Pilih jenis tanaman pangan untuk nishab & zakat",
+          icon: "fa-wheat-awn",
+          selectedValue: zakatPertanianState.commodity,
+          searchable: false,
+          options: opts,
+          onSelect: function(val) {
+            updateZakatPertanianCommodity(val);
+          }
+        });
+      }
+
+      function openGoldKaratPicker() {
+        var opts = [
+          { value: "24k", label: "24 Karat (99.9% Murni)", icon: "🥇", desc: "Kandungan emas murni 99.9%", badge: "100%" },
+          { value: "22k", label: "22 Karat (91.6% Emas Tua)", icon: "🥇", desc: "Kandungan emas tua perhiasan", badge: "91.6%" },
+          { value: "18k", label: "18 Karat (75.0% Emas 750)", icon: "🥇", desc: "Standar toko perhiasan internasional", badge: "75.0%" },
+          { value: "16k", label: "16 Karat (70.0% Emas Muda)", icon: "🥇", desc: "Perhiasan emas kadar sedang", badge: "70.0%" },
+          { value: "14k", label: "14 Karat (58.5% Emas)", icon: "🥇", desc: "Kadar emas campuran", badge: "58.5%" },
+          { value: "9k", label: "9 Karat (37.5% Emas 375)", icon: "🥇", desc: "Perhiasan emas kadar rendah", badge: "37.5%" }
+        ];
+
+        openDigitalPicker({
+          title: "Pilih Kadar Karat Perhiasan",
+          subtitle: "Konversi otomatis bobot ke ekuivalen emas murni 24K",
+          icon: "fa-gem",
+          selectedValue: zakatEmasState.goldJewelryKarat,
+          searchable: false,
+          options: opts,
+          onSelect: function(val) {
+            updateZakatEmasField('goldJewelryKarat', val);
+          }
+        });
+      }
+
+      function openTanamanItemPicker() {
+        var cat = zakatTanamanState.categoryGroup;
+        if (cat === "custom") return;
+        var list = TANAMAN_PRODUKTIF_DATA[cat] || [];
+        var opts = list.map(function(it) {
+          return {
+            value: it.id,
+            label: it.name,
+            icon: it.icon,
+            desc: it.desc,
+            badge: cat.toUpperCase()
+          };
+        });
+
+        openDigitalPicker({
+          title: "Pilih Komoditas " + (cat === 'perkebunan' ? 'Perkebunan' : (cat === 'buah' ? 'Buah-Buahan' : 'Hortikultura')),
+          subtitle: "Pilih komoditas hasil panen kebun Anda",
+          icon: "fa-seedling",
+          selectedValue: zakatTanamanState.selectedItem,
+          searchable: true,
+          options: opts,
+          onSelect: function(val) {
+            setZakatTanamanItem(val);
+          }
+        });
+      }
+
+      function openPrayerAudioPicker(prayerKey) {
+        var PRAYER_AUDIO_CATALOG = {
+          standard: [
+            { id: 'mekkah', name: 'Adzan Mekkah (Syeikh Ali Ahmed Mulla)', icon: '🕋', desc: 'Lantunan adzan merdu Masjidil Haram Mekkah' },
+            { id: 'madinah', name: 'Adzan Madinah (Syeikh Essam Bukhari)', icon: '🕌', desc: 'Lantunan adzan syahdu Masjid Nabawi Madinah' },
+            { id: 'kurdi', name: 'Adzan Kurdi (Mishary Rashid Alafasy)', icon: '🎵', desc: 'Irama maqam Kurdi yang menyentuh hati' },
+            { id: 'bayati', name: 'Adzan Bayati (Muzammil Hasballah)', icon: '✨', desc: 'Irama maqam Bayati khas Nusantara' }
+          ],
+          subuh: [
+            { id: 'subuh_bahanan', name: 'Adzan Subuh (Salim Bahanan)', icon: '🌅', desc: 'Lengkap dengan bacaan As-Shalatu Khairum Minan Naum' },
+            { id: 'subuh_kurdi', name: 'Adzan Subuh Kurdi (Mishary Rashid)', icon: '🌄', desc: 'Versi Subuh penuh ketenangan fajar' }
+          ],
+          tarhim: [
+            { id: 'tarhim_hussary', name: 'Shalawat Tarhim (Syeikh Mahmoud Al-Hussary)', icon: '🌙', desc: 'Lantunan klasik Tarhim menjelang adzan Subuh' }
+          ]
+        };
+
+        var groupOpts = (prayerKey === 'subuh') ? PRAYER_AUDIO_CATALOG.subuh : ((prayerKey === 'tarhim' || prayerKey === 'imsak') ? PRAYER_AUDIO_CATALOG.tarhim : PRAYER_AUDIO_CATALOG.standard);
+        var currentSaved = localStorage.getItem('pad_audio_' + prayerKey) || ((prayerKey === 'subuh') ? 'subuh_bahanan' : ((prayerKey === 'tarhim' || prayerKey === 'imsak') ? 'tarhim_hussary' : 'mekkah'));
+
+        var opts = groupOpts.map(function(o) {
+          return {
+            value: o.id,
+            label: o.name,
+            icon: o.icon || '🔔',
+            desc: o.desc,
+            badge: prayerKey.toUpperCase()
+          };
+        });
+
+        openDigitalPicker({
+          title: "Pilih Suara " + prayerKey.toUpperCase(),
+          subtitle: "Tentukan audio adzan / notifikasi sholat",
+          icon: "fa-volume-high",
+          selectedValue: currentSaved,
+          searchable: false,
+          options: opts,
+          onSelect: function(val) {
+            localStorage.setItem('pad_audio_' + prayerKey, val);
+            if (typeof showToast === 'function') showToast("Suara " + prayerKey.toUpperCase() + " disimpan ✓");
+            if (typeof scheduleAllPrayerAlarms === 'function') scheduleAllPrayerAlarms();
+            var modal = document.getElementById("ringtoneSettingsModal");
+            if (modal) {
+              modal.remove();
+              openRingtoneSettingsModal();
+            }
+          }
+        });
+      }
+
+      // Expose globally
+      window.openDigitalPicker = openDigitalPicker;
+      window.closeDigitalPicker = closeDigitalPicker;
+      window.filterDigitalPickerOptions = filterDigitalPickerOptions;
+      window.handleDigitalPickerSelect = handleDigitalPickerSelect;
+      window.openPertanianCommodityPicker = openPertanianCommodityPicker;
+      window.openGoldKaratPicker = openGoldKaratPicker;
+      window.openTanamanItemPicker = openTanamanItemPicker;
+      window.openPrayerAudioPicker = openPrayerAudioPicker;
 
       // initSplashScreen sudah dihandle oleh __ensureSplash() di head script.
       // Tidak perlu dipanggil ulang di sini untuk mencegah konflik __splashShown guard.
@@ -8351,6 +8649,72 @@
         font-size: 0.8rem;
         font-weight: 700;
         color: var(--clr-primary);
+      }
+
+      /* ============================================================
+       DIGITAL PICKER & MODERN DROPDOWN ENHANCEMENT
+    ============================================================ */
+      @keyframes slideUpPicker {
+        from {
+          transform: translateY(100%);
+          opacity: 0.5;
+        }
+        to {
+          transform: translateY(0);
+          opacity: 1;
+        }
+      }
+
+      .digital-select-trigger {
+        cursor: pointer;
+        border: 1.5px solid var(--clr-border);
+        border-radius: 16px;
+        padding: 12px 16px;
+        background: var(--clr-surface2);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+        transition: all 0.22s var(--ease);
+        user-select: none;
+        -webkit-user-select: none;
+      }
+
+      .digital-select-trigger:hover {
+        border-color: var(--clr-primary);
+        box-shadow: 0 4px 14px rgba(11, 89, 64, 0.1);
+        transform: translateY(-1px);
+      }
+
+      .digital-select-trigger:active {
+        transform: scale(0.98);
+      }
+
+      .digital-picker-opt:hover {
+        border-color: var(--clr-primary) !important;
+        transform: translateY(-1px);
+      }
+
+      .digital-picker-opt:active {
+        transform: scale(0.98);
+      }
+
+      /* Global Modernized Select Fallback */
+      select {
+        background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%230b5940' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e') !important;
+        background-repeat: no-repeat !important;
+        background-position: right 14px center !important;
+        background-size: 16px !important;
+        appearance: none !important;
+        -webkit-appearance: none !important;
+        padding-right: 40px !important;
+        transition: all 0.2s var(--ease) !important;
+      }
+
+      select:focus {
+        border-color: var(--clr-primary) !important;
+        box-shadow: 0 0 0 3px rgba(11, 89, 64, 0.15) !important;
       }
     </style>
   </head>
