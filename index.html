@@ -6572,22 +6572,29 @@
       }
 
       :root {
-        /* Palette */
-        --clr-bg: #f5f0e8;
-        --clr-surface: #fffdf8;
-        --clr-surface2: #f0ead6;
-        --clr-border: #e2d9c5;
-        --clr-primary: #0b5940;
-        --clr-primary-lt: #147a55;
-        --clr-primary-dk: #073d2b;
-        --clr-gold: #c27c15;
+        /* Apple iOS Modern & Islamic Spiritual Luxury Palette */
+        --clr-bg: #f4f6f8; /* Crisp Apple System Background */
+        --clr-surface: #ffffff; /* Pure Apple Surface */
+        --clr-surface2: #f8fafc; /* Inset Secondary Surface */
+        --clr-surface3: #f1f5f9;
+        --clr-border: rgba(0, 0, 0, 0.08); /* iOS Hairline border */
+        --clr-border-subtle: rgba(0, 0, 0, 0.04);
+        --clr-primary: #0a6c4a; /* Royal Emerald */
+        --clr-primary-lt: #128a60;
+        --clr-primary-dk: #064e35;
+        --clr-gold: #c27c15; /* Imperial Gold */
         --clr-gold-lt: #e8971a;
         --clr-gold-dk: #9a6010;
-        --clr-text: #1c2b22;
-        --clr-text-muted: #2d4536;
-        --clr-text-subtle: #456150;
-        --clr-success: #15803d;
-        --clr-danger: #b91c1c;
+        --clr-text: #0f172a; /* Slate 900 Ultra High Legibility */
+        --clr-text-muted: #334155;
+        --clr-text-subtle: #64748b;
+        --clr-success: #10b981;
+        --clr-danger: #ef4444;
+
+        /* Glassmorphism & Translucent Materials */
+        --glass-bg: rgba(255, 255, 255, 0.82);
+        --glass-border: rgba(255, 255, 255, 0.7);
+        --glass-blur: blur(24px) saturate(180%);
 
         /* Arabic & Latin Sizes */
         --arabic-font:
@@ -6614,39 +6621,48 @@
         --safe-bottom: env(safe-area-inset-bottom, 0px);
         --header-h: 62px;
         --nav-h: 94px;
-        --radius-xl: 24px;
+        --radius-squircle: 20px;
+        --radius-xl: 22px;
         --radius-lg: 16px;
         --radius-md: 12px;
         --radius-sm: 8px;
+        --radius-pill: 9999px;
 
-        /* Shadows */
-        --shadow-sm: 0 1px 4px rgba(0, 0, 0, 0.06);
-        --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.09);
-        --shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.12);
-        --shadow-gold: 0 4px 20px rgba(194, 124, 21, 0.25);
-        --shadow-green: 0 4px 20px rgba(11, 89, 64, 0.25);
+        /* Diffuse Ambient iOS Shadows */
+        --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.03), 0 1px 2px rgba(0, 0, 0, 0.02);
+        --shadow-md: 0 4px 18px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.02);
+        --shadow-lg: 0 12px 36px rgba(0, 0, 0, 0.07), 0 4px 12px rgba(0, 0, 0, 0.03);
+        --shadow-gold: 0 6px 24px rgba(194, 124, 21, 0.16);
+        --shadow-green: 0 6px 24px rgba(10, 108, 74, 0.16);
 
-        /* Transition */
+        /* Apple Spring Curve Transitions */
         --ease: cubic-bezier(0.4, 0, 0.2, 1);
+        --ease-spring: cubic-bezier(0.32, 0.72, 0, 1);
         --dur-fast: 160ms;
         --dur-med: 280ms;
         --dur-slow: 420ms;
       }
 
       [data-theme="dark"] {
-        --clr-bg: #0c1811;
-        --clr-surface: #132218;
-        --clr-surface2: #1c3328;
-        --clr-border: #2a4035;
-        --clr-primary: #1db97b;
-        --clr-primary-lt: #25d68e;
-        --clr-primary-dk: #15985f;
+        --clr-bg: #09100d; /* Deep OLED Night Velvet */
+        --clr-surface: #121c17; /* Deep Emerald Night Card */
+        --clr-surface2: #192720;
+        --clr-surface3: #22342c;
+        --clr-border: rgba(255, 255, 255, 0.09);
+        --clr-border-subtle: rgba(255, 255, 255, 0.05);
+        --clr-primary: #10b981;
+        --clr-primary-lt: #34d399;
+        --clr-primary-dk: #059669;
         --clr-gold: #f0a837;
-        --clr-gold-lt: #f7c05a;
-        --clr-gold-dk: #c68820;
-        --clr-text: #e8f5ee;
-        --clr-text-muted: #bbf7d0;
-        --clr-text-subtle: #86efac;
+        --clr-gold-lt: #fbbf24;
+        --clr-gold-dk: #d97706;
+        --clr-text: #f8fafc;
+        --clr-text-muted: #cbd5e1;
+        --clr-text-subtle: #94a3b8;
+
+        /* Glassmorphism Dark */
+        --glass-bg: rgba(18, 28, 23, 0.85);
+        --glass-border: rgba(255, 255, 255, 0.1);
       }
 
       /* ============================================================
@@ -8552,15 +8568,17 @@
 
       .nu-mod-card {
         background: var(--clr-surface);
-        border: 1.5px solid color-mix(in srgb, var(--clr-gold) 35%, var(--clr-border));
-        border-radius: var(--radius-lg);
-        padding: 18px;
+        border: 0.5px solid var(--clr-border);
+        border-radius: 20px;
+        padding: 16px 18px;
         display: flex;
         align-items: center;
         gap: 16px;
         cursor: pointer;
-        transition: all 0.25s ease;
-        box-shadow: 0 4px 16px rgba(0,0,0,0.04);
+        transition: all 0.22s var(--ease-spring);
+        box-shadow: var(--shadow-sm);
+        user-select: none;
+        -webkit-user-select: none;
       }
 
       .nu-mod-card:hover {
@@ -8569,16 +8587,20 @@
         box-shadow: var(--shadow-md);
       }
 
+      .nu-mod-card:active {
+        transform: scale(0.975);
+      }
+
       .nu-mod-icon-wrap {
-        width: 52px;
-        height: 52px;
-        border-radius: 16px;
+        width: 48px;
+        height: 48px;
+        border-radius: 14px;
         display: grid;
         place-items: center;
         color: #fff;
-        font-size: 1.4rem;
+        font-size: 1.3rem;
         flex-shrink: 0;
-        box-shadow: 0 6px 16px rgba(0,0,0,0.18);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
       }
 
       .nu-mod-info {
@@ -8709,22 +8731,28 @@
 
       .module-card {
         background: var(--clr-surface);
-        border: 1.5px solid var(--clr-border);
-        border-radius: var(--radius-lg);
-        padding: 20px;
-        transition: all var(--dur-fast) var(--ease);
+        border: 0.5px solid var(--clr-border);
+        border-radius: 20px;
+        padding: 18px 20px;
+        transition: all 0.22s var(--ease-spring);
         cursor: pointer;
         display: flex;
         flex-direction: column;
         justify-content: space-between;
         position: relative;
         overflow: hidden;
+        box-shadow: var(--shadow-sm);
+        user-select: none;
       }
 
       .module-card:hover {
         border-color: var(--clr-primary);
-        transform: translateY(-3px);
+        transform: translateY(-2px);
         box-shadow: var(--shadow-md);
+      }
+
+      .module-card:active {
+        transform: scale(0.975);
       }
 
       .module-card.active {
@@ -8902,6 +8930,127 @@
       select:focus {
         border-color: var(--clr-primary) !important;
         box-shadow: 0 0 0 3px rgba(11, 89, 64, 0.15) !important;
+      }
+
+      /* ============================================================
+       APPLE iOS MODERN & ISLAMIC LUXURY COMPONENT SYSTEM
+    ============================================================ */
+      .ios-grouped-card {
+        background: var(--clr-surface);
+        border: 0.5px solid var(--clr-border);
+        border-radius: var(--radius-squircle);
+        box-shadow: var(--shadow-sm);
+        overflow: hidden;
+        margin-bottom: 16px;
+        transition: all 0.25s var(--ease-spring);
+      }
+
+      .ios-table-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 14px 16px;
+        border-bottom: 0.5px solid var(--clr-border-subtle);
+        transition: background 0.15s ease, transform 0.18s var(--ease-spring);
+        cursor: pointer;
+        user-select: none;
+      }
+
+      .ios-table-row:last-child {
+        border-bottom: none;
+      }
+
+      .ios-table-row:active {
+        background: var(--clr-surface2);
+        transform: scale(0.985);
+      }
+
+      .ios-squircle-icon {
+        width: 44px;
+        height: 44px;
+        border-radius: 13px;
+        display: grid;
+        place-items: center;
+        font-size: 1.15rem;
+        flex-shrink: 0;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      }
+
+      .ios-segmented-control {
+        background: var(--clr-surface2);
+        padding: 4px;
+        border-radius: 14px;
+        display: flex;
+        gap: 4px;
+        border: 0.5px solid var(--clr-border);
+      }
+
+      .ios-segment-btn {
+        flex: 1;
+        padding: 8px 12px;
+        border-radius: 10px;
+        border: none;
+        background: transparent;
+        color: var(--clr-text-subtle);
+        font-size: 0.8rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.2s var(--ease);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+      }
+
+      .ios-segment-btn.active {
+        background: var(--clr-surface);
+        color: var(--clr-primary);
+        font-weight: 800;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+      }
+
+      .ios-input {
+        width: 100%;
+        height: 48px;
+        box-sizing: border-box;
+        border-radius: 14px;
+        border: 1px solid var(--clr-border);
+        background: var(--clr-surface2);
+        color: var(--clr-text);
+        font-size: 0.95rem;
+        font-weight: 700;
+        padding: 0 16px;
+        outline: none;
+        transition: all 0.2s var(--ease);
+      }
+
+      .ios-input:focus {
+        border-color: var(--clr-primary);
+        background: var(--clr-surface);
+        box-shadow: 0 0 0 3.5px rgba(10, 108, 74, 0.12);
+      }
+
+      .ios-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 4px 10px;
+        border-radius: var(--radius-pill);
+        font-size: 0.72rem;
+        font-weight: 800;
+        letter-spacing: 0.3px;
+      }
+
+      .ios-badge-gold {
+        background: color-mix(in srgb, var(--clr-gold) 15%, transparent);
+        color: var(--clr-gold-dk);
+        border: 0.5px solid color-mix(in srgb, var(--clr-gold) 30%, transparent);
+      }
+
+      .ios-badge-green {
+        background: color-mix(in srgb, var(--clr-primary) 12%, transparent);
+        color: var(--clr-primary);
+        border: 0.5px solid color-mix(in srgb, var(--clr-primary) 25%, transparent);
       }
     </style>
   </head>
