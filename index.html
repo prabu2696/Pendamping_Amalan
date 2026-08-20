@@ -8238,13 +8238,13 @@
       }
 
       /* ============================================================
-         ELEGANT CLEAN BANKING SPLASH SCREEN CSS
+         ULTRA-LUXURY HOLOGRAPHIC GLOW SPLASH SCREEN CSS
       ============================================================ */
       #splashScreen {
         position: fixed;
         inset: 0;
         z-index: var(--z-splash, 1000);
-        background: #030f0b;
+        background: radial-gradient(circle at 50% 36%, rgba(10, 108, 74, 0.7) 0%, rgba(6, 36, 25, 0.95) 55%, #04100b 100%);
         display: flex;
         flex-direction: column;
         align-items: center;
@@ -8265,37 +8265,62 @@
         display: none !important;
       }
 
-      /* Clean Banking-Style Logo (Glow STRICTLY on Logo Contours) */
+      /* Hologram Rotating Aura Ring & Particles */
       .splash-logo-wrap {
         position: relative;
-        width: 170px;
-        height: 170px;
+        width: 190px;
+        height: 190px;
         display: grid;
         place-items: center;
-        margin-bottom: 20px;
+        margin-bottom: 22px;
+      }
+
+      .splash-hologram-aura {
+        position: absolute;
+        width: 220px;
+        height: 220px;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(212, 175, 55, 0.35) 0%, rgba(16, 185, 129, 0.2) 45%, transparent 70%);
+        filter: blur(14px);
+        animation: hologramPulse 3.5s ease-in-out infinite alternate;
+        pointer-events: none;
+        z-index: 1;
       }
 
       .splash-logo-img {
-        width: 160px;
-        height: 160px;
+        position: relative;
+        z-index: 2;
+        width: 170px;
+        height: 170px;
         object-fit: contain;
         border-radius: 0 !important;
         border: none !important;
         outline: none !important;
         background: transparent !important;
         box-shadow: none !important;
-        filter: drop-shadow(0 0 24px rgba(212, 175, 55, 0.75)) drop-shadow(0 6px 16px rgba(0,0,0,0.7));
-        animation: logoBreathing 3.5s ease-in-out infinite alternate;
+        filter: drop-shadow(0 0 28px rgba(212, 175, 55, 0.85)) drop-shadow(0 0 50px rgba(16, 185, 129, 0.45)) drop-shadow(0 10px 30px rgba(0,0,0,0.85));
+        animation: logoHologramBreathing 3.5s ease-in-out infinite alternate;
       }
 
-      @keyframes logoBreathing {
+      @keyframes logoHologramBreathing {
         0% {
-          transform: scale(0.95);
-          filter: drop-shadow(0 0 16px rgba(212, 175, 55, 0.55)) drop-shadow(0 4px 12px rgba(0,0,0,0.6));
+          transform: scale(0.95) translateY(2px);
+          filter: drop-shadow(0 0 20px rgba(212, 175, 55, 0.65)) drop-shadow(0 0 35px rgba(16, 185, 129, 0.35)) drop-shadow(0 6px 20px rgba(0,0,0,0.7));
         }
         100% {
-          transform: scale(1.05);
-          filter: drop-shadow(0 0 30px rgba(212, 175, 55, 0.95)) drop-shadow(0 8px 20px rgba(0,0,0,0.8));
+          transform: scale(1.04) translateY(-3px);
+          filter: drop-shadow(0 0 36px rgba(255, 215, 0, 0.98)) drop-shadow(0 0 60px rgba(16, 185, 129, 0.6)) drop-shadow(0 14px 36px rgba(0,0,0,0.9));
+        }
+      }
+
+      @keyframes hologramPulse {
+        0% {
+          transform: scale(0.9) rotate(0deg);
+          opacity: 0.6;
+        }
+        100% {
+          transform: scale(1.12) rotate(180deg);
+          opacity: 1;
         }
       }
 
@@ -8303,16 +8328,16 @@
         font-size: clamp(1.5rem, 5.8vw, 2.1rem);
         font-weight: 900;
         letter-spacing: 2px;
-        background: linear-gradient(135deg, #fff6d6 0%, #f59e0b 50%, #d4af37 100%);
+        background: linear-gradient(135deg, #fff9e6 0%, #f59e0b 50%, #ffd700 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
-        text-shadow: 0 4px 25px rgba(212, 175, 55, 0.3);
+        text-shadow: 0 4px 25px rgba(212, 175, 55, 0.35);
         margin-bottom: 6px;
       }
 
       .splash-subtitle {
         font-size: 0.88rem;
-        color: rgba(255, 255, 255, 0.82);
+        color: rgba(255, 255, 255, 0.85);
         font-weight: 500;
         font-style: italic;
         letter-spacing: 0.5px;
@@ -9058,11 +9083,12 @@
   <body>
     <!-- ===== ELEGANT CLEAN BANKING SPLASH SCREEN ===== -->
     <div id="splashScreen">
-      <!-- Logo Neon Breathing Pulse (Glow strictly on logo contour) -->
+      <!-- Logo Neon Breathing Pulse & Hologram Aura -->
       <div class="splash-logo-wrap">
+        <div class="splash-hologram-aura"></div>
         <img
-          src="assets/images/Logo_Pesantren.png"
-          alt="Logo Pesantren"
+          src="assets/images/Logo.png"
+          alt="Logo Pendamping Amalan"
           class="splash-logo-img"
         />
       </div>
@@ -9091,23 +9117,22 @@
           <div
             class="brand-icon"
             style="
-              width: 34px;
-              height: 34px;
-              border-radius: 8px;
-              background: color-mix(in srgb, var(--clr-primary) 12%, transparent);
-              border: 1px solid color-mix(in srgb, var(--clr-primary) 25%, transparent);
+              width: 38px;
+              height: 38px;
+              border-radius: 12px;
+              background: transparent;
               display: flex;
               align-items: center;
               justify-content: center;
               overflow: hidden;
               flex-shrink: 0;
-              box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+              box-shadow: 0 4px 14px rgba(10, 108, 74, 0.22);
             "
           >
             <img
-              src="assets/images/Logo_Pesantren.png"
-              alt="Logo Pesantren"
-              style="width: 100%; height: 100%; object-fit: contain; padding: 2px"
+              src="assets/images/Logo.png"
+              alt="Logo Pendamping Amalan"
+              style="width: 100%; height: 100%; object-fit: contain"
             />
           </div>
           <div class="brand-text">
