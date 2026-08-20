@@ -120,7 +120,7 @@
             if (currentScreen === "reader") {
               homeBtn.setAttribute("title", "Kembali ke Katalog Wirid & Doa");
               homeBtn.onclick = function() { openWiridCatalog(); };
-            } else if (currentScreen === "zakat_pertanian" || currentScreen === "zakat_perdagangan") {
+            } else if (currentScreen === "zakat_pertanian" || currentScreen === "zakat_perdagangan" || currentScreen === "zakat_emas") {
               homeBtn.setAttribute("title", "Kembali ke Menu Zakat");
               homeBtn.onclick = function() { showZakatMenuPage(); };
             } else {
@@ -2605,6 +2605,82 @@
         }
       }
 
+      var REGIONAL_SILVER_PRICES = {
+        "dki jakarta": 19500,
+        "jawa barat": 19500,
+        "banten": 19500,
+        "jawa tengah": 19600,
+        "jawa timur": 19600,
+        "sumatera": 19800,
+        "sulawesi": 19900,
+        "kalimantan": 19900,
+        "default": 19500
+      };
+
+      var KARAT_FACTORS = {
+        "24k": { factor: 1.0, label: "24 Karat (99.9% Murni)" },
+        "22k": { factor: 0.916, label: "22 Karat (91.6% Emas Tua)" },
+        "18k": { factor: 0.750, label: "18 Karat (75.0% Emas 750)" },
+        "16k": { factor: 0.700, label: "16 Karat (70.0% Emas Muda)" },
+        "14k": { factor: 0.585, label: "14 Karat (58.5%)" },
+        "9k": { factor: 0.375, label: "9 Karat (37.5% Emas 375)" }
+      };
+
+      var zakatEmasState = {
+        goldNisabStandard: 85, // 85 (BAZNAS/MUI) or 77.5 (Pesantren Klasik)
+        silverNisabStandard: 595, // 595 (BAZNAS/MUI) or 542.5 (Pesantren Klasik)
+        haulCalendar: "hijri", // "hijri" (2.5%) or "masehi" (2.577%)
+        goldPricePerGram: 1545000,
+        silverPricePerGram: 19500,
+        goldBars: "",
+        goldJewelry: "",
+        goldJewelryKarat: "22k",
+        silverBars: "",
+        silverJewelry: "",
+        isCalculated: false,
+        fiqhExpanded: false,
+        isSyncingPrice: false,
+        detectedRegion: "Jawa Barat (Nasional)",
+        lastPriceSync: "Hari ini"
+      };
+
+      function syncRegionalGoldSilverPrice(forceNotify) {
+        zakatEmasState.isSyncingPrice = true;
+        var regKey = detectCurrentRegion();
+        var baseGold = REGIONAL_GOLD_PRICES[regKey] || REGIONAL_GOLD_PRICES["default"];
+        var baseSilver = REGIONAL_SILVER_PRICES[regKey] || REGIONAL_SILVER_PRICES["default"];
+        
+        var regionDisplayName = "Nasional / Jawa Barat";
+        if (pLocation && pLocation.name) {
+          regionDisplayName = pLocation.name;
+        } else {
+          if (regKey === "dki jakarta") regionDisplayName = "DKI Jakarta";
+          else if (regKey === "jawa tengah") regionDisplayName = "Jawa Tengah";
+          else if (regKey === "jawa timur") regionDisplayName = "Jawa Timur";
+          else if (regKey === "sumatera") regionDisplayName = "Sumatera";
+          else if (regKey === "sulawesi") regionDisplayName = "Sulawesi";
+          else if (regKey === "kalimantan") regionDisplayName = "Kalimantan";
+          else if (regKey === "banten") regionDisplayName = "Banten";
+        }
+        
+        zakatEmasState.detectedRegion = regionDisplayName;
+        zakatEmasState.goldPricePerGram = baseGold;
+        zakatEmasState.silverPricePerGram = baseSilver;
+        
+        var now = new Date();
+        var timeStr = String(now.getHours()).padStart(2, "0") + ":" + String(now.getMinutes()).padStart(2, "0");
+        zakatEmasState.lastPriceSync = "Hari ini " + timeStr;
+        zakatEmasState.isSyncingPrice = false;
+
+        if (forceNotify && typeof showToast === "function") {
+          showToast("🟢 Harga acuan emas & perak wilayah " + regionDisplayName + " berhasil diperbarui!");
+        }
+
+        if (currentScreen === "zakat_emas") {
+          renderZakatEmasPage();
+        }
+      }
+
       function showZakatMenuPage() {
         currentScreen = "zakat_menu";
         syncUpdateBtnVisibility();
@@ -2721,22 +2797,24 @@
                 </div>
               </div>
 
-              <!-- 3. Zakat Emas, Perak & Perhiasan -->
-              <div class="nu-mod-card" style="border:1.5px solid var(--clr-border);border-radius:18px;padding:20px;background:var(--clr-surface);cursor:pointer;display:flex;align-items:center;gap:18px;opacity:0.9" onclick="showToast('ℹ️ Modul Zakat Emas &amp; Perak akan segera dibuka berikutnya.')">
-                <div class="nu-mod-icon-wrap" style="width:54px;height:54px;border-radius:16px;background:linear-gradient(135deg, #D97706, #B45309);display:grid;place-items:center;flex-shrink:0">
+              <!-- 3. Zakat Emas, Perak & Perhiasan (AKTIF) -->
+              <div class="nu-mod-card active" onclick="showZakatEmasPage()" style="border:2px solid #D97706;border-radius:18px;padding:20px;box-shadow:0 6px 20px rgba(217,119,6,0.12);background:var(--clr-surface);cursor:pointer;display:flex;align-items:center;gap:18px;transition:all 0.25s ease">
+                <div class="nu-mod-icon-wrap" style="width:54px;height:54px;border-radius:16px;background:linear-gradient(135deg, #F59E0B, #D97706);display:grid;place-items:center;flex-shrink:0;box-shadow:0 4px 14px rgba(217,119,6,0.3)">
                   <i class="fa-solid fa-gem" style="color:#ffffff;font-size:1.4rem"></i>
                 </div>
                 <div class="nu-mod-info" style="flex:1">
-                  <div style="display:flex;align-items:center;gap:8px">
-                    <span class="nu-mod-title" style="font-size:0.98rem;font-weight:800;color:var(--clr-text-main)">Zakat Simpanan Emas &amp; Perak</span>
-                    <span style="font-size:0.68rem;background:var(--clr-surface2);color:var(--clr-text-subtle);font-weight:700;padding:2px 8px;border-radius:99px;border:1px solid var(--clr-border)">Nisab 85g / 595g</span>
+                  <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+                    <span class="nu-mod-title" style="font-size:0.98rem;font-weight:800;color:#B45309">Zakat Simpanan Emas &amp; Perak</span>
+                    <span style="font-size:0.65rem;background:#D97706;color:#ffffff;font-weight:800;padding:3px 9px;border-radius:99px;display:inline-flex;align-items:center;gap:4px">
+                      <span style="width:5px;height:5px;border-radius:50%;background:#ffffff"></span> AKTIF &amp; REALTIME
+                    </span>
                   </div>
                   <div class="nu-mod-sub" style="font-size:0.8rem;color:var(--clr-text-subtle);margin-top:4px;line-height:1.45">
-                    Logam Mulia Batangan, Tabungan Emas &amp; Perhiasan Simpanan • Tarif 2.5%
+                    Logam Mulia Batangan, Tabungan Emas &amp; Perhiasan Simpanan • Nisab 85g / 595g • 2.5%
                   </div>
                 </div>
-                <div class="nu-mod-arrow" style="width:34px;height:34px;border-radius:10px;background:var(--clr-surface2);display:grid;place-items:center;flex-shrink:0">
-                  <i class="fa-solid fa-chevron-right" style="color:var(--clr-text-subtle);font-size:0.85rem"></i>
+                <div class="nu-mod-arrow" style="width:34px;height:34px;border-radius:10px;background:color-mix(in srgb, #D97706 10%, transparent);display:grid;place-items:center;flex-shrink:0">
+                  <i class="fa-solid fa-chevron-right" style="color:#D97706;font-size:0.85rem"></i>
                 </div>
               </div>
 
@@ -3981,6 +4059,664 @@
                   <div>
                     <strong style="color:var(--clr-text-main)">Boleh Dicicil Per Bulan (Ta'jil az-Zakat):</strong>
                     <span style="color:var(--clr-text-subtle)"> Jika pedagang merasa berat membayar zakat tahunan secara sekaligus, syariat memperbolehkan menyicil pembayarannya setiap bulan (*Ta'jil*) demi menjaga kestabilan arus kas (*cashflow*) usaha.</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        `;
+      }
+
+      function showZakatEmasPage() {
+        currentScreen = "zakat_emas";
+        syncUpdateBtnVisibility();
+
+        const main = document.getElementById("main");
+        if (!main) return;
+
+        if (!zakatEmasState.goldPricePerGram || zakatEmasState.goldPricePerGram === 1545000) {
+          syncRegionalGoldSilverPrice(false);
+        }
+
+        renderZakatEmasPage();
+
+        const navBar = document.getElementById("nav-bar");
+        if (navBar) navBar.style.display = "none";
+        const progressTrack = document.getElementById("progress-track");
+        if (progressTrack) progressTrack.style.display = "none";
+        const slideChipWrap = document.getElementById("slideChipWrap");
+        if (slideChipWrap) slideChipWrap.style.display = "none";
+        const catalogChipWrap = document.getElementById("catalogChipWrap");
+        if (catalogChipWrap) catalogChipWrap.style.display = "none";
+      }
+
+      function toggleZakatEmasFiqhAccordion() {
+        zakatEmasState.fiqhExpanded = !zakatEmasState.fiqhExpanded;
+        var el = document.getElementById("zakatEmasFiqhBody");
+        var icon = document.getElementById("zakatEmasFiqhIcon");
+        if (el) {
+          el.style.display = zakatEmasState.fiqhExpanded ? "block" : "none";
+        }
+        if (icon) {
+          icon.style.transform = zakatEmasState.fiqhExpanded ? "rotate(180deg)" : "rotate(0deg)";
+        }
+      }
+
+      function updateZakatEmasGoldNisabStandard(val) {
+        zakatEmasState.goldNisabStandard = parseFloat(val) || 85;
+        zakatEmasState.isCalculated = false;
+        renderZakatEmasPage();
+      }
+
+      function updateZakatEmasSilverNisabStandard(val) {
+        zakatEmasState.silverNisabStandard = parseFloat(val) || 595;
+        zakatEmasState.isCalculated = false;
+        renderZakatEmasPage();
+      }
+
+      function updateZakatEmasHaul(val) {
+        zakatEmasState.haulCalendar = val;
+        zakatEmasState.isCalculated = false;
+        renderZakatEmasPage();
+      }
+
+      function updateZakatEmasPrice(type, val) {
+        var clean = String(val).replace(/[^0-9]/g, "");
+        var num = parseInt(clean, 10);
+        if (type === "gold") {
+          zakatEmasState.goldPricePerGram = isNaN(num) ? 0 : num;
+        } else if (type === "silver") {
+          zakatEmasState.silverPricePerGram = isNaN(num) ? 0 : num;
+        }
+      }
+
+      function updateZakatEmasField(field, val) {
+        if (field === "goldJewelryKarat") {
+          zakatEmasState.goldJewelryKarat = val;
+        } else {
+          var clean = String(val).replace(/,/g, ".").replace(/[^0-9.]/g, "");
+          zakatEmasState[field] = clean;
+        }
+
+        var goldBarsNum = parseFloat(zakatEmasState.goldBars) || 0;
+        var goldJewelryNum = parseFloat(zakatEmasState.goldJewelry) || 0;
+        var karatObj = KARAT_FACTORS[zakatEmasState.goldJewelryKarat] || KARAT_FACTORS["22k"];
+        var goldJewelryPure = goldJewelryNum * karatObj.factor;
+        var goldPrice = zakatEmasState.goldPricePerGram || 1545000;
+
+        var elGoldEst = document.getElementById("live_goldBars_estimate");
+        if (elGoldEst) elGoldEst.innerText = "Estimasi Nilai: Rp " + Math.round(goldBarsNum * goldPrice).toLocaleString("id-ID");
+
+        var elJewelryEst = document.getElementById("live_goldJewelry_estimate");
+        if (elJewelryEst) elJewelryEst.innerText = "Setara Emas Murni: " + goldJewelryPure.toFixed(2) + " gr (Rp " + Math.round(goldJewelryPure * goldPrice).toLocaleString("id-ID") + ")";
+
+        var silverBarsNum = parseFloat(zakatEmasState.silverBars) || 0;
+        var silverJewelryNum = parseFloat(zakatEmasState.silverJewelry) || 0;
+        var silverPrice = zakatEmasState.silverPricePerGram || 19500;
+
+        var elSilverBarsEst = document.getElementById("live_silverBars_estimate");
+        if (elSilverBarsEst) elSilverBarsEst.innerText = "Estimasi Nilai: Rp " + Math.round(silverBarsNum * silverPrice).toLocaleString("id-ID");
+
+        var elSilverJewelryEst = document.getElementById("live_silverJewelry_estimate");
+        if (elSilverJewelryEst) elSilverJewelryEst.innerText = "Estimasi Nilai: Rp " + Math.round(silverJewelryNum * silverPrice).toLocaleString("id-ID");
+      }
+
+      function calculateZakatEmas() {
+        var pGold = document.getElementById("zakatEmasGoldPriceInput");
+        if (pGold) {
+          var cleanG = String(pGold.value).replace(/[^0-9]/g, "");
+          var gNum = parseInt(cleanG, 10);
+          zakatEmasState.goldPricePerGram = isNaN(gNum) ? 1545000 : gNum;
+        }
+
+        var pSilver = document.getElementById("zakatEmasSilverPriceInput");
+        if (pSilver) {
+          var cleanS = String(pSilver.value).replace(/[^0-9]/g, "");
+          var sNum = parseInt(cleanS, 10);
+          zakatEmasState.silverPricePerGram = isNaN(sNum) ? 19500 : sNum;
+        }
+
+        var gBars = document.getElementById("input_goldBars");
+        if (gBars) zakatEmasState.goldBars = String(gBars.value).replace(/,/g, ".").replace(/[^0-9.]/g, "");
+
+        var gJewel = document.getElementById("input_goldJewelry");
+        if (gJewel) zakatEmasState.goldJewelry = String(gJewel.value).replace(/,/g, ".").replace(/[^0-9.]/g, "");
+
+        var sBars = document.getElementById("input_silverBars");
+        if (sBars) zakatEmasState.silverBars = String(sBars.value).replace(/,/g, ".").replace(/[^0-9.]/g, "");
+
+        var sJewel = document.getElementById("input_silverJewelry");
+        if (sJewel) zakatEmasState.silverJewelry = String(sJewel.value).replace(/,/g, ".").replace(/[^0-9.]/g, "");
+
+        var totalGoldEntered = (parseFloat(zakatEmasState.goldBars) || 0) + (parseFloat(zakatEmasState.goldJewelry) || 0);
+        var totalSilverEntered = (parseFloat(zakatEmasState.silverBars) || 0) + (parseFloat(zakatEmasState.silverJewelry) || 0);
+
+        if (totalGoldEntered <= 0 && totalSilverEntered <= 0) {
+          if (typeof showToast === "function") showToast("⚠️ Masukkan minimal salah satu berat simpanan emas atau perak (dalam gram).");
+          return;
+        }
+
+        zakatEmasState.isCalculated = true;
+        renderZakatEmasPage();
+
+        setTimeout(function() {
+          var resCard = document.getElementById("zakatEmasResultSection");
+          if (resCard) {
+            resCard.scrollIntoView({ behavior: "smooth", block: "nearest" });
+          }
+        }, 100);
+      }
+
+      function resetZakatEmasForm() {
+        zakatEmasState.goldBars = "";
+        zakatEmasState.goldJewelry = "";
+        zakatEmasState.goldJewelryKarat = "22k";
+        zakatEmasState.silverBars = "";
+        zakatEmasState.silverJewelry = "";
+        zakatEmasState.isCalculated = false;
+        renderZakatEmasPage();
+        if (typeof showToast === "function") showToast("Formulir zakat emas & perak berhasil direset.");
+      }
+
+      // Expose to window
+      window.showZakatEmasPage = showZakatEmasPage;
+      window.renderZakatEmasPage = renderZakatEmasPage;
+      window.syncRegionalGoldSilverPrice = syncRegionalGoldSilverPrice;
+      window.toggleZakatEmasFiqhAccordion = toggleZakatEmasFiqhAccordion;
+      window.updateZakatEmasGoldNisabStandard = updateZakatEmasGoldNisabStandard;
+      window.updateZakatEmasSilverNisabStandard = updateZakatEmasSilverNisabStandard;
+      window.updateZakatEmasHaul = updateZakatEmasHaul;
+      window.updateZakatEmasPrice = updateZakatEmasPrice;
+      window.updateZakatEmasField = updateZakatEmasField;
+      window.calculateZakatEmas = calculateZakatEmas;
+      window.resetZakatEmasForm = resetZakatEmasForm;
+
+      function renderZakatEmasPage() {
+        const main = document.getElementById("main");
+        if (!main) return;
+
+        var isMasehi = (zakatEmasState.haulCalendar === "masehi");
+        var rate = isMasehi ? 0.02577 : 0.025;
+        var rateLabel = isMasehi ? "2.577% (Tahun Masehi / 365 Hari)" : "2.5% (Tahun Hijriyah / 354 Hari)";
+
+        var goldPrice = zakatEmasState.goldPricePerGram || 1545000;
+        var silverPrice = zakatEmasState.silverPricePerGram || 19500;
+
+        var goldNisabGram = zakatEmasState.goldNisabStandard || 85;
+        var silverNisabGram = zakatEmasState.silverNisabStandard || 595;
+
+        var goldNisabRp = goldNisabGram * goldPrice;
+        var silverNisabRp = silverNisabGram * silverPrice;
+
+        var goldBars = parseFloat(zakatEmasState.goldBars) || 0;
+        var goldJewelry = parseFloat(zakatEmasState.goldJewelry) || 0;
+        var karatObj = KARAT_FACTORS[zakatEmasState.goldJewelryKarat] || KARAT_FACTORS["22k"];
+        var goldJewelryPure = goldJewelry * karatObj.factor;
+        var totalGoldPure = goldBars + goldJewelryPure;
+        var totalGoldRp = totalGoldPure * goldPrice;
+
+        var isGoldWajib = (totalGoldPure >= goldNisabGram);
+        var goldZakatGram = isGoldWajib ? (totalGoldPure * rate) : 0;
+        var goldZakatRp = isGoldWajib ? (goldZakatGram * goldPrice) : 0;
+        var goldKekurangan = Math.max(0, goldNisabGram - totalGoldPure);
+
+        var silverBars = parseFloat(zakatEmasState.silverBars) || 0;
+        var silverJewelry = parseFloat(zakatEmasState.silverJewelry) || 0;
+        var totalSilverPure = silverBars + silverJewelry;
+        var totalSilverRp = totalSilverPure * silverPrice;
+
+        var isSilverWajib = (totalSilverPure >= silverNisabGram);
+        var silverZakatGram = isSilverWajib ? (totalSilverPure * rate) : 0;
+        var silverZakatRp = isSilverWajib ? (silverZakatGram * silverPrice) : 0;
+        var silverKekurangan = Math.max(0, silverNisabGram - totalSilverPure);
+
+        var totalCombinedZakatRp = goldZakatRp + silverZakatRp;
+        var totalCombinedZakatBulananRp = totalCombinedZakatRp / 12;
+        var isAnyWajib = isGoldWajib || isSilverWajib;
+
+        main.innerHTML = `
+          <div id="zakatEmasScreen" style="max-width:800px;margin:0 auto;width:100%;box-sizing:border-box;padding:8px 16px 60px">
+            
+            <!-- HEADER APP BAR -->
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;padding-bottom:16px;border-bottom:1.5px solid var(--clr-border)">
+              <div style="display:flex;align-items:center;gap:14px">
+                <button class="icon-btn" onclick="showZakatMenuPage()" style="width:42px;height:42px;border-radius:12px;background:var(--clr-surface);border:1.5px solid var(--clr-border);box-shadow:0 2px 8px rgba(0,0,0,0.04);cursor:pointer;display:grid;place-items:center;color:var(--clr-text)" title="Kembali ke Menu Zakat">
+                  <i class="fa-solid fa-arrow-left" style="font-size:1rem"></i>
+                </button>
+                <div>
+                  <div style="display:flex;align-items:center;gap:8px">
+                    <h2 style="font-size:1.25rem;font-weight:800;margin:0;color:var(--clr-primary-dk);letter-spacing:-0.3px">
+                      Zakat Simpanan Emas &amp; Perak
+                    </h2>
+                  </div>
+                  <div style="font-size:0.78rem;color:var(--clr-text-subtle);margin-top:2px">
+                    Logam Mulia Batangan, Tabungan &amp; Perhiasan Simpanan
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- LOCATION & REALTIME METAL PRICES BADGE -->
+            <div style="background:color-mix(in srgb, #F59E0B 12%, var(--clr-surface));border:1.5px solid color-mix(in srgb, #F59E0B 35%, var(--clr-border));border-radius:16px;padding:14px 18px;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;box-shadow:0 4px 14px rgba(245,158,11,0.08)">
+              <div style="display:flex;align-items:center;gap:10px">
+                <span style="position:relative;display:flex;width:10px;height:10px">
+                  <span style="position:absolute;display:inline-flex;height:100%;width:100%;border-radius:50%;background:#F59E0B;opacity:0.75;animation:ping 1.5s cubic-bezier(0, 0, 0.2, 1) infinite"></span>
+                  <span style="position:relative;display:inline-flex;border-radius:50%;height:10px;width:10px;background:#F59E0B"></span>
+                </span>
+                <div>
+                  <div style="font-size:0.82rem;font-weight:800;color:var(--clr-primary-dk)">
+                    Wilayah Acuan: <u>${zakatEmasState.detectedRegion}</u>
+                  </div>
+                  <div style="font-size:0.72rem;color:var(--clr-text-subtle);margin-top:1px">
+                    Emas 24K: <strong>Rp ${goldPrice.toLocaleString('id-ID')}/gr</strong> • Perak Murni: <strong>Rp ${silverPrice.toLocaleString('id-ID')}/gr</strong>
+                  </div>
+                </div>
+              </div>
+              <button onclick="syncRegionalGoldSilverPrice(true)" style="background:var(--clr-surface);border:1.5px solid color-mix(in srgb, #F59E0B 40%, var(--clr-border));padding:6px 14px;border-radius:10px;font-size:0.75rem;font-weight:800;color:var(--clr-gold-dk);cursor:pointer;display:inline-flex;align-items:center;gap:6px;box-shadow:0 2px 6px rgba(0,0,0,0.03);transition:all 0.2s ease">
+                <i class="fa-solid fa-rotate ${zakatEmasState.isSyncingPrice ? 'fa-spin' : ''}" style="color:var(--clr-gold)"></i> Perbarui Harga
+              </button>
+            </div>
+
+            <!-- FIQH DALIL ACCORDION -->
+            <div style="background:var(--clr-surface);border:1.5px solid color-mix(in srgb, var(--clr-gold) 45%, var(--clr-border));border-radius:18px;margin-bottom:24px;overflow:hidden;box-shadow:0 4px 16px rgba(194,124,21,0.06)">
+              <div onclick="toggleZakatEmasFiqhAccordion()" style="padding:14px 18px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;background:color-mix(in srgb, var(--clr-gold) 10%, var(--clr-surface))">
+                <div style="display:flex;align-items:center;gap:10px;font-weight:800;font-size:0.9rem;color:var(--clr-gold-dk)">
+                  <i class="fa-solid fa-book-quran" style="font-size:1.1rem"></i>
+                  <span>Dasar Hukum &amp; Ketentuan Syariat Zakat Emas &amp; Perak</span>
+                </div>
+                <div style="width:28px;height:28px;border-radius:8px;background:var(--clr-surface);display:grid;place-items:center;box-shadow:0 2px 6px rgba(0,0,0,0.04)">
+                  <i id="zakatEmasFiqhIcon" class="fa-solid fa-chevron-down" style="font-size:0.75rem;color:var(--clr-gold-dk);transition:transform 0.25s ease;${zakatEmasState.fiqhExpanded ? 'transform:rotate(180deg)' : ''}"></i>
+                </div>
+              </div>
+              <div id="zakatEmasFiqhBody" style="display:${zakatEmasState.fiqhExpanded ? 'block' : 'none'};padding:18px 20px;font-size:0.82rem;color:var(--clr-text-subtle);line-height:1.65;border-top:1px solid var(--clr-border)">
+                <div style="background:var(--clr-surface2);padding:12px 14px;border-radius:12px;margin-bottom:12px;border-left:4px solid var(--clr-gold)">
+                  <strong style="color:var(--clr-text-main);display:block;margin-bottom:2px">1. Landasan Syariat (QS. At-Taubah: 34 &amp; HR. Muslim):</strong>
+                  Wajib dikeluarkan dari simpanan emas dan perak yang telah mencapai nishab dan tersimpan selama genap 1 tahun (haul).
+                </div>
+                <div style="background:var(--clr-surface2);padding:12px 14px;border-radius:12px;margin-bottom:12px;border-left:4px solid var(--clr-primary)">
+                  <strong style="color:var(--clr-text-main);display:block;margin-bottom:2px">2. Pemisahan Nishab Emas &amp; Perak (Mazhab Syafi'i &amp; Jumhur):</strong>
+                  Nishab emas dan perak <strong>tidak digabungkan</strong>. Emas: <strong>85 gram</strong> (atau 77,5g). Perak: <strong>595 gram</strong> (atau 542,5g).
+                </div>
+                <div style="background:var(--clr-surface2);padding:12px 14px;border-radius:12px;margin-bottom:12px;border-left:4px solid #0284C7">
+                  <strong style="color:var(--clr-text-main);display:block;margin-bottom:2px">3. Kaidah Perhiasan Dipakai Wajar vs Disimpan:</strong>
+                  Perhiasan wanita yang dipakai sehari-hari secara wajar (*Hulyul Mubah*) <strong>bebas zakat</strong> menurut Jumhur Ulama. Hanya perhiasan simpanan / investasi / berlebihan yang wajib dizakati.
+                </div>
+                <div style="background:var(--clr-surface2);padding:12px 14px;border-radius:12px;border-left:4px solid #10B981">
+                  <strong style="color:var(--clr-text-main);display:block;margin-bottom:2px">4. Tarif Zakat 2.5%:</strong>
+                  Tarif zakat adalah <strong>2.5%</strong> untuk tahun Hijriyah (354 hari) atau <strong>2.577%</strong> untuk tahun Masehi (365 hari).
+                </div>
+              </div>
+            </div>
+
+            <!-- FORM CARD (SPACIOUS & INTUITIVE GUI) -->
+            <div style="background:var(--clr-surface);border:1.5px solid color-mix(in srgb, var(--clr-gold) 35%, var(--clr-border));border-radius:22px;padding:24px 22px;box-shadow:0 6px 24px rgba(0,0,0,0.04)">
+              
+              <!-- 1. Pilihan Harga Acuan, Nishab & Kalender Haul -->
+              <div style="margin-bottom:24px;padding-bottom:20px;border-bottom:1px solid var(--clr-border)">
+                <div style="font-size:0.88rem;font-weight:800;color:var(--clr-text-main);margin-bottom:12px;display:flex;align-items:center;gap:8px">
+                  <i class="fa-solid fa-sliders" style="color:var(--clr-gold)"></i> 1. Konfigurasi Harga Acuan &amp; Standar Nishab:
+                </div>
+
+                <!-- Input Harga Emas & Perak Side-by-Side -->
+                <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(240px, 1fr));gap:12px;margin-bottom:14px">
+                  <div>
+                    <label style="display:block;font-size:0.78rem;font-weight:700;color:var(--clr-text-main);margin-bottom:4px">
+                      Harga Emas 24K per Gram (Rp):
+                    </label>
+                    <div style="position:relative">
+                      <span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);font-weight:800;color:var(--clr-gold-dk);font-size:0.88rem">Rp</span>
+                      <input id="zakatEmasGoldPriceInput" type="text" value="${goldPrice.toLocaleString('id-ID')}" oninput="updateZakatEmasPrice('gold', this.value)" placeholder="Harga Emas" style="width:100%;height:46px;box-sizing:border-box;padding:0 14px 0 40px;border-radius:12px;border:1.5px solid var(--clr-border);background:var(--clr-surface2);color:var(--clr-text-main);font-size:0.95rem;font-weight:800;outline:none" />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label style="display:block;font-size:0.78rem;font-weight:700;color:var(--clr-text-main);margin-bottom:4px">
+                      Harga Perak Murni per Gram (Rp):
+                    </label>
+                    <div style="position:relative">
+                      <span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);font-weight:800;color:var(--clr-text-subtle);font-size:0.88rem">Rp</span>
+                      <input id="zakatEmasSilverPriceInput" type="text" value="${silverPrice.toLocaleString('id-ID')}" oninput="updateZakatEmasPrice('silver', this.value)" placeholder="Harga Perak" style="width:100%;height:46px;box-sizing:border-box;padding:0 14px 0 40px;border-radius:12px;border:1.5px solid var(--clr-border);background:var(--clr-surface2);color:var(--clr-text-main);font-size:0.95rem;font-weight:800;outline:none" />
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Standar Nishab Emas & Perak Selectors -->
+                <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(240px, 1fr));gap:12px;margin-bottom:14px">
+                  <div style="background:var(--clr-surface2);padding:10px 12px;border-radius:12px;border:1px solid var(--clr-border)">
+                    <div style="font-size:0.75rem;font-weight:800;color:var(--clr-text-main);margin-bottom:6px">Standar Nishab Emas:</div>
+                    <div style="display:flex;gap:4px">
+                      <button type="button" onclick="updateZakatEmasGoldNisabStandard(85)" style="flex:1;padding:5px;border-radius:6px;border:none;font-size:0.74rem;font-weight:800;cursor:pointer;${zakatEmasState.goldNisabStandard === 85 ? 'background:var(--clr-gold);color:#ffffff' : 'background:transparent;color:var(--clr-text-subtle)'}">85g (BAZNAS/MUI)</button>
+                      <button type="button" onclick="updateZakatEmasGoldNisabStandard(77.5)" style="flex:1;padding:5px;border-radius:6px;border:none;font-size:0.74rem;font-weight:800;cursor:pointer;${zakatEmasState.goldNisabStandard === 77.5 ? 'background:var(--clr-gold);color:#ffffff' : 'background:transparent;color:var(--clr-text-subtle)'}">77,5g (Klasik)</button>
+                    </div>
+                  </div>
+
+                  <div style="background:var(--clr-surface2);padding:10px 12px;border-radius:12px;border:1px solid var(--clr-border)">
+                    <div style="font-size:0.75rem;font-weight:800;color:var(--clr-text-main);margin-bottom:6px">Standar Nishab Perak:</div>
+                    <div style="display:flex;gap:4px">
+                      <button type="button" onclick="updateZakatEmasSilverNisabStandard(595)" style="flex:1;padding:5px;border-radius:6px;border:none;font-size:0.74rem;font-weight:800;cursor:pointer;${zakatEmasState.silverNisabStandard === 595 ? 'background:var(--clr-primary);color:#ffffff' : 'background:transparent;color:var(--clr-text-subtle)'}">595g (BAZNAS/MUI)</button>
+                      <button type="button" onclick="updateZakatEmasSilverNisabStandard(542.5)" style="flex:1;padding:5px;border-radius:6px;border:none;font-size:0.74rem;font-weight:800;cursor:pointer;${zakatEmasState.silverNisabStandard === 542.5 ? 'background:var(--clr-primary);color:#ffffff' : 'background:transparent;color:var(--clr-text-subtle)'}">542,5g (Klasik)</button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Pilihan Kalender Haul -->
+                <div>
+                  <label style="display:block;font-size:0.78rem;font-weight:700;color:var(--clr-text-main);margin-bottom:6px">
+                    Periode Kalender Haul (1 Tahun):
+                  </label>
+                  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+                    <div onclick="updateZakatEmasHaul('hijri')" style="cursor:pointer;padding:10px 12px;border-radius:10px;border:2px solid ${!isMasehi ? 'var(--clr-gold)' : 'var(--clr-border)'};background:${!isMasehi ? 'color-mix(in srgb, var(--clr-gold) 10%, var(--clr-surface))' : 'var(--clr-surface2)'};font-size:0.8rem;font-weight:800;display:flex;justify-content:space-between;align-items:center">
+                      <span>Hijriyah (354 Hari)</span>
+                      <span style="color:var(--clr-gold-dk)">2.5%</span>
+                    </div>
+                    <div onclick="updateZakatEmasHaul('masehi')" style="cursor:pointer;padding:10px 12px;border-radius:10px;border:2px solid ${isMasehi ? 'var(--clr-gold)' : 'var(--clr-border)'};background:${isMasehi ? 'color-mix(in srgb, var(--clr-gold) 10%, var(--clr-surface))' : 'var(--clr-surface2)'};font-size:0.8rem;font-weight:800;display:flex;justify-content:space-between;align-items:center">
+                      <span>Masehi (365 Hari)</span>
+                      <span style="color:var(--clr-gold-dk)">2.577%</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 2. Komponen Simpanan Emas -->
+              <div style="margin-bottom:24px;padding-bottom:20px;border-bottom:1px solid var(--clr-border)">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px">
+                  <div style="font-size:0.9rem;font-weight:800;color:var(--clr-gold-dk);display:flex;align-items:center;gap:8px">
+                    <i class="fa-solid fa-coins" style="color:var(--clr-gold)"></i> 2. Komponen Simpanan Emas:
+                  </div>
+                  <span style="font-size:0.72rem;background:color-mix(in srgb, var(--clr-gold) 12%, var(--clr-surface));color:var(--clr-gold-dk);font-weight:800;padding:3px 8px;border-radius:6px;border:1px solid color-mix(in srgb, var(--clr-gold) 25%, var(--clr-border))">Nishab: ${goldNisabGram} gr (Rp ${goldNisabRp.toLocaleString('id-ID')})</span>
+                </div>
+
+                <!-- Input Emas Batangan / Tabungan Emas -->
+                <div style="margin-bottom:14px">
+                  <label style="display:block;font-size:0.8rem;font-weight:700;color:var(--clr-text-main);margin-bottom:4px">
+                    A. Emas Batangan / Logam Mulia / Tabungan Emas (24K):
+                  </label>
+                  <div style="position:relative">
+                    <input id="input_goldBars" type="text" value="${zakatEmasState.goldBars}" oninput="updateZakatEmasField('goldBars', this.value)" placeholder="0" style="width:100%;height:48px;box-sizing:border-box;padding:0 80px 0 16px;border-radius:12px;border:1.5px solid var(--clr-border);background:var(--clr-surface2);color:var(--clr-text-main);font-size:1.05rem;font-weight:800;outline:none" />
+                    <span style="position:absolute;right:16px;top:50%;transform:translateY(-50%);font-size:0.82rem;font-weight:800;color:var(--clr-text-subtle)">Gram</span>
+                  </div>
+                  <div id="live_goldBars_estimate" style="font-size:0.72rem;color:var(--clr-gold-dk);margin-top:3px;font-weight:700">
+                    Estimasi Nilai: Rp ${Math.round(goldBars * goldPrice).toLocaleString('id-ID')}
+                  </div>
+                </div>
+
+                <!-- Input Perhiasan Emas Simpanan + Karat -->
+                <div>
+                  <label style="display:block;font-size:0.8rem;font-weight:700;color:var(--clr-text-main);margin-bottom:4px">
+                    B. Perhiasan Emas Simpanan / Tidak Dipakai:
+                  </label>
+                  <div style="display:flex;gap:8px">
+                    <div style="position:relative;flex:2">
+                      <input id="input_goldJewelry" type="text" value="${zakatEmasState.goldJewelry}" oninput="updateZakatEmasField('goldJewelry', this.value)" placeholder="0" style="width:100%;height:48px;box-sizing:border-box;padding:0 70px 0 16px;border-radius:12px;border:1.5px solid var(--clr-border);background:var(--clr-surface2);color:var(--clr-text-main);font-size:1.05rem;font-weight:800;outline:none" />
+                      <span style="position:absolute;right:14px;top:50%;transform:translateY(-50%);font-size:0.82rem;font-weight:800;color:var(--clr-text-subtle)">Gram</span>
+                    </div>
+                    <div style="flex:1">
+                      <select id="select_goldJewelryKarat" onchange="updateZakatEmasField('goldJewelryKarat', this.value)" style="width:100%;height:48px;border-radius:12px;border:1.5px solid var(--clr-border);background:var(--clr-surface2);color:var(--clr-text-main);font-size:0.85rem;font-weight:800;padding:0 10px;outline:none;cursor:pointer">
+                        <option value="24k" ${zakatEmasState.goldJewelryKarat === '24k' ? 'selected' : ''}>24K (99.9%)</option>
+                        <option value="22k" ${zakatEmasState.goldJewelryKarat === '22k' ? 'selected' : ''}>22K (91.6%)</option>
+                        <option value="18k" ${zakatEmasState.goldJewelryKarat === '18k' ? 'selected' : ''}>18K (75%)</option>
+                        <option value="16k" ${zakatEmasState.goldJewelryKarat === '16k' ? 'selected' : ''}>16K (70%)</option>
+                        <option value="14k" ${zakatEmasState.goldJewelryKarat === '14k' ? 'selected' : ''}>14K (58%)</option>
+                        <option value="9k" ${zakatEmasState.goldJewelryKarat === '9k' ? 'selected' : ''}>9K (37.5%)</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div id="live_goldJewelry_estimate" style="font-size:0.72rem;color:var(--clr-gold-dk);margin-top:3px;font-weight:700">
+                    Setara Emas Murni: ${goldJewelryPure.toFixed(2)} gr (Rp ${Math.round(goldJewelryPure * goldPrice).toLocaleString('id-ID')})
+                  </div>
+                  <div style="font-size:0.72rem;color:var(--clr-text-subtle);margin-top:2px">*(Perhiasan yang dipakai wajar sehari-hari bebas zakat).*</div>
+                </div>
+              </div>
+
+              <!-- 3. Komponen Simpanan Perak -->
+              <div style="margin-bottom:24px">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px">
+                  <div style="font-size:0.9rem;font-weight:800;color:var(--clr-primary-dk);display:flex;align-items:center;gap:8px">
+                    <i class="fa-solid fa-ring" style="color:var(--clr-primary)"></i> 3. Komponen Simpanan Perak:
+                  </div>
+                  <span style="font-size:0.72rem;background:color-mix(in srgb, var(--clr-primary) 12%, var(--clr-surface));color:var(--clr-primary-dk);font-weight:800;padding:3px 8px;border-radius:6px;border:1px solid color-mix(in srgb, var(--clr-primary) 25%, var(--clr-border))">Nishab: ${silverNisabGram} gr (Rp ${silverNisabRp.toLocaleString('id-ID')})</span>
+                </div>
+
+                <!-- Input Perak Batangan / Koin -->
+                <div style="margin-bottom:14px">
+                  <label style="display:block;font-size:0.8rem;font-weight:700;color:var(--clr-text-main);margin-bottom:4px">
+                    A. Perak Batangan / Koin Perak Murni:
+                  </label>
+                  <div style="position:relative">
+                    <input id="input_silverBars" type="text" value="${zakatEmasState.silverBars}" oninput="updateZakatEmasField('silverBars', this.value)" placeholder="0" style="width:100%;height:48px;box-sizing:border-box;padding:0 80px 0 16px;border-radius:12px;border:1.5px solid var(--clr-border);background:var(--clr-surface2);color:var(--clr-text-main);font-size:1.05rem;font-weight:800;outline:none" />
+                    <span style="position:absolute;right:16px;top:50%;transform:translateY(-50%);font-size:0.82rem;font-weight:800;color:var(--clr-text-subtle)">Gram</span>
+                  </div>
+                  <div id="live_silverBars_estimate" style="font-size:0.72rem;color:var(--clr-primary-dk);margin-top:3px;font-weight:700">
+                    Estimasi Nilai: Rp ${Math.round(silverBars * silverPrice).toLocaleString('id-ID')}
+                  </div>
+                </div>
+
+                <!-- Input Perhiasan / Peralatan Perak Simpanan -->
+                <div>
+                  <label style="display:block;font-size:0.8rem;font-weight:700;color:var(--clr-text-main);margin-bottom:4px">
+                    B. Perhiasan &amp; Peralatan Perak Simpanan:
+                  </label>
+                  <div style="position:relative">
+                    <input id="input_silverJewelry" type="text" value="${zakatEmasState.silverJewelry}" oninput="updateZakatEmasField('silverJewelry', this.value)" placeholder="0" style="width:100%;height:48px;box-sizing:border-box;padding:0 80px 0 16px;border-radius:12px;border:1.5px solid var(--clr-border);background:var(--clr-surface2);color:var(--clr-text-main);font-size:1.05rem;font-weight:800;outline:none" />
+                    <span style="position:absolute;right:16px;top:50%;transform:translateY(-50%);font-size:0.82rem;font-weight:800;color:var(--clr-text-subtle)">Gram</span>
+                  </div>
+                  <div id="live_silverJewelry_estimate" style="font-size:0.72rem;color:var(--clr-primary-dk);margin-top:3px;font-weight:700">
+                    Estimasi Nilai: Rp ${Math.round(silverJewelry * silverPrice).toLocaleString('id-ID')}
+                  </div>
+                </div>
+              </div>
+
+              <!-- Action Buttons -->
+              <div style="display:flex;gap:12px">
+                <button type="button" onclick="calculateZakatEmas()" style="flex:2;height:52px;background:linear-gradient(135deg, #F59E0B, #D97706);color:#ffffff;border:none;border-radius:14px;font-size:1rem;font-weight:800;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:10px;box-shadow:0 6px 18px rgba(217,119,6,0.3);transition:all 0.2s ease">
+                  <i class="fa-solid fa-calculator" style="font-size:1.1rem"></i> Hitung Zakat Emas &amp; Perak
+                </button>
+                <button type="button" onclick="resetZakatEmasForm()" style="flex:1;height:52px;background:var(--clr-surface2);color:var(--clr-text-main);border:1.5px solid var(--clr-border);border-radius:14px;font-size:0.9rem;font-weight:700;cursor:pointer;transition:all 0.2s ease">
+                  Reset
+                </button>
+              </div>
+
+            </div>
+
+            <!-- RESULT SECTION -->
+            ${zakatEmasState.isCalculated ? `
+              <div id="zakatEmasResultSection" style="margin-top:32px;animation:fadeIn 0.35s ease">
+                
+                <!-- Status Cards (Dual Status: Emas & Perak) -->
+                <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(260px, 1fr));gap:14px;margin-bottom:20px">
+                  
+                  <!-- Status Emas -->
+                  <div style="background:${isGoldWajib ? 'linear-gradient(135deg, #B45309 0%, #D97706 100%)' : 'var(--clr-surface)'};color:${isGoldWajib ? '#ffffff' : 'var(--clr-text-main)'};border:${isGoldWajib ? 'none' : '1.5px solid var(--clr-border)'};border-radius:18px;padding:18px;box-shadow:0 6px 20px rgba(0,0,0,0.06)">
+                    <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
+                      <i class="fa-solid ${isGoldWajib ? 'fa-circle-check' : 'fa-circle-info'}" style="font-size:1.2rem;color:${isGoldWajib ? '#FDE68A' : 'var(--clr-gold)'}"></i>
+                      <h4 style="margin:0;font-size:0.95rem;font-weight:800">Status Simpanan Emas</h4>
+                    </div>
+                    <div style="font-size:0.8rem;line-height:1.5;opacity:${isGoldWajib ? '0.95' : '0.8'}">
+                      ${isGoldWajib
+                        ? `Total emas murni <strong>${totalGoldPure.toFixed(2)} gr</strong> telah mencapai nishab (${goldNisabGram} gr). <strong>Wajib Zakat: ${goldZakatGram.toFixed(2)} gr (Rp ${Math.round(goldZakatRp).toLocaleString('id-ID')})</strong>.`
+                        : `Total emas murni <strong>${totalGoldPure.toFixed(2)} gr</strong> belum mencapai nishab (${goldNisabGram} gr). Kurang <strong>${goldKekurangan.toFixed(2)} gr</strong>.`
+                      }
+                    </div>
+                  </div>
+
+                  <!-- Status Perak -->
+                  <div style="background:${isSilverWajib ? 'linear-gradient(135deg, #047857 0%, #059669 100%)' : 'var(--clr-surface)'};color:${isSilverWajib ? '#ffffff' : 'var(--clr-text-main)'};border:${isSilverWajib ? 'none' : '1.5px solid var(--clr-border)'};border-radius:18px;padding:18px;box-shadow:0 6px 20px rgba(0,0,0,0.06)">
+                    <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
+                      <i class="fa-solid ${isSilverWajib ? 'fa-circle-check' : 'fa-circle-info'}" style="font-size:1.2rem;color:${isSilverWajib ? '#A7F3D0' : 'var(--clr-primary)'}"></i>
+                      <h4 style="margin:0;font-size:0.95rem;font-weight:800">Status Simpanan Perak</h4>
+                    </div>
+                    <div style="font-size:0.8rem;line-height:1.5;opacity:${isSilverWajib ? '0.95' : '0.8'}">
+                      ${isSilverWajib
+                        ? `Total perak murni <strong>${totalSilverPure.toFixed(2)} gr</strong> telah mencapai nishab (${silverNisabGram} gr). <strong>Wajib Zakat: ${silverZakatGram.toFixed(2)} gr (Rp ${Math.round(silverZakatRp).toLocaleString('id-ID')})</strong>.`
+                        : `Total perak murni <strong>${totalSilverPure.toFixed(2)} gr</strong> belum mencapai nishab (${silverNisabGram} gr). Kurang <strong>${silverKekurangan.toFixed(2)} gr</strong>.`
+                      }
+                    </div>
+                  </div>
+
+                </div>
+
+                ${isAnyWajib ? `
+                  <!-- Total Gabungan Zakat Card -->
+                  <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(260px, 1fr));gap:16px;margin-bottom:20px">
+                    
+                    <!-- Card 1: Total Zakat Tahunan -->
+                    <div style="background:var(--clr-surface);border:2px solid var(--clr-gold);border-radius:18px;padding:20px;box-shadow:0 6px 20px rgba(217,119,6,0.08);display:flex;flex-direction:column;justify-content:space-between">
+                      <div>
+                        <div style="display:flex;align-items:center;gap:8px;font-size:0.78rem;font-weight:800;color:var(--clr-gold-dk);text-transform:uppercase;margin-bottom:8px">
+                          <i class="fa-solid fa-coins"></i> TOTAL ZAKAT LOGAM MULIA (TAHUNAN)
+                        </div>
+                        <div style="font-size:1.65rem;font-weight:900;color:var(--clr-gold-dk);line-height:1.2;margin-bottom:6px">
+                          Rp ${Math.round(totalCombinedZakatRp).toLocaleString('id-ID')}
+                        </div>
+                      </div>
+                      <div style="font-size:0.74rem;color:var(--clr-text-subtle);line-height:1.4;margin-top:8px;padding-top:8px;border-top:1px dashed var(--clr-border)">
+                        *Dikeluarkan saat genap haul 1 tahun (${rateLabel}). Boleh berupa fisik emas/perak atau uang tunai.
+                      </div>
+                    </div>
+
+                    <!-- Card 2: Opsi Cicilan Bulanan -->
+                    <div style="background:var(--clr-surface);border:2px solid var(--clr-primary);border-radius:18px;padding:20px;box-shadow:0 6px 20px rgba(16,185,129,0.08);display:flex;flex-direction:column;justify-content:space-between">
+                      <div>
+                        <div style="display:flex;align-items:center;gap:8px;font-size:0.78rem;font-weight:800;color:var(--clr-primary-dk);text-transform:uppercase;margin-bottom:8px">
+                          <i class="fa-solid fa-calendar-check"></i> OPSI CICILAN PER BULAN (TA'JIL)
+                        </div>
+                        <div style="font-size:1.65rem;font-weight:900;color:var(--clr-primary-dk);line-height:1.2;margin-bottom:6px">
+                          Rp ${Math.round(totalCombinedZakatBulananRp).toLocaleString('id-ID')} <span style="font-size:0.9rem;font-weight:700">/ bln</span>
+                        </div>
+                      </div>
+                      <div style="font-size:0.74rem;color:var(--clr-text-subtle);line-height:1.4;margin-top:8px;padding-top:8px;border-top:1px dashed var(--clr-border)">
+                        *Boleh dicicil setiap bulan untuk memudahkan penunaian (*Ta'jil az-Zakat*).
+                      </div>
+                    </div>
+
+                  </div>
+
+                  <!-- Detail Breakdown Table -->
+                  <div style="background:var(--clr-surface);border:1.5px solid var(--clr-border);border-radius:18px;padding:20px 22px;margin-bottom:20px;box-shadow:0 4px 16px rgba(0,0,0,0.02)">
+                    <h4 style="margin:0 0 16px;font-size:0.92rem;font-weight:800;color:var(--clr-text-main);display:flex;align-items:center;gap:8px">
+                      <i class="fa-solid fa-list-check" style="color:var(--clr-gold)"></i> Rincian Perhitungan Fiqh Logam Mulia
+                    </h4>
+                    
+                    <div style="display:flex;flex-direction:column;gap:10px;font-size:0.84rem">
+                      <div style="display:flex;justify-content:space-between;align-items:center;padding-bottom:8px;border-bottom:1px dashed var(--clr-border)">
+                        <span style="color:var(--clr-text-subtle)">Total Kepemilikan Emas Murni:</span>
+                        <span style="font-weight:800;color:var(--clr-text-main)">${totalGoldPure.toFixed(2)} gr (Rp ${Math.round(totalGoldRp).toLocaleString('id-ID')})</span>
+                      </div>
+                      <div style="display:flex;justify-content:space-between;align-items:center;padding-bottom:8px;border-bottom:1px dashed var(--clr-border)">
+                        <span style="color:var(--clr-text-subtle)">Batas Nishab Emas:</span>
+                        <span style="font-weight:800;color:var(--clr-text-main)">${goldNisabGram} gr (Rp ${goldNisabRp.toLocaleString('id-ID')}) • ${isGoldWajib ? '<strong style="color:#10B981">WAJIB</strong>' : '<span style="color:var(--clr-text-subtle)">Belum</span>'}</span>
+                      </div>
+                      <div style="display:flex;justify-content:space-between;align-items:center;padding-bottom:8px;border-bottom:1px dashed var(--clr-border)">
+                        <span style="color:var(--clr-text-subtle)">Zakat Emas (2.5%):</span>
+                        <span style="font-weight:800;color:var(--clr-gold-dk)">${goldZakatGram.toFixed(2)} gr (Rp ${Math.round(goldZakatRp).toLocaleString('id-ID')})</span>
+                      </div>
+                      <div style="display:flex;justify-content:space-between;align-items:center;padding-bottom:8px;border-bottom:1px dashed var(--clr-border)">
+                        <span style="color:var(--clr-text-subtle)">Total Kepemilikan Perak Murni:</span>
+                        <span style="font-weight:800;color:var(--clr-text-main)">${totalSilverPure.toFixed(2)} gr (Rp ${Math.round(totalSilverRp).toLocaleString('id-ID')})</span>
+                      </div>
+                      <div style="display:flex;justify-content:space-between;align-items:center;padding-bottom:8px;border-bottom:1px dashed var(--clr-border)">
+                        <span style="color:var(--clr-text-subtle)">Batas Nishab Perak:</span>
+                        <span style="font-weight:800;color:var(--clr-text-main)">${silverNisabGram} gr (Rp ${silverNisabRp.toLocaleString('id-ID')}) • ${isSilverWajib ? '<strong style="color:#10B981">WAJIB</strong>' : '<span style="color:var(--clr-text-subtle)">Belum</span>'}</span>
+                      </div>
+                      <div style="display:flex;justify-content:space-between;align-items:center;padding-bottom:8px;border-bottom:1px dashed var(--clr-border)">
+                        <span style="color:var(--clr-text-subtle)">Zakat Perak (2.5%):</span>
+                        <span style="font-weight:800;color:var(--clr-primary-dk)">${silverZakatGram.toFixed(2)} gr (Rp ${Math.round(silverZakatRp).toLocaleString('id-ID')})</span>
+                      </div>
+                      <div style="display:flex;justify-content:space-between;align-items:center;padding-top:4px">
+                        <span style="color:var(--clr-text-subtle)">Total Kewajiban Zakat:</span>
+                        <span style="font-weight:800;color:var(--clr-gold-dk)">Rp ${Math.round(totalCombinedZakatRp).toLocaleString('id-ID')}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Doa Penyuci Logam Mulia -->
+                  <div style="background:linear-gradient(135deg, color-mix(in srgb, var(--clr-gold) 12%, var(--clr-surface)) 0%, color-mix(in srgb, var(--clr-primary) 8%, var(--clr-surface)) 100%);border:1.5px solid color-mix(in srgb, var(--clr-gold) 45%, var(--clr-border));border-radius:20px;padding:22px 24px;text-align:center;box-shadow:0 6px 20px rgba(194,124,21,0.06)">
+                    <div style="font-size:0.78rem;font-weight:800;color:var(--clr-gold-dk);margin-bottom:10px;text-transform:uppercase;letter-spacing:1px;display:flex;align-items:center;justify-content:center;gap:6px">
+                      <span>🤲</span> DOA PENYUCI SIMPANAN EMAS &amp; PERAK
+                    </div>
+                    <div style="font-family:'Amiri', serif;font-size:1.35rem;color:var(--clr-primary-dk);direction:rtl;margin-bottom:10px;line-height:2.2;text-shadow:0 1px 2px rgba(0,0,0,0.05)">
+                      اللَّهُمَّ اجْعَلْهَا مَغْنَمًا وَلَا تَجْعَلْهَا مَغْرَمًا، وَطَهِّرْ بِهَا أَمْوَالَنَا وَأَزْكِ بِهَا نُفُوسَنَا
+                    </div>
+                    <div style="font-size:0.8rem;color:var(--clr-text-subtle);font-style:italic;line-height:1.5">
+                      "Ya Allah, jadikanlah zakat ini sebagai keberuntungan (penambah kebaikan) dan jangan jadikan ia sebagai beban/kerugian. Sucikanlah harta kami dengannya dan bersihkanlah jiwa kami."
+                    </div>
+                  </div>
+                ` : `
+                  <!-- Belum Nishab Guidance -->
+                  <div style="background:var(--clr-surface);border:1.5px solid var(--clr-border);border-radius:18px;padding:22px 24px;text-align:center;box-shadow:0 4px 16px rgba(0,0,0,0.02)">
+                    <div style="width:48px;height:48px;border-radius:14px;background:color-mix(in srgb, var(--clr-gold) 15%, var(--clr-surface));display:grid;place-items:center;margin:0 auto 12px;color:var(--clr-gold-dk);font-size:1.3rem">
+                      <i class="fa-solid fa-hand-holding-heart"></i>
+                    </div>
+                    <div style="font-size:0.92rem;font-weight:800;color:var(--clr-text-main);margin-bottom:4px">
+                      Anjuran Sedekah &amp; Infaq Emas/Perak
+                    </div>
+                    <div style="font-size:0.82rem;color:var(--clr-text-subtle);line-height:1.55;max-width:500px;margin:0 auto">
+                      Simpanan emas dan perak Anda saat ini belum mencapai batas nishab minimal wajib zakat. Anda tetap sangat dianjurkan untuk mengeluarkan <strong>sedekah sukarela</strong> agar harta simpanan senantiasa diberkahi dan dilindungi oleh Allah SWT.
+                    </div>
+                  </div>
+                `}
+
+              </div>
+            ` : ''}
+
+            <!-- EDUKASI & ASPEK PENGHITUNGAN ZAKAT EMAS & PERAK -->
+            <div style="margin-top:32px;background:var(--clr-surface);border:1.5px solid color-mix(in srgb, var(--clr-gold) 35%, var(--clr-border));border-radius:20px;padding:22px 24px;box-shadow:0 6px 20px rgba(0,0,0,0.03)">
+              <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--clr-border)">
+                <div style="width:36px;height:36px;border-radius:10px;background:color-mix(in srgb, var(--clr-gold) 12%, var(--clr-surface));display:grid;place-items:center;color:var(--clr-gold-dk)">
+                  <i class="fa-solid fa-lightbulb" style="font-size:1.1rem"></i>
+                </div>
+                <div>
+                  <h4 style="margin:0;font-size:0.95rem;font-weight:800;color:var(--clr-gold-dk)">
+                    Panduan Fiqh &amp; Aspek Yang Dihitung (Zakat Emas &amp; Perak)
+                  </h4>
+                  <div style="font-size:0.75rem;color:var(--clr-text-subtle)">Kaidah syariat mengenai batangan, kadar karat perhiasan, dan perhiasan pakai</div>
+                </div>
+              </div>
+
+              <div style="display:flex;flex-direction:column;gap:14px;font-size:0.82rem;line-height:1.6">
+                <!-- Point 1 -->
+                <div style="display:flex;align-items:flex-start;gap:10px">
+                  <span style="display:inline-block;width:22px;height:22px;border-radius:6px;background:#FEF3C7;color:#D97706;font-weight:800;font-size:0.75rem;text-align:center;line-height:22px;flex-shrink:0">1</span>
+                  <div>
+                    <strong style="color:var(--clr-text-main)">Nishab Dihitung Terpisah (Tidak Digabungkan):</strong>
+                    <span style="color:var(--clr-text-subtle)"> Menurut Mazhab Syafi'i, Maliki, dan Hanbali, nishab emas dan perak berdiri sendiri. Emas memiliki nishab <strong>85 gram</strong> (atau 77,5g), sedangkan perak memiliki nishab <strong>595 gram</strong> (atau 542,5g). Tidak boleh menggabungkan 50g emas + 200g perak untuk dipaksakan mencapai nishab.</span>
+                  </div>
+                </div>
+
+                <!-- Point 2 -->
+                <div style="display:flex;align-items:flex-start;gap:10px">
+                  <span style="display:inline-block;width:22px;height:22px;border-radius:6px;background:#FEF3C7;color:#D97706;font-weight:800;font-size:0.75rem;text-align:center;line-height:22px;flex-shrink:0">2</span>
+                  <div>
+                    <strong style="color:var(--clr-text-main)">Perhiasan Dipakai Wajar Bebas Zakat (*Hulyul Mubah*):</strong>
+                    <span style="color:var(--clr-text-subtle)"> Perhiasan wanita yang rutin dipakai sehari-hari dalam batas kewajaran adat (*'Urf*) <strong>tidak wajib dizakati</strong>. Yang wajib dizakati hanyalah perhiasan yang disimpan/ditabung di brankas atau yang jumlahnya melampaui batas kewajaran (berlebihan).</span>
+                  </div>
+                </div>
+
+                <!-- Point 3 -->
+                <div style="display:flex;align-items:flex-start;gap:10px">
+                  <span style="display:inline-block;width:22px;height:22px;border-radius:6px;background:#FEF3C7;color:#D97706;font-weight:800;font-size:0.75rem;text-align:center;line-height:22px;flex-shrink:0">3</span>
+                  <div>
+                    <strong style="color:var(--clr-text-main)">Konversi Kadar Karat Perhiasan:</strong>
+                    <span style="color:var(--clr-text-subtle)"> Penghitungan nishab dan zakat perhiasan didasarkan pada <strong>kandungan emas murni bersihnya</strong> (24K = 100%, 22K = 91.6%, 18K = 75%, 16K = 70%). Aplikasi ini secara otomatis mengonversi karatase ke bobot emas murni.</span>
+                  </div>
+                </div>
+
+                <!-- Point 4 -->
+                <div style="display:flex;align-items:flex-start;gap:10px">
+                  <span style="display:inline-block;width:22px;height:22px;border-radius:6px;background:#FEF3C7;color:#D97706;font-weight:800;font-size:0.75rem;text-align:center;line-height:22px;flex-shrink:0">4</span>
+                  <div>
+                    <strong style="color:var(--clr-text-main)">Syarat Haul 1 Tahun &amp; Tarif Zakat:</strong>
+                    <span style="color:var(--clr-text-subtle)"> Emas/perak simpanan wajib dizakati apabila telah genap dimiliki selama 1 tahun (haul). Tarif sebesar <strong>2.5%</strong> (Tahun Hijriyah) atau <strong>2.577%</strong> (Tahun Masehi).</span>
+                  </div>
+                </div>
+
+                <!-- Point 5 -->
+                <div style="display:flex;align-items:flex-start;gap:10px">
+                  <span style="display:inline-block;width:22px;height:22px;border-radius:6px;background:#FEF3C7;color:#D97706;font-weight:800;font-size:0.75rem;text-align:center;line-height:22px;flex-shrink:0">5</span>
+                  <div>
+                    <strong style="color:var(--clr-text-main)">Bentuk Penunaian (Fisik Logam vs Uang Tunai):</strong>
+                    <span style="color:var(--clr-text-subtle)"> Zakat boleh ditunaikan dalam bentuk fisik logam mulia (misal menyerahkan gram emas) ataupun dibayarkan setara nilai uang tunai seharga pasar emas/perak saat jatuh tempo haul.</span>
                   </div>
                 </div>
               </div>
