@@ -1475,7 +1475,7 @@
 
                     <!-- DIGITAL AUDIO TRIGGER -->
                     <div style="margin-bottom:14px">
-                      <div class="digital-select-trigger" onclick="openPrayerAudioPicker('${p.key}')" style="padding:12px 14px;background:var(--clr-bg);border:1.5px solid var(--clr-border);border-radius:14px">
+                      <div class="digital-select-trigger" onclick="toggleInlineDropdown('ringtone_${p.key}_dropdown')" style="padding:12px 14px;background:var(--clr-bg);border:1.5px solid var(--clr-border);border-radius:14px">
                         <div style="display:flex;align-items:center;gap:10px;overflow:hidden">
                           <div style="width:32px;height:32px;border-radius:8px;background:color-mix(in srgb, var(--clr-primary) 15%, var(--clr-surface));display:grid;place-items:center;color:var(--clr-primary);flex-shrink:0">
                             <i class="fa-solid fa-volume-high"></i>
@@ -1485,9 +1485,25 @@
                           </div>
                         </div>
                         <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
-                          <span style="font-size:0.72rem;font-weight:800;background:var(--clr-surface2);color:var(--clr-primary);padding:3px 8px;border-radius:6px;border:1px solid var(--clr-border)">Ganti</span>
-                          <i class="fa-solid fa-chevron-down" style="font-size:0.75rem;color:var(--clr-text-subtle)"></i>
+                          <span style="font-size:0.72rem;font-weight:800;background:var(--clr-surface2);color:var(--clr-primary);padding:3px 8px;border-radius:6px;border:1px solid var(--clr-border)">Pilih</span>
+                          <i id="ringtone_${p.key}_dropdown_chevron" class="fa-solid fa-chevron-down" style="font-size:0.75rem;color:var(--clr-text-subtle);transition:transform 0.25s ease"></i>
                         </div>
+                      </div>
+
+                      <!-- INLINE ACCORDION AUDIO OPTIONS -->
+                      <div id="ringtone_${p.key}_dropdown" class="inline-dropdown-content">
+                        ${p.options.map(function(opt) {
+                          var isSel = (opt.id === savedId);
+                          return `
+                            <div class="inline-dropdown-opt" onclick="selectInlineOption('ringtone_${p.key}_dropdown', function(v){ localStorage.setItem('pad_audio_${p.key}', v); showToast('Suara ${p.label} disimpan ✓'); vibrate([30]); if(typeof scheduleAllPrayerAlarms==='function')scheduleAllPrayerAlarms(); var m=document.getElementById('ringtoneSettingsModal'); if(m){ m.remove(); openRingtoneSettingsModal(); } }, '${opt.id}')" style="background:${isSel ? 'color-mix(in srgb, var(--clr-primary) 12%, var(--clr-surface))' : 'var(--clr-surface)'};border:1.5px solid ${isSel ? 'var(--clr-primary)' : 'var(--clr-border)'};">
+                              <div style="display:flex;align-items:center;gap:10px">
+                                <i class="fa-solid fa-music" style="color:var(--clr-primary);font-size:0.85rem"></i>
+                                <span style="font-size:0.85rem;font-weight:800;color:${isSel ? 'var(--clr-primary-dk)' : 'var(--clr-text)'}">${opt.name}</span>
+                              </div>
+                              ${isSel ? '<i class="fa-solid fa-circle-check" style="color:var(--clr-primary);font-size:0.9rem"></i>' : ''}
+                            </div>
+                          `;
+                        }).join('')}
                       </div>
                     </div>
 
@@ -3317,7 +3333,7 @@
                 <label style="display:flex;align-items:center;gap:8px;font-size:0.88rem;font-weight:800;color:var(--clr-text-main);margin-bottom:8px">
                   <i class="fa-solid fa-seedling" style="color:var(--clr-primary)"></i> 1. Jenis Komoditas Tanaman Pangan:
                 </label>
-                <div class="digital-select-trigger" onclick="openPertanianCommodityPicker()">
+                <div class="digital-select-trigger" onclick="toggleInlineDropdown('pertanian_comm_dropdown')">
                   <div style="display:flex;align-items:center;gap:12px">
                     <div style="width:38px;height:38px;border-radius:12px;background:linear-gradient(135deg, #16A34A, #15803D);color:#ffffff;display:grid;place-items:center;font-size:1.15rem;box-shadow:0 3px 10px rgba(22,163,74,0.25)">
                       ${zakatPertanianState.commodity.startsWith('kacang') ? '🌱' : '🌾'}
@@ -3329,8 +3345,31 @@
                   </div>
                   <div style="display:flex;align-items:center;gap:8px">
                     <span style="font-size:0.72rem;font-weight:800;background:var(--clr-surface);color:var(--clr-primary-dk);padding:4px 10px;border-radius:99px;border:1px solid var(--clr-border)">Pilih</span>
-                    <i class="fa-solid fa-chevron-down" style="color:var(--clr-text-subtle);font-size:0.8rem"></i>
+                    <i id="pertanian_comm_dropdown_chevron" class="fa-solid fa-chevron-down" style="color:var(--clr-text-subtle);font-size:0.8rem;transition:transform 0.25s ease"></i>
                   </div>
+                </div>
+
+                <!-- INLINE ACCORDION OPTIONS -->
+                <div id="pertanian_comm_dropdown" class="inline-dropdown-content">
+                  ${Object.keys(COMMODITY_NISAB_DATA).map(function(key) {
+                    var it = COMMODITY_NISAB_DATA[key];
+                    var isSel = (zakatPertanianState.commodity === key);
+                    return `
+                      <div class="inline-dropdown-opt" onclick="selectInlineOption('pertanian_comm_dropdown', updateZakatPertanianCommodity, '${key}')" style="background:${isSel ? 'color-mix(in srgb, var(--clr-primary) 12%, var(--clr-surface))' : 'var(--clr-surface)'};border:1.5px solid ${isSel ? 'var(--clr-primary)' : 'var(--clr-border)'};">
+                        <div style="display:flex;align-items:center;gap:10px">
+                          <span style="font-size:1.15rem">${key.startsWith('kacang') ? '🌱' : '🌾'}</span>
+                          <div>
+                            <div style="font-weight:800;font-size:0.88rem;color:${isSel ? 'var(--clr-primary-dk)' : 'var(--clr-text-main)'}">${it.name}</div>
+                            <div style="font-size:0.72rem;color:var(--clr-text-subtle)">${it.description}</div>
+                          </div>
+                        </div>
+                        <div style="display:flex;align-items:center;gap:6px">
+                          <span style="font-size:0.68rem;font-weight:800;background:${isSel ? 'var(--clr-primary)' : 'var(--clr-surface2)'};color:${isSel ? '#ffffff' : 'var(--clr-text-subtle)'};padding:2px 8px;border-radius:99px">${it.nisabLabel}</span>
+                          ${isSel ? '<i class="fa-solid fa-circle-check" style="color:var(--clr-primary);font-size:0.9rem"></i>' : ''}
+                        </div>
+                      </div>
+                    `;
+                  }).join('')}
                 </div>
                 
                 <!-- Nishab Info Preview Badge -->
@@ -4597,13 +4636,33 @@
                       <input id="input_goldJewelry" type="text" value="${zakatEmasState.goldJewelry}" oninput="updateZakatEmasField('goldJewelry', this.value)" placeholder="0" style="width:100%;height:48px;box-sizing:border-box;padding:0 70px 0 16px;border-radius:12px;border:1.5px solid var(--clr-border);background:var(--clr-surface2);color:var(--clr-text-main);font-size:1.05rem;font-weight:800;outline:none" />
                       <span style="position:absolute;right:14px;top:50%;transform:translateY(-50%);font-size:0.82rem;font-weight:800;color:var(--clr-text-subtle)">Gram</span>
                     </div>
-                    <div style="flex:1">
-                      <div onclick="openGoldKaratPicker()" style="cursor:pointer;height:48px;border-radius:12px;border:1.5px solid var(--clr-border);background:var(--clr-surface2);color:var(--clr-text-main);display:flex;align-items:center;justify-content:space-between;padding:0 12px;font-size:0.85rem;font-weight:800;box-sizing:border-box;transition:all 0.2s ease">
-                        <span style="display:flex;align-items:center;gap:6px">
+                    <div style="flex:1;position:relative">
+                      <div class="digital-select-trigger" onclick="toggleInlineDropdown('emas_karat_dropdown')" style="height:48px;padding:0 12px;border-radius:12px;box-sizing:border-box">
+                        <span style="display:flex;align-items:center;gap:6px;font-size:0.85rem;font-weight:800">
                           <span style="width:8px;height:8px;border-radius:50%;background:#D97706"></span>
                           <span>${zakatEmasState.goldJewelryKarat.toUpperCase()}</span>
                         </span>
-                        <i class="fa-solid fa-chevron-down" style="font-size:0.75rem;color:var(--clr-text-subtle)"></i>
+                        <i id="emas_karat_dropdown_chevron" class="fa-solid fa-chevron-down" style="font-size:0.75rem;color:var(--clr-text-subtle);transition:transform 0.25s ease"></i>
+                      </div>
+
+                      <!-- INLINE DROPDOWN OPTIONS -->
+                      <div id="emas_karat_dropdown" class="inline-dropdown-content" style="position:absolute;top:54px;left:0;right:0;z-index:50;background:var(--clr-surface);box-shadow:0 8px 24px rgba(0,0,0,0.15)">
+                        ${[
+                          { val: '24k', label: '24K (99.9%)', desc: 'Murni' },
+                          { val: '22k', label: '22K (91.6%)', desc: 'Tua' },
+                          { val: '18k', label: '18K (75.0%)', desc: '750' },
+                          { val: '16k', label: '16K (70.0%)', desc: 'Muda' },
+                          { val: '14k', label: '14K (58.5%)', desc: '585' },
+                          { val: '9k', label: '9K (37.5%)', desc: '375' }
+                        ].map(function(k) {
+                          var isSel = (zakatEmasState.goldJewelryKarat === k.val);
+                          return `
+                            <div class="inline-dropdown-opt" onclick="selectInlineOption('emas_karat_dropdown', function(v){ updateZakatEmasField('goldJewelryKarat', v); }, '${k.val}')" style="padding:8px 10px;background:${isSel ? 'color-mix(in srgb, var(--clr-gold) 15%, var(--clr-surface))' : 'var(--clr-surface)'};border:1px solid ${isSel ? 'var(--clr-gold)' : 'var(--clr-border)'};font-size:0.78rem;font-weight:700">
+                              <span>${k.label}</span>
+                              <span style="font-size:0.68rem;color:var(--clr-text-subtle)">${k.desc}</span>
+                            </div>
+                          `;
+                        }).join('')}
                       </div>
                     </div>
                   </div>
@@ -5744,7 +5803,8 @@
                     <input id="input_tnm_customName" type="text" value="${zakatTanamanState.customName || ''}" oninput="updateZakatTanamanCustomName(this.value)" placeholder="Tuliskan nama tanaman / komoditas Anda (misal: Sengon, Porang, Nilam...)" style="width:100%;height:48px;box-sizing:border-box;padding:0 16px;border-radius:12px;border:1.5px solid var(--clr-border);background:var(--clr-surface2);color:var(--clr-text-main);font-size:0.95rem;font-weight:700;outline:none" />
                   </div>
                 ` : `
-                  <div class="digital-select-trigger" onclick="openTanamanItemPicker()">
+                  <!-- TRIGGER HEADER -->
+                  <div class="digital-select-trigger" onclick="toggleInlineDropdown('tanaman_item_dropdown')">
                     <div style="display:flex;align-items:center;gap:12px">
                       <div style="width:38px;height:38px;border-radius:12px;background:linear-gradient(135deg, #059669, #047857);color:#ffffff;display:grid;place-items:center;font-size:1.15rem;box-shadow:0 3px 10px rgba(5,150,105,0.25)">
                         ${currentItemIcon}
@@ -5756,8 +5816,32 @@
                     </div>
                     <div style="display:flex;align-items:center;gap:8px">
                       <span style="font-size:0.72rem;font-weight:800;background:var(--clr-surface);color:#047857;padding:4px 10px;border-radius:99px;border:1px solid var(--clr-border)">Pilih</span>
-                      <i class="fa-solid fa-chevron-down" style="color:var(--clr-text-subtle);font-size:0.8rem"></i>
+                      <i id="tanaman_item_dropdown_chevron" class="fa-solid fa-chevron-down" style="color:var(--clr-text-subtle);font-size:0.8rem;transition:transform 0.25s ease"></i>
                     </div>
+                  </div>
+
+                  <!-- INLINE ACCORDION OPTIONS (WITH SEARCH FILTER) -->
+                  <div id="tanaman_item_dropdown" class="inline-dropdown-content">
+                    <div style="position:relative;margin-bottom:6px">
+                      <i class="fa-solid fa-magnifying-glass" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--clr-text-subtle);font-size:0.8rem"></i>
+                      <input type="text" placeholder="Cari komoditas tanaman..." oninput="filterInlineOptions('tanaman_item_dropdown', this.value)" style="width:100%;height:38px;box-sizing:border-box;padding:0 12px 0 34px;border-radius:10px;border:1px solid var(--clr-border);background:var(--clr-surface2);color:var(--clr-text-main);font-size:0.82rem;font-weight:700;outline:none" />
+                    </div>
+
+                    ${(TANAMAN_PRODUKTIF_DATA[currentCat] || []).map(function(it) {
+                      var isSel = (zakatTanamanState.selectedItem === it.id);
+                      return `
+                        <div class="inline-dropdown-opt" data-text="${(it.name + ' ' + it.desc).toLowerCase()}" onclick="selectInlineOption('tanaman_item_dropdown', setZakatTanamanItem, '${it.id}')" style="background:${isSel ? 'color-mix(in srgb, #059669 12%, var(--clr-surface))' : 'var(--clr-surface)'};border:1.5px solid ${isSel ? '#059669' : 'var(--clr-border)'};">
+                          <div style="display:flex;align-items:center;gap:10px">
+                            <span style="font-size:1.15rem">${it.icon}</span>
+                            <div>
+                              <div style="font-weight:800;font-size:0.88rem;color:${isSel ? '#047857' : 'var(--clr-text-main)'}">${it.name}</div>
+                              <div style="font-size:0.72rem;color:var(--clr-text-subtle)">${it.desc}</div>
+                            </div>
+                          </div>
+                          ${isSel ? '<i class="fa-solid fa-circle-check" style="color:#059669;font-size:0.9rem"></i>' : ''}
+                        </div>
+                      `;
+                    }).join('')}
                   </div>
                 `}
 
@@ -6402,7 +6486,66 @@
         });
       }
 
+      /* ===== DYNAMIC INLINE ACCORDION DROPDOWN ENGINE ===== */
+      function toggleInlineDropdown(id) {
+        var container = document.getElementById(id);
+        var chevron = document.getElementById(id + '_chevron');
+        if (!container) return;
+
+        var isExpanded = container.classList.contains('expanded');
+
+        // Close other expanded inline dropdowns
+        document.querySelectorAll('.inline-dropdown-content.expanded').forEach(function(el) {
+          if (el !== container) {
+            el.classList.remove('expanded');
+            el.style.maxHeight = '0px';
+            el.style.opacity = '0';
+            el.style.marginTop = '0px';
+            var c = document.getElementById(el.id + '_chevron');
+            if (c) c.style.transform = 'rotate(0deg)';
+          }
+        });
+
+        if (isExpanded) {
+          container.classList.remove('expanded');
+          container.style.maxHeight = '0px';
+          container.style.opacity = '0';
+          container.style.marginTop = '0px';
+          if (chevron) chevron.style.transform = 'rotate(0deg)';
+        } else {
+          container.classList.add('expanded');
+          container.style.maxHeight = '420px';
+          container.style.opacity = '1';
+          container.style.marginTop = '12px';
+          if (chevron) chevron.style.transform = 'rotate(180deg)';
+        }
+      }
+
+      function selectInlineOption(dropdownId, callbackFn, value) {
+        if (typeof vibrate === 'function') vibrate([25]);
+        toggleInlineDropdown(dropdownId);
+        if (typeof callbackFn === 'function') {
+          callbackFn(value);
+        }
+      }
+
+      function filterInlineOptions(containerId, q) {
+        var query = String(q || "").toLowerCase().trim();
+        var items = document.querySelectorAll("#" + containerId + " .inline-dropdown-opt");
+        items.forEach(function(el) {
+          var text = el.getAttribute("data-text") || "";
+          if (!query || text.indexOf(query) !== -1) {
+            el.style.display = "flex";
+          } else {
+            el.style.display = "none";
+          }
+        });
+      }
+
       // Expose globally
+      window.toggleInlineDropdown = toggleInlineDropdown;
+      window.selectInlineOption = selectInlineOption;
+      window.filterInlineOptions = filterInlineOptions;
       window.openDigitalPicker = openDigitalPicker;
       window.closeDigitalPicker = closeDigitalPicker;
       window.filterDigitalPickerOptions = filterDigitalPickerOptions;
@@ -8697,6 +8840,50 @@
       }
 
       .digital-picker-opt:active {
+        transform: scale(0.98);
+      }
+
+      /* ============================================================
+       INLINE DYNAMIC ACCORDION DROPDOWN SYSTEM
+    ============================================================ */
+      .inline-dropdown-content {
+        max-height: 0;
+        opacity: 0;
+        overflow: hidden;
+        overflow-y: auto;
+        transition: max-height 0.32s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.25s ease, margin-top 0.25s ease, padding 0.25s ease;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        border-radius: 16px;
+        background: var(--clr-surface);
+        border: 1.5px solid var(--clr-border);
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+        box-sizing: border-box;
+      }
+
+      .inline-dropdown-content.expanded {
+        padding: 12px;
+      }
+
+      .inline-dropdown-opt {
+        border-radius: 12px;
+        padding: 10px 14px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        transition: all 0.2s var(--ease);
+        cursor: pointer;
+        user-select: none;
+      }
+
+      .inline-dropdown-opt:hover {
+        border-color: var(--clr-primary) !important;
+        transform: translateX(3px);
+      }
+
+      .inline-dropdown-opt:active {
         transform: scale(0.98);
       }
 
