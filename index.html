@@ -8278,29 +8278,29 @@
         display: none !important;
       }
 
-      /* Logo Wrap & Scoped Rotating Hologram Ring */
+      /* Logo Wrap & Soft Rotating Conic Light Halo */
       .splash-logo-wrap {
         position: relative;
-        width: 160px;
-        height: 160px;
+        width: 170px;
+        height: 170px;
         display: grid;
         place-items: center;
         margin-bottom: 24px;
       }
 
-      .splash-hologram-ring {
+      .splash-rotating-halo {
         position: absolute;
-        width: 172px;
-        height: 172px;
-        border-radius: 34px;
-        border: 1.5px dashed rgba(212, 175, 55, 0.45);
-        animation: hologramRingSpin 14s linear infinite;
+        width: 190px;
+        height: 190px;
+        border-radius: 50%;
+        background: conic-gradient(from 0deg, transparent 0%, rgba(255, 215, 0, 0.45) 20%, transparent 45%, rgba(16, 185, 129, 0.35) 70%, transparent 100%);
+        filter: blur(16px);
+        animation: haloRotate 5s linear infinite;
         pointer-events: none;
-        box-shadow: inset 0 0 16px rgba(212, 175, 55, 0.12), 0 0 24px rgba(212, 175, 55, 0.18);
         z-index: 1;
       }
 
-      @keyframes hologramRingSpin {
+      @keyframes haloRotate {
         0% { transform: rotate(0deg); }
         100% { transform: rotate(360deg); }
       }
@@ -8308,43 +8308,55 @@
       .splash-logo-img {
         position: relative;
         z-index: 2;
-        width: 148px;
-        height: 148px;
+        width: 152px;
+        height: 152px;
         object-fit: contain;
         border-radius: 0 !important;
         border: none !important;
         outline: none !important;
         background: transparent !important;
         box-shadow: none !important;
-        filter: drop-shadow(0 0 18px rgba(212, 175, 55, 0.75)) drop-shadow(0 0 32px rgba(16, 185, 129, 0.35)) drop-shadow(0 8px 20px rgba(0,0,0,0.8));
-        animation: logoBreathing 3.5s ease-in-out infinite alternate;
+        filter: drop-shadow(0 0 22px rgba(212, 175, 55, 0.8)) drop-shadow(0 0 40px rgba(255, 215, 0, 0.45)) drop-shadow(0 8px 24px rgba(0,0,0,0.9));
+        animation: logoZoomInOut 3.5s ease-in-out infinite alternate;
       }
 
-      @keyframes logoBreathing {
+      @keyframes logoZoomInOut {
         0% {
-          transform: scale(0.96);
-          filter: drop-shadow(0 0 14px rgba(212, 175, 55, 0.55)) drop-shadow(0 0 24px rgba(16, 185, 129, 0.25)) drop-shadow(0 4px 14px rgba(0,0,0,0.7));
+          transform: scale(0.92);
+          filter: drop-shadow(0 0 16px rgba(212, 175, 55, 0.6)) drop-shadow(0 0 28px rgba(16, 185, 129, 0.25)) drop-shadow(0 6px 16px rgba(0,0,0,0.8));
         }
         100% {
-          transform: scale(1.03);
-          filter: drop-shadow(0 0 26px rgba(255, 215, 0, 0.95)) drop-shadow(0 0 42px rgba(16, 185, 129, 0.45)) drop-shadow(0 8px 24px rgba(0,0,0,0.9));
+          transform: scale(1.08);
+          filter: drop-shadow(0 0 32px rgba(255, 215, 0, 0.98)) drop-shadow(0 0 52px rgba(212, 175, 55, 0.65)) drop-shadow(0 10px 28px rgba(0,0,0,0.95));
         }
       }
 
+      /* Animated Left-to-Right Text Gradient */
       .splash-title {
-        font-size: clamp(1.4rem, 5.2vw, 1.9rem);
+        font-size: clamp(1.45rem, 5.4vw, 2rem);
         font-weight: 900;
-        letter-spacing: 2px;
-        background: linear-gradient(135deg, #fff9e6 0%, #f59e0b 50%, #ffd700 100%);
+        letter-spacing: 2.5px;
+        background: linear-gradient(90deg, #d4af37 0%, #fff9e6 25%, #ffd700 50%, #ffffff 75%, #d4af37 100%);
+        background-size: 200% auto;
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
-        text-shadow: 0 4px 25px rgba(212, 175, 55, 0.35);
+        text-shadow: 0 2px 22px rgba(212, 175, 55, 0.35);
+        animation: textGradientShift 3.5s linear infinite;
         margin-bottom: 6px;
+      }
+
+      @keyframes textGradientShift {
+        0% {
+          background-position: 0% center;
+        }
+        100% {
+          background-position: 200% center;
+        }
       }
 
       .splash-subtitle {
         font-size: 0.86rem;
-        color: rgba(255, 255, 255, 0.8);
+        color: rgba(255, 255, 255, 0.82);
         font-weight: 500;
         font-style: italic;
         letter-spacing: 0.5px;
@@ -9090,9 +9102,9 @@
   <body>
     <!-- ===== ELEGANT CLEAN BANKING SPLASH SCREEN ===== -->
     <div id="splashScreen">
-      <!-- Logo Neon Breathing Pulse & Hologram Ring -->
+      <!-- Logo Zoom In/Out & Rotating Light Halo -->
       <div class="splash-logo-wrap">
-        <div class="splash-hologram-ring"></div>
+        <div class="splash-rotating-halo"></div>
         <img
           src="assets/images/Logo.png"
           alt="Logo Pendamping Amalan"
