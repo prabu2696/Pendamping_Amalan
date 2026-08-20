@@ -8281,21 +8281,21 @@
       /* Logo Wrap & Soft Rotating Conic Light Halo */
       .splash-logo-wrap {
         position: relative;
-        width: 150px;
-        height: 150px;
+        width: 155px;
+        height: 155px;
         display: grid;
         place-items: center;
-        margin-bottom: 34px;
+        margin-bottom: 28px;
       }
 
       .splash-rotating-halo {
         position: absolute;
-        width: 175px;
-        height: 175px;
+        width: 180px;
+        height: 180px;
         border-radius: 50%;
         background: conic-gradient(from 0deg, transparent 0%, rgba(255, 215, 0, 0.4) 20%, transparent 45%, rgba(16, 185, 129, 0.3) 70%, transparent 100%);
         filter: blur(16px);
-        animation: haloRotate 4s linear infinite;
+        animation: haloRotate 5s linear infinite;
         pointer-events: none;
         z-index: 1;
       }
@@ -8308,47 +8308,26 @@
       .splash-logo-img {
         position: relative;
         z-index: 2;
-        width: 140px;
-        height: 140px;
+        width: 145px;
+        height: 145px;
         object-fit: contain;
         border-radius: 0 !important;
         border: none !important;
         outline: none !important;
         background: transparent !important;
         box-shadow: none !important;
-        filter: drop-shadow(0 0 20px rgba(212, 175, 55, 0.8)) drop-shadow(0 0 36px rgba(255, 215, 0, 0.45)) drop-shadow(0 8px 24px rgba(0,0,0,0.9));
-        animation: logoTripleZoom 3.5s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+        filter: drop-shadow(0 0 24px rgba(212, 175, 55, 0.75)) drop-shadow(0 6px 16px rgba(0,0,0,0.7));
+        animation: logoBreathing 2.8s ease-in-out infinite alternate;
       }
 
-      /* Relaxed & Delayed 3-Step Sequence: Zoom In -> Hold -> Zoom Out -> Hold -> Final Zoom In */
-      @keyframes logoTripleZoom {
+      @keyframes logoBreathing {
         0% {
-          transform: scale(0.88);
-          filter: drop-shadow(0 0 12px rgba(212, 175, 55, 0.45)) drop-shadow(0 0 20px rgba(16, 185, 129, 0.2));
-        }
-        12% {
-          transform: scale(0.88);
-          filter: drop-shadow(0 0 12px rgba(212, 175, 55, 0.45)) drop-shadow(0 0 20px rgba(16, 185, 129, 0.2));
-        }
-        36% {
-          transform: scale(1.06);
-          filter: drop-shadow(0 0 28px rgba(255, 215, 0, 0.95)) drop-shadow(0 0 45px rgba(212, 175, 55, 0.6));
-        }
-        48% {
-          transform: scale(1.06);
-          filter: drop-shadow(0 0 28px rgba(255, 215, 0, 0.95)) drop-shadow(0 0 45px rgba(212, 175, 55, 0.6));
-        }
-        70% {
-          transform: scale(0.93);
-          filter: drop-shadow(0 0 16px rgba(212, 175, 55, 0.6)) drop-shadow(0 0 26px rgba(16, 185, 129, 0.25));
-        }
-        80% {
-          transform: scale(0.93);
-          filter: drop-shadow(0 0 16px rgba(212, 175, 55, 0.6)) drop-shadow(0 0 26px rgba(16, 185, 129, 0.25));
+          transform: scale(0.94);
+          filter: drop-shadow(0 0 16px rgba(212, 175, 55, 0.55)) drop-shadow(0 4px 12px rgba(0,0,0,0.6));
         }
         100% {
-          transform: scale(1.04);
-          filter: drop-shadow(0 0 32px rgba(255, 215, 0, 1)) drop-shadow(0 0 52px rgba(212, 175, 55, 0.7));
+          transform: scale(1.06);
+          filter: drop-shadow(0 0 30px rgba(212, 175, 55, 0.95)) drop-shadow(0 8px 20px rgba(0,0,0,0.8));
         }
       }
 
